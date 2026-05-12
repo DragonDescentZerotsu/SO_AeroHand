@@ -1,0 +1,51 @@
+# Quest wrist/palm -> SO101 end-effector teleop.
+# Priority:
+# 1. Position is the strong constraint and follows normal world axes.
+# 2. Orientation follows relatively, with wrist direction favored when possible.
+# 3. Aero Hand fingers are retargeted independently in palm-local coordinates.
+# Tune workspace_bounds and R_robot_from_quest for your physical/table setup.
+scale: 0.5
+use_orientation: true
+position_alpha: 0.25
+orientation_alpha: 0.2
+orientation_source: wrist_pose
+orientation_weight: 0.25
+orientation_tolerance: 0.08
+require_orientation_success: false
+direct_wrist_control: true
+direct_wrist_mapping: rotvec
+wrist_flex_axis: "+y"
+wrist_roll_axis: "+x"
+wrist_flex_gain: 1.0
+wrist_roll_gain: 1.0
+deadzone: 0.005
+max_ee_step: 0.02
+max_joint_step: 0.03
+
+R_robot_from_quest:
+  - [1.0, 0.0, 0.0]
+  - [0.0, 1.0, 0.0]
+  - [0.0, 0.0, 1.0]
+
+# hand_frame: at startup/reanchor, map current palm local axes to robot axes.
+# fixed_matrix: keep translation in Quest/world axes through R_robot_from_quest.
+# Use fixed_matrix for natural up/down/left/right/forward/back translation;
+# wrist/palm rigid frames are still used for orientation.
+alignment_mode: fixed_matrix
+
+# anchored_initial_hand maps total wrist displacement through R_robot_from_quest,
+# so translation stays in stable world axes. incremental_current_hand maps
+# translation through the current palm frame and is useful only when you want
+# movement directions to rotate with your hand.
+position_mapping_mode: anchored_initial_hand
+robot_x_axis: "+x"
+robot_y_axis: "+y"
+robot_z_axis: "+z"
+
+workspace_bounds:
+  # Initial SO101+Aero scene EE is around x=0.377, y=0.051, z=0.235.
+  # Keep this box conservative but make sure it contains the reanchor pose;
+  # tune for your table and camera setup before hardware use.
+  x: [0.05, 0.55]
+  y: [-0.35, 0.35]
+  z: [0.05, 0.55]

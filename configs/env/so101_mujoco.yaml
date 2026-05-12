@@ -1,0 +1,12 @@
+model_path: third_party/SO-ARM100/Simulation/SO101/scene.xml
+use_new_calib: true
+control_dt: 0.02
+physics_dt: 0.005
+render_width: 640
+render_height: 480
+camera_names: []
+action_scale: 1.0
+episode_len: 200
+init_qpos: null
+reward_type: zero
+ee_site_name: gripperframe
