@@ -15,7 +15,7 @@ Quest wrist-local hand landmarks       -> Aero Hand 7D finger action
 Clone with the MuJoCo model submodules and install the Python package:
 
 ```bash
-git clone --recurse-submodules <repo-url>
+git clone git@github.com:DragonDescentZerotsu/SO_AeroHand.git
 cd aero_quest_sim
 conda activate aero_sim
 python -m pip install -e ".[dev,quest]"
