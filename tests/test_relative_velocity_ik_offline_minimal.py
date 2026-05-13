@@ -23,7 +23,7 @@ from aero_quest.arm_teleop import (
 )
 
 
-DEFAULT_MODEL = PROJECT_ROOT / "mujoco_menagerie/so101_aero_hand/scene.xml"
+DEFAULT_MODEL = PROJECT_ROOT / "models/so101_aero_hand/scene.xml"
 DEFAULT_ARM_JOINTS = "shoulder_pan,shoulder_lift,elbow_flex,wrist_flex,wrist_roll"
 
 

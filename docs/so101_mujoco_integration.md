@@ -206,7 +206,7 @@ The standalone SO101 env is independent of Quest hand tracking and Aero Hand
 retargeting. A first-pass combined SO101 arm + Aero Hand MJCF is available at:
 
 ```text
-mujoco_menagerie/so101_aero_hand/scene.xml
+models/so101_aero_hand/scene.xml
 ```
 
 Refresh it from the source XML files with:

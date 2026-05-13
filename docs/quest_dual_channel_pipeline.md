@@ -316,5 +316,5 @@ Useful checks:
 ```bash
 python tests/test_quest_hand_frame.py
 python scripts/quest_arm_channel_so101_aero_full_teleop.py --dry-run
-python tests/test_arm_ik_minimal.py --model mujoco_menagerie/so101_aero_hand/scene.xml --ee_site so101_aero_attach_site
+python tests/test_arm_ik_minimal.py --model models/so101_aero_hand/scene.xml --ee_site so101_aero_attach_site
 ```

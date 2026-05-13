@@ -12,11 +12,24 @@ Quest wrist-local hand landmarks       -> Aero Hand 7D finger action
 
 ## Quick Start
 
-Run from the project root:
+Clone with the MuJoCo model submodules and install the Python package:
 
 ```bash
+git clone --recurse-submodules <repo-url>
+cd aero_quest_sim
 conda activate aero_sim
-cd ~/Projects/aero_quest_sim
+python -m pip install -e ".[dev,quest]"
+```
+
+For an existing checkout, initialize the submodules with:
+
+```bash
+git submodule update --init --recursive
+```
+
+Then run from the project root:
+
+```bash
 adb devices
 adb reverse tcp:8000 tcp:8000
 ```
@@ -46,7 +59,7 @@ P  pause/resume arm motion
 The full teleop script uses:
 
 ```text
-model:   mujoco_menagerie/so101_aero_hand/scene.xml
+model:   models/so101_aero_hand/scene.xml
 arm EE:  so101_aero_attach_site
 hand:    right hand by default
 ```
@@ -116,6 +129,29 @@ The SO101 arm uses three-joint position velocity IK plus separate palm-direction
  index_curl, middle_curl, ring_curl, little_curl]
 ```
 
+## Quest Telemetry Layer
+
+This repo includes a local Quest telemetry layer that treats `external/hand-tracking-streamer` as an upstream data source and keeps project-specific logging, quality checks, buffering, and replay tools in `aero_quest/` and `scripts/`.
+
+Install and fetch the dependencies:
+
+```bash
+git clone https://github.com/wengmister/hand-tracking-streamer.git external/hand-tracking-streamer
+python -m pip install hand-tracking-sdk
+```
+
+Record, analyze, and replay Quest dual-channel data:
+
+```bash
+adb devices
+adb reverse tcp:8000 tcp:8000
+python scripts/record_quest_dual_channel.py --transport tcp --host 0.0.0.0 --port 8000 --out logs/test.jsonl --duration 30
+python scripts/analyze_quest_latency.py --log logs/test.jsonl
+python scripts/replay_quest_dual_channel.py --log logs/test.jsonl --realtime
+```
+
+The logged frame keeps the arm channel (`wrist_pos_world`, `wrist_quat_world`) separate from the hand channel (`landmarks_wrist`). `landmarks_wrist` are wrist-local landmarks, not world or robot coordinates. More detail is in `docs/quest_telemetry_layer.md`.
+
 ## Useful Scripts
 
 Full current teleop:
@@ -165,10 +201,29 @@ python scripts/build_so101_aero_scene.py
 Run core checks:
 
 ```bash
-python tests/test_quest_hand_frame.py
-python tests/test_so101_aero_model.py
+pytest tests/test_quest_hand_frame.py tests/test_so101_aero_model.py
 python scripts/quest_arm_channel_so101_aero_full_teleop.py --dry-run
 ```
+
+## Repository Layout
+
+```text
+aero_quest/       Python package for retargeting, buffering, quality checks, and control
+scripts/          Teleoperation, recording, replay, model generation, and diagnostics
+models/           Project-owned MuJoCo scenes generated from third-party assets
+docs/             Pipeline notes and tutorials
+tests/            Offline and MuJoCo smoke tests
+mujoco_menagerie/ Third-party MuJoCo assets, tracked as a git submodule
+third_party/      Other third-party robot assets, tracked as git submodules
+```
+
+Runtime logs and local upstream checkouts under `logs/` and `external/` are intentionally ignored.
+
+## License
+
+No project license has been selected yet. Third-party assets remain under their
+own licenses; see `THIRD_PARTY_NOTICES.md` and the license files inside each
+submodule before redistributing models or derived assets.
 
 ## Legacy Aero Hand Only Path
 

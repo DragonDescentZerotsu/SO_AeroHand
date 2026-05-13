@@ -1,0 +1,539 @@
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{hyperref}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!60!black,
+  urlcolor=blue!60!black,
+  citecolor=blue!60!black
+}
+
+\lstdefinestyle{code}{
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  columns=fullflexible,
+  frame=single,
+  rulecolor=\color{black!20},
+  backgroundcolor=\color{black!3},
+  keepspaces=true
+}
+\lstset{style=code}
+
+\title{Aero Quest Sim: Principles, Coordinate Frames, and Setup Tutorial}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{Goal}
+
+This project connects Meta Quest hand tracking to a MuJoCo simulation of an
+SO101 arm with an Aero Hand. The current control path is a two-channel
+controller:
+
+\begin{lstlisting}
+Quest wrist position        -> SO101 shoulder/elbow position IK
+Quest palm direction        -> SO101 wrist_flex + wrist_roll
+Quest wrist-local landmarks -> Aero Hand 7D finger action
+\end{lstlisting}
+
+The main entry point is:
+
+\begin{lstlisting}
+scripts/quest_arm_channel_so101_aero_full_teleop.py
+\end{lstlisting}
+
+Core files:
+
+\begin{itemize}
+  \item \texttt{aero\_quest/quest\_hand\_frame.py}: typed Quest frames, coordinate conversion, and palm-frame helpers.
+  \item \texttt{aero\_quest/arm\_teleop.py}: task-space velocity control and damped least-squares IK.
+  \item \texttt{aero\_quest/retargeting.py}: Quest 21-landmark to Aero Hand 7D action retargeting.
+  \item \texttt{aero\_quest/so101\_aero\_control.py}: normalized action to MuJoCo actuator control mapping.
+\end{itemize}
+
+\section{Running the Demo}
+
+Run from the project root:
+
+\begin{lstlisting}
+conda activate aero_sim
+cd ~/Projects/aero_quest_sim
+adb devices
+adb reverse tcp:8000 tcp:8000
+\end{lstlisting}
+
+Quest Hand Tracking Streamer settings:
+
+\begin{lstlisting}
+Protocol: TCP
+IP/Host: localhost or 127.0.0.1
+Port: 8000
+Hand: Right
+\end{lstlisting}
+
+Start full SO101 plus Aero Hand teleoperation:
+
+\begin{lstlisting}
+python scripts/quest_arm_channel_so101_aero_full_teleop.py
+\end{lstlisting}
+
+Useful MuJoCo viewer keys:
+
+\begin{lstlisting}
+R  Re-zero: map the current Quest wrist pose to the current SO101 end-effector pose
+P  Pause or resume arm motion
+\end{lstlisting}
+
+\section{Input Data Format}
+
+Quest TCP packets are converted into \texttt{QuestHandFrame} objects:
+
+\begin{lstlisting}[language=Python]
+hand_side: str
+timestamp_ns: int | None
+frame_id: int | None
+wrist_pos_world: np.ndarray    # shape (3,)
+wrist_quat_world: np.ndarray   # shape (4,), xyzw
+landmarks_wrist: np.ndarray    # shape (21, 3)
+\end{lstlisting}
+
+The most important detail is that one packet contains data from two different
+frames:
+
+\begin{itemize}
+  \item \texttt{wrist\_pos\_world} and \texttt{wrist\_quat\_world} are expressed in the Quest/Unity world frame $Q$.
+  \item \texttt{landmarks\_wrist} are expressed in the Quest wrist/root local frame $Wrist$.
+\end{itemize}
+
+Do not treat \texttt{landmarks\_wrist} as world or robot coordinates. Convert
+them to world coordinates only for visualization, debugging, or dataset
+inspection:
+
+\begin{lstlisting}[language=Python]
+landmarks_Q = convert_landmarks_wrist_to_world(
+    wrist_pos_world,
+    wrist_quat_world,
+    landmarks_wrist,
+)
+\end{lstlisting}
+
+\section{Coordinate Frames}
+
+\subsection{Quest World Frame $Q$}
+
+The current Quest/Unity streamer uses:
+
+\begin{lstlisting}
++X right
++Y up
++Z forward
+\end{lstlisting}
+
+\subsection{Robot Base Frame $B$}
+
+The SO101/MuJoCo debug base frame used by this project is:
+
+\begin{lstlisting}
++X forward
++Y left
++Z up
+\end{lstlisting}
+
+\subsection{Quest Wrist Frame $Wrist$}
+
+\texttt{landmarks\_wrist} contains 21 points relative to the Quest hand
+root/wrist. These points are best used for hand shape: finger curl, thumb
+abduction, pinch distance, and similar features. They should not directly set
+the robot end-effector position.
+
+\section{\texorpdfstring{$R_{BQ}$}{R\_BQ}: Quest-to-Robot Axis Mapping}
+
+The default matrix in the main script is:
+
+\begin{lstlisting}[language=Python]
+R_BQ = np.array([
+    [ 0.0, 0.0, 1.0],
+    [-1.0, 0.0, 0.0],
+    [ 0.0, 1.0, 0.0],
+])
+\end{lstlisting}
+
+It maps vectors from the Quest world frame $Q$ into the robot base frame $B$:
+
+\begin{align}
+\mathbf{v}_B = R_{BQ}\mathbf{v}_Q .
+\end{align}
+
+The default mapping is:
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Quest direction & Robot direction & Meaning \\
+\midrule
+$+Z_Q$ & $+X_B$ & hand forward moves the robot forward \\
+$+X_Q$ & $-Y_B$ & hand right moves the robot right \\
+$+Y_Q$ & $+Z_B$ & hand up moves the robot up \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+If the arm moves in the wrong direction, tune this matrix first. The main
+script can accept a custom matrix with \texttt{--R\_BQ} as 9 row-major floats.
+
+\section{Teleop Zero and Relative Motion}
+
+The Quest world origin is not treated as the robot base origin. At startup, or
+when the user presses \texttt{R}, the controller records a teleop zero:
+
+\begin{align}
+\mathbf{p}^{0}_{wrist,Q} &= \text{current Quest wrist position}, \\
+\mathbf{p}^{0}_{ee,B} &= \text{current SO101 end-effector position}, \\
+R^{0}_{ee,B} &= \text{current SO101 end-effector orientation}.
+\end{align}
+
+After that, each frame uses only relative wrist displacement:
+
+\begin{align}
+\Delta\mathbf{p}_{Q}
+  &= \mathbf{p}^{t}_{wrist,Q} - \mathbf{p}^{0}_{wrist,Q}, \\
+\mathbf{p}^{target}_{B}
+  &= \mathbf{p}^{0}_{ee,B}
+     + s R_{BQ}\Delta\mathbf{p}_{Q}.
+\end{align}
+
+Here $s$ is the position scale. The main script default is:
+
+\begin{lstlisting}
+--scale 0.6
+\end{lstlisting}
+
+This means 1 meter of Quest hand motion produces about 0.6 meters of robot
+target motion. In practice, smaller values are usually easier to control.
+
+\section{Workspace Limits}
+
+The computed target position is clipped to an axis-aligned workspace box:
+
+\begin{lstlisting}
+--workspace-min 0.05 -0.35 0.03
+--workspace-max 0.55  0.35 0.60
+\end{lstlisting}
+
+In robot-base coordinates:
+
+\begin{align}
+x_B &\in [0.05, 0.55], \\
+y_B &\in [-0.35, 0.35], \\
+z_B &\in [0.03, 0.60].
+\end{align}
+
+Interpretation:
+
+\begin{itemize}
+  \item $x_B$: forward/backward, larger means farther forward.
+  \item $y_B$: left/right, larger means farther left.
+  \item $z_B$: height, larger means higher.
+\end{itemize}
+
+If the end effector stops moving near a boundary, inspect \texttt{target\_B} in
+the debug output and check whether it is being clipped by the workspace.
+
+\section{Palm Direction and Wrist Control}
+
+Palm direction comes from \texttt{landmarks\_wrist}. The relevant landmark
+indices are:
+
+\begin{lstlisting}
+0  wrist
+5  index MCP
+9  middle MCP
+17 pinky MCP
+\end{lstlisting}
+
+First, the code builds a palm frame in the $Wrist$ frame:
+
+\begin{align}
+\mathbf{x}_{palm}
+  &= \operatorname{normalize}(\mathbf{P}_5-\mathbf{P}_{17}), \\
+\mathbf{y}_{hint}
+  &= \operatorname{normalize}(\mathbf{P}_9-\mathbf{P}_0), \\
+\mathbf{z}_{palm}
+  &= \operatorname{normalize}(\mathbf{x}_{palm}\times\mathbf{y}_{hint}), \\
+\mathbf{y}_{palm}
+  &= \operatorname{normalize}(\mathbf{z}_{palm}\times\mathbf{x}_{palm}).
+\end{align}
+
+Thus:
+
+\begin{align}
+R_{palm,Wrist}
+  = [\mathbf{x}_{palm},\mathbf{y}_{palm},\mathbf{z}_{palm}] .
+\end{align}
+
+The Quest wrist quaternion then maps the palm frame into Quest world:
+
+\begin{align}
+R_{palm,Q} = R_{wrist,Q}R_{palm,Wrist}.
+\end{align}
+
+If orientation control is enabled, the controller computes a relative rotation:
+
+\begin{align}
+R_{\Delta,Q} &= R^{t}_{palm,Q}(R^{0}_{palm,Q})^T, \\
+R_{\Delta,B} &= R_{BQ}R_{\Delta,Q}R_{BQ}^T, \\
+R^{target}_{B} &= R_{\Delta,B}R^{0}_{ee,B}.
+\end{align}
+
+In the current full teleop script, position IK mainly controls
+\texttt{shoulder\_pan}, \texttt{shoulder\_lift}, and \texttt{elbow\_flex}.
+Palm direction is also projected onto \texttt{wrist\_flex} and
+\texttt{wrist\_roll}:
+
+\begin{lstlisting}
+--wrist-flex-axis +y
+--wrist-roll-axis -x
+--wrist-flex-gain 1.0
+--wrist-roll-gain 1.0
+--wrist-orientation-alpha 0.25
+--max-wrist-orientation-step 0.03
+\end{lstlisting}
+
+\texttt{wrist-orientation-alpha} controls how quickly the wrist follows the
+target. \texttt{max-wrist-orientation-step} limits the target change per
+simulation step and helps avoid sudden jumps.
+
+\section{Task-Space Velocity Control}
+
+The arm does not teleport to \(\mathbf{p}^{target}_{B}\). It first computes a
+position error:
+
+\begin{align}
+\mathbf{e}_{p} = \mathbf{p}^{target}_{B} - \mathbf{p}^{current}_{B}.
+\end{align}
+
+Then it computes a bounded desired linear velocity:
+
+\begin{align}
+\mathbf{v}_{cmd}
+  = \operatorname{clipNorm}(k_p\mathbf{e}_p, v_{max}).
+\end{align}
+
+Default values:
+
+\begin{lstlisting}
+--kp-pos 5.0
+--max-linear-speed 0.18
+\end{lstlisting}
+
+A larger \texttt{kp-pos} makes the end effector follow the target more
+aggressively. \texttt{max-linear-speed} is the linear speed cap.
+
+\section{Damped Least-Squares IK}
+
+IK uses MuJoCo to compute the Jacobian of the end-effector site, then selects
+only the arm joints. The default arm joints are:
+
+\begin{lstlisting}
+shoulder_pan,shoulder_lift,elbow_flex
+\end{lstlisting}
+
+Let the task-space velocity be \(\dot{\mathbf{x}}\), the Jacobian be \(J\), and
+the damping coefficient be \(\lambda\). The damped least-squares solution is:
+
+\begin{align}
+\dot{\mathbf{q}}
+  = J^T(JJ^T+\lambda^2I)^{-1}\dot{\mathbf{x}}.
+\end{align}
+
+The solver integrates this velocity into a joint-position target:
+
+\begin{align}
+\mathbf{q}^{target}
+  = \mathbf{q}^{current}+\dot{\mathbf{q}}\Delta t.
+\end{align}
+
+Relevant parameters:
+
+\begin{lstlisting}
+--ik-damping 0.05
+--max-joint-speed 1.2
+--joint-target-smoothing-alpha 0.0
+\end{lstlisting}
+
+Higher \texttt{ik-damping} is usually more stable but less responsive. Lower
+values are faster but can shake near singular configurations.
+\texttt{max-joint-speed} limits each joint velocity.
+
+\section{Aero Hand 7D Finger Action}
+
+The hand channel uses only \texttt{landmarks\_wrist}. It first converts the 21
+points into a palm-local frame, removing global position, global orientation,
+and approximate hand-size differences:
+
+\begin{align}
+\mathbf{P}_{local}
+  = \frac{(\mathbf{P}-\mathbf{P}_0)R_{palm}}{\|\mathbf{P}_9-\mathbf{P}_0\|}.
+\end{align}
+
+The output is a 7D Aero Hand action:
+
+\begin{center}
+\begin{tabular}{cll}
+\toprule
+Index & Name & Meaning \\
+\midrule
+0 & thumb\_abduction & thumb abduction/adduction \\
+1 & thumb\_flexion\_1 & first thumb flexion channel \\
+2 & thumb\_flexion\_2 & second thumb flexion channel \\
+3 & index\_curl & index finger curl \\
+4 & middle\_curl & middle finger curl \\
+5 & ring\_curl & ring finger curl \\
+6 & little\_curl & little finger curl \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Each value is clamped to $[0,1]$. For finger curl:
+
+\begin{lstlisting}
+0 = open
+1 = closed
+\end{lstlisting}
+
+For three points around a joint, the bend angle is:
+
+\begin{align}
+\theta
+  &= \arccos
+     \frac{(\mathbf{A}-\mathbf{B})\cdot(\mathbf{C}-\mathbf{B})}
+          {\|\mathbf{A}-\mathbf{B}\|\|\mathbf{C}-\mathbf{B}\|}, \\
+bend &= \pi-\theta.
+\end{align}
+
+The bend is normalized with:
+
+\begin{align}
+curl
+  = \operatorname{clip}_{[0,1]}
+    \frac{bend-open\_angle}{closed\_angle-open\_angle}.
+\end{align}
+
+Current defaults:
+
+\begin{lstlisting}
+open_angle   = 0.08 rad
+closed_angle = 1.35 rad
+\end{lstlisting}
+
+For index, middle, ring, and little fingers, curl combines proximal and distal
+bend:
+
+\begin{align}
+curl
+  = normalize(0.65\,bend_{proximal}+0.35\,bend_{distal}).
+\end{align}
+
+\section{Mapping Actions to MuJoCo Actuators}
+
+The SO101 plus Aero Hand actuator mapping lives in:
+
+\begin{lstlisting}
+aero_quest/so101_aero_control.py
+\end{lstlisting}
+
+SO101 arm actuator names:
+
+\begin{lstlisting}
+shoulder_pan
+shoulder_lift
+elbow_flex
+wrist_flex
+wrist_roll
+\end{lstlisting}
+
+Aero Hand semantic action mapping:
+
+\begin{lstlisting}
+thumb_abduction -> right_thumb_A_cmc_abd
+thumb_flexion_1 -> right_th1_A_tendon
+thumb_flexion_2 -> right_th2_A_tendon
+index_curl      -> right_index_A_tendon
+middle_curl     -> right_middle_A_tendon
+ring_curl       -> right_ring_A_tendon
+little_curl     -> right_pinky_A_tendon
+\end{lstlisting}
+
+The hand action is in $[0,1]^7$. When it is written into MuJoCo control values,
+each channel is linearly mapped into the actuator \texttt{ctrlrange}. In the
+current Aero Hand mapping, each channel is marked \texttt{inverted=True}, so the
+code first applies:
+
+\begin{align}
+a' = 1-a
+\end{align}
+
+and then maps the result to the actuator range.
+
+\section{Debugging Checklist}
+
+If Quest does not connect, check:
+
+\begin{lstlisting}
+adb devices
+adb reverse --list
+\end{lstlisting}
+
+If the arm moves in the wrong direction, inspect these values in order:
+
+\begin{enumerate}
+  \item \texttt{delta\_p\_Q}: whether Quest wrist motion is detected in the expected direction.
+  \item \texttt{R\_BQ}: whether Quest axes map to the correct robot axes.
+  \item \texttt{target\_B}: whether the target is being clipped by the workspace.
+  \item \texttt{ee\_B} and \texttt{err}: whether IK can track the target.
+\end{enumerate}
+
+If finger motion looks unnatural, check:
+
+\begin{enumerate}
+  \item Whether \texttt{landmarks\_wrist} has shape \((21,3)\).
+  \item \texttt{open\_angle} and \texttt{closed\_angle} in \texttt{aero\_quest/retargeting.py}.
+  \item \texttt{--hand-smoothing-alpha}: too small is sluggish; too large can shake.
+\end{enumerate}
+
+\section{Recommended Learning Order}
+
+\begin{enumerate}
+  \item Run \texttt{scripts/debug\_quest\_dual\_channel.py} to verify wrist pose and landmarks.
+  \item Run \texttt{scripts/quest\_arm\_channel\_target\_ball.py} to inspect translation axes only.
+  \item Run \texttt{scripts/quest\_arm\_channel\_so101\_ik.py} to tune the SO101 arm channel only.
+  \item Run \texttt{scripts/quest\_tcp\_aero\_teleop.py --alpha 0.25} to tune Aero Hand finger retargeting only.
+  \item Run \texttt{scripts/quest\_arm\_channel\_so101\_aero\_full\_teleop.py} to combine both channels.
+\end{enumerate}
+
+\section{Core Rules}
+
+The most important design rule is to keep coordinate frames and control
+channels explicit:
+
+\begin{itemize}
+  \item The Quest world origin is not the robot base origin.
+  \item Quest wrist world pose is used by the arm channel.
+  \item Wrist-local landmarks are used by the hand channel.
+  \item Robot target position is based on relative motion from teleop zero.
+  \item Axis differences are handled by $R_{BQ}$.
+  \item Workspace bounds, velocity caps, and IK damping are the main stability safeguards.
+\end{itemize}
+
+\end{document}
