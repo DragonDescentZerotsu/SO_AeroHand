@@ -1,0 +1,36 @@
+<mujoco model="quest_arm_channel_target_ball">
+  <compiler angle="radian"/>
+
+  <option timestep="0.005" gravity="0 0 0"/>
+
+  <visual>
+    <headlight diffuse="0.6 0.6 0.6" ambient="0.35 0.35 0.35" specular="0.1 0.1 0.1"/>
+    <rgba haze="0.15 0.18 0.22 1"/>
+  </visual>
+
+  <asset>
+    <texture name="grid" type="2d" builtin="checker" width="512" height="512" rgb1="0.18 0.2 0.22" rgb2="0.24 0.26 0.28"/>
+    <material name="grid" texture="grid" texrepeat="6 6" reflectance="0.05"/>
+    <material name="target_red" rgba="1 0.08 0.04 0.9"/>
+    <material name="forward_x" rgba="0.2 0.55 1 1"/>
+    <material name="left_y" rgba="0.15 0.85 0.35 1"/>
+    <material name="up_z" rgba="1 0.85 0.1 1"/>
+  </asset>
+
+  <worldbody>
+    <light pos="0 -1.5 2.5" dir="0 1 -1"/>
+    <camera name="overview" pos="1.0 -1.4 0.85" xyaxes="0.82 0.57 0 -0.28 0.4 0.87"/>
+
+    <geom name="floor" type="plane" size="1.2 1.2 0.02" material="grid"/>
+
+    <!-- Debug B frame axes: +X forward, +Y left, +Z up. -->
+    <geom name="b_forward_x" type="capsule" fromto="0 0 0.01 0.45 0 0.01" size="0.008" material="forward_x" contype="0" conaffinity="0"/>
+    <geom name="b_left_y" type="capsule" fromto="0 0 0.025 0 0.45 0.025" size="0.008" material="left_y" contype="0" conaffinity="0"/>
+    <geom name="b_up_z" type="capsule" fromto="0 0 0.04 0 0 0.45" size="0.008" material="up_z" contype="0" conaffinity="0"/>
+
+    <!-- The script drives this mocap body from Quest wrist relative motion. -->
+    <body name="quest_arm_target" mocap="true" pos="0.35 0 0.25">
+      <geom name="quest_arm_target_ball" type="sphere" size="0.035" material="target_red" contype="0" conaffinity="0"/>
+    </body>
+  </worldbody>
+</mujoco>

@@ -1,6 +1,7 @@
 [submodule "mujoco_menagerie"]
 	path = mujoco_menagerie
 	url = https://github.com/google-deepmind/mujoco_menagerie.git
+
 [submodule "third_party/SO-ARM100"]
 	path = third_party/SO-ARM100
 	url = https://github.com/TheRobotStudio/SO-ARM100.git

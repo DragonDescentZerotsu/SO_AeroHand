@@ -6,7 +6,7 @@ import numpy as np
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_MODEL = PROJECT_ROOT / "mujoco_menagerie/so101_aero_hand/scene.xml"
+DEFAULT_MODEL = PROJECT_ROOT / "models/so101_aero_hand/scene.xml"
 
 
 def parse_args():

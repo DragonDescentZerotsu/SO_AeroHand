@@ -1,11 +1,12 @@
 import copy
+import os
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SO101_XML = PROJECT_ROOT / "third_party/SO-ARM100/Simulation/SO101/so101_new_calib.xml"
 AERO_XML = PROJECT_ROOT / "mujoco_menagerie/tetheria_aero_hand_open/right_hand.xml"
-OUTPUT_DIR = PROJECT_ROOT / "mujoco_menagerie/so101_aero_hand"
+OUTPUT_DIR = PROJECT_ROOT / "models/so101_aero_hand"
 OUTPUT_XML = OUTPUT_DIR / "scene.xml"
 
 # SO101's stock gripperframe is near the removed jaw tip, about 9.8 cm past the
@@ -34,7 +35,7 @@ AERO_CLASS_RENAMES = {
 
 
 def rel_path(path: Path) -> str:
-    return str(path.relative_to(OUTPUT_DIR).as_posix()) if path.is_relative_to(OUTPUT_DIR) else str(path)
+    return os.path.relpath(path, OUTPUT_DIR).replace(os.sep, "/")
 
 
 def set_mesh_paths(asset: ET.Element, asset_dir: Path) -> None:
@@ -152,6 +153,96 @@ def ensure_site(parent: ET.Element, name: str, pos: list[float], group: str = "4
     site.set("size", "0.003")
     site.set("rgba", "0.2 1 0.2 1")
     return site
+
+
+def ensure_aero_landmark_sites(palm: ET.Element) -> None:
+    """Add the 21 Quest/Aero retargeting landmarks to an upstream Aero Hand XML."""
+    body_sites = {
+        "palm": [
+            ("aero_wrist_site", [0.002, -0.0015, 0.022], "1 0.2 0.2 1"),
+            ("aero_wrist_lm", [0.002, -0.0015, 0.022], "0.2 0.8 1 1"),
+        ],
+        "right_index_proximal_link": [
+            ("aero_index_proximal_site", [0, -0.003, 0.019], "1 0.2 0.2 1"),
+            ("aero_index_proximal_lm", [0, -0.003, 0.019], "0.2 0.8 1 1"),
+        ],
+        "right_index_middle_link": [
+            ("aero_index_intermediate_site", [0, -0.001, 0.006], "1 0.2 0.2 1"),
+            ("aero_index_intermediate_lm", [0, -0.001, 0.006], "0.2 0.8 1 1"),
+        ],
+        "right_index_distal_link": [
+            ("aero_index_distal_site", [0, -0.003, 0.014], "1 0.2 0.2 1"),
+            ("aero_index_distal_lm", [0, -0.003, 0.014], "0.2 0.8 1 1"),
+            ("aero_index_tip_site", [0, -0.003, 0.023], "1 0.2 0.2 1"),
+            ("aero_index_tip_lm", [0, -0.003, 0.023], "0.2 0.8 1 1"),
+        ],
+        "right_middle_proximal_link": [
+            ("aero_middle_proximal_site", [0, -0.003, 0.019], "1 0.2 0.2 1"),
+            ("aero_middle_proximal_lm", [0, -0.003, 0.019], "0.2 0.8 1 1"),
+        ],
+        "right_middle_middle_link": [
+            ("aero_middle_intermediate_site", [0, -0.001, 0.006], "1 0.2 0.2 1"),
+            ("aero_middle_intermediate_lm", [0, -0.001, 0.006], "0.2 0.8 1 1"),
+        ],
+        "right_middle_distal_link": [
+            ("aero_middle_distal_site", [0, -0.003, 0.014], "1 0.2 0.2 1"),
+            ("aero_middle_distal_lm", [0, -0.003, 0.014], "0.2 0.8 1 1"),
+            ("aero_middle_tip_site", [0, -0.003, 0.023], "1 0.2 0.2 1"),
+            ("aero_middle_tip_lm", [0, -0.003, 0.023], "0.2 0.8 1 1"),
+        ],
+        "right_ring_proximal_link": [
+            ("aero_ring_proximal_site", [0, -0.003, 0.019], "1 0.2 0.2 1"),
+            ("aero_ring_proximal_lm", [0, -0.003, 0.019], "0.2 0.8 1 1"),
+        ],
+        "right_ring_middle_link": [
+            ("aero_ring_intermediate_site", [0, -0.001, 0.006], "1 0.2 0.2 1"),
+            ("aero_ring_intermediate_lm", [0, -0.001, 0.006], "0.2 0.8 1 1"),
+        ],
+        "right_ring_distal_link": [
+            ("aero_ring_distal_site", [0, -0.003, 0.014], "1 0.2 0.2 1"),
+            ("aero_ring_distal_lm", [0, -0.003, 0.014], "0.2 0.8 1 1"),
+            ("aero_ring_tip_site", [0, -0.003, 0.023], "1 0.2 0.2 1"),
+            ("aero_ring_tip_lm", [0, -0.003, 0.023], "0.2 0.8 1 1"),
+        ],
+        "right_pinky_proximal_link": [
+            ("aero_little_proximal_site", [0, -0.003, 0.019], "1 0.2 0.2 1"),
+            ("aero_little_proximal_lm", [0, -0.003, 0.019], "0.2 0.8 1 1"),
+        ],
+        "right_pinky_middle_link": [
+            ("aero_little_intermediate_site", [0, -0.001, 0.006], "1 0.2 0.2 1"),
+            ("aero_little_intermediate_lm", [0, -0.001, 0.006], "0.2 0.8 1 1"),
+        ],
+        "right_pinky_distal_link": [
+            ("aero_little_distal_site", [0, -0.003, 0.014], "1 0.2 0.2 1"),
+            ("aero_little_distal_lm", [0, -0.003, 0.014], "0.2 0.8 1 1"),
+            ("aero_little_tip_site", [0, -0.003, 0.023], "1 0.2 0.2 1"),
+            ("aero_little_tip_lm", [0, -0.003, 0.023], "0.2 0.8 1 1"),
+        ],
+        "right_t_link": [
+            ("aero_thumb_metacarpal_site", [-0.01, 0.015, 0.005], "1 0.2 0.2 1"),
+            ("aero_thumb_metacarpal_lm", [-0.01, 0.015, 0.005], "0.2 0.8 1 1"),
+        ],
+        "right_thumb_mcp_link": [
+            ("aero_thumb_proximal_site", [0, 0, 0.014], "1 0.2 0.2 1"),
+            ("aero_thumb_proximal_lm", [0, 0, 0.014], "0.2 0.8 1 1"),
+        ],
+        "right_thumb_proximal_link": [
+            ("aero_thumb_distal_site", [0, -0.002, 0.012], "1 0.2 0.2 1"),
+            ("aero_thumb_distal_lm", [0, -0.002, 0.012], "0.2 0.8 1 1"),
+        ],
+        "right_thumb_distal_link": [
+            ("aero_thumb_tip_site", [0, -0.005, 0.027], "1 0.2 0.2 1"),
+            ("aero_thumb_tip_lm", [0, -0.005, 0.027], "0.2 0.8 1 1"),
+        ],
+    }
+
+    for body_name, sites in body_sites.items():
+        body = palm if body_name == "palm" else find_body(palm, body_name)
+        if body is None:
+            raise RuntimeError(f"Could not find Aero Hand body named {body_name!r}")
+        for name, pos, rgba in sites:
+            site = ensure_site(body, name, pos)
+            site.set("rgba", rgba)
 
 
 def strip_so101_gripper_geometry(gripper_body: ET.Element) -> None:
@@ -286,6 +377,7 @@ def build_scene() -> ET.ElementTree:
         raise RuntimeError("Could not find Aero Hand body named 'palm'")
     direct_palm = copy.deepcopy(palm)
     direct_palm.set("childclass", "aero_tetheria_rh")
+    ensure_aero_landmark_sites(direct_palm)
 
     # Remove the Tetheria mounting plate and use the exposed hand wrist/bottom
     # site as the new fixed connection point to the SO101 wrist roll frame.

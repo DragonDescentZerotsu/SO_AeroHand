@@ -20,7 +20,7 @@ if str(PROJECT_ROOT) not in sys.path:
 from aero_quest.quest_hand_frame import RelativeWristArmController, quest_hand_frame_from_sdk
 
 
-DEFAULT_MODEL = PROJECT_ROOT / "mujoco_menagerie/quest_arm_channel_target_ball/scene.xml"
+DEFAULT_MODEL = PROJECT_ROOT / "models/quest_arm_channel_target_ball/scene.xml"
 DEFAULT_TARGET_BODY = "quest_arm_target"
 
 # Default axis map for validating "up / forward / left":
