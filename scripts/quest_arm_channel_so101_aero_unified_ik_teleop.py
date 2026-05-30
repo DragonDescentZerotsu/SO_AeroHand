@@ -262,9 +262,14 @@ def main():
     }
     last_frame_time = 0.0
     last_debug_time = 0.0
+    last_control_time = time.time()
     last_frame_id = None
     last_delta_p_Q = np.zeros(3, dtype=np.float64)
     last_velocity = np.zeros(3, dtype=np.float64)
+    last_control_dt = float(model.opt.timestep)
+    sim_step_dt = float(model.opt.timestep)
+    sim_accumulator = 0.0
+    last_sim_steps = 0
     last_error = np.zeros(3, dtype=np.float64)
     last_rot_error = np.zeros(3, dtype=np.float64)
     last_qdot = np.zeros(len(ik.joint_ids), dtype=np.float64)
@@ -312,6 +317,10 @@ def main():
                 _raw_hand, filtered_hand = hand_retargeter(quest_frame.landmarks_wrist)
 
             now = time.time()
+            raw_control_dt = max(0.0, now - last_control_time)
+            last_control_dt = float(np.clip(raw_control_dt, 0.001, 0.03))
+            last_control_time = now
+            sim_accumulator += min(raw_control_dt, 0.05)
             stale = last_frame_time == 0.0 or now - last_frame_time > args.timeout
             ee_pos_B, ee_R_B = ik.ee_pose(data)
             if arm_channel.is_calibrated and not stale and not state["paused"]:
@@ -324,7 +333,7 @@ def main():
                     ik,
                     data,
                     cmd.xdot,
-                    dt=float(model.opt.timestep),
+                    dt=last_control_dt,
                     position_weight=args.position_weight,
                     orientation_weight=args.orientation_weight,
                     control_orientation=args.control_orientation,
@@ -343,7 +352,13 @@ def main():
                     hand_retargeter.prev_action = filtered_hand.astype(np.float32)
 
             normalized_aero_hand_to_ctrl(model, filtered_hand, ctrl=data.ctrl)
-            mujoco.mj_step(model, data)
+            last_sim_steps = 0
+            while sim_accumulator >= sim_step_dt and last_sim_steps < 10:
+                mujoco.mj_step(model, data)
+                sim_accumulator -= sim_step_dt
+                last_sim_steps += 1
+            if last_sim_steps >= 10:
+                sim_accumulator = 0.0
             viewer.sync()
 
             if now - last_debug_time >= args.debug_interval:
@@ -357,6 +372,8 @@ def main():
                     f"rot_err={np.array2string(last_rot_error, precision=4, suppress_small=True)} "
                     f"xdot={np.array2string(last_velocity, precision=4, suppress_small=True)} "
                     f"qdot={np.array2string(last_qdot, precision=4, suppress_small=True)} "
+                    f"dt={last_control_dt:.4f} "
+                    f"sim_steps={last_sim_steps} "
                     f"hand={np.array2string(filtered_hand, precision=3, suppress_small=True)}"
                 )
                 last_debug_time = now
