@@ -46,7 +46,7 @@ Hand: Right
 启动完整的 SO101 + Aero Hand 遥操作：
 
 ```bash
-python scripts/quest_arm_channel_so101_aero_full_teleop.py
+python scripts/quest_so101_aero_nullspace_ik_teleop.py
 ```
 
 ### 仿真在 remote，Quest 接在本地 Mac
@@ -116,7 +116,7 @@ python scripts/debug_quest_dual_channel.py --host 127.0.0.1 --port 8000 --hand a
 确认有 `frame_id` 和腕部/landmark 数据持续输出后，再启动完整遥操作：
 
 ```bash
-python scripts/quest_arm_channel_so101_aero_full_teleop.py --host 127.0.0.1 --port 8000 --hand any
+python scripts/quest_so101_aero_nullspace_ik_teleop.py --host 127.0.0.1 --port 8000 --hand any
 ```
 
 MuJoCo viewer 中常用按键：
@@ -227,7 +227,7 @@ python scripts/replay_quest_dual_channel.py --log logs/test.jsonl --realtime
 当前完整遥操作：
 
 ```bash
-python scripts/quest_arm_channel_so101_aero_full_teleop.py
+python scripts/quest_so101_aero_nullspace_ik_teleop.py
 ```
 
 仅 Arm Channel，使用相同的 SO101 IK 控制模式：
@@ -272,7 +272,7 @@ python scripts/build_so101_aero_scene.py
 
 ```bash
 pytest tests/test_quest_hand_frame.py tests/test_so101_aero_model.py
-python scripts/quest_arm_channel_so101_aero_full_teleop.py --dry-run
+python scripts/quest_so101_aero_nullspace_ik_teleop.py --dry-run
 ```
 
 ## 仓库布局
@@ -298,13 +298,13 @@ third_party/      其他第三方机器人资产，以 git 子模块跟踪
 旧命令：
 
 ```bash
-python scripts/06_quest_to_mujoco_tcp.py
+python scripts/legacy/06_quest_to_mujoco_tcp.py
 ```
 
 保留为仅 Aero Hand 遥操作的兼容包装器。它不会控制 SO101 机械臂。当前完整机器人遥操作请使用：
 
 ```bash
-python scripts/quest_arm_channel_so101_aero_full_teleop.py
+python scripts/quest_so101_aero_nullspace_ik_teleop.py
 ```
 
 ## 故障排查

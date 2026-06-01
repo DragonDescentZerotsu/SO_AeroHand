@@ -22,7 +22,7 @@ except ImportError:
 
 PROJECT_ROOT = Path.home() / "Projects/aero_quest_sim"
 MODEL_PATH = PROJECT_ROOT / "mujoco_menagerie/tetheria_aero_hand_open/scene_right.xml"
-FAKE_CONTROL_PATH = PROJECT_ROOT / "scripts/03_fake_7d_control.py"
+FAKE_CONTROL_PATH = PROJECT_ROOT / "scripts/legacy/03_fake_7d_control.py"
 EPISODE_ID = "demo_quest_aero_sim_001"
 OUTPUT_PATH = PROJECT_ROOT / "data" / f"{EPISODE_ID}.jsonl"
 

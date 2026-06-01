@@ -26,7 +26,7 @@ from aero_quest.arm_teleop import (
 from aero_quest.quest_hand_frame import RelativeWristArmController, palm_frame_from_landmarks_wrist, quat_xyzw_to_matrix
 from aero_quest.retargeting import AeroHandRetargetingWrapper
 from aero_quest.so101_aero_control import normalized_aero_hand_to_ctrl, print_combined_actuator_info
-from scripts.quest_arm_channel_so101_aero_full_teleop import (
+from scripts.legacy.quest_so101_aero_split_wrist_teleop import (
     DEFAULT_MODEL,
     DEFAULT_R_BQ,
     SAFE_OPEN_HAND,
@@ -128,7 +128,7 @@ def make_key_callback(arm_channel, latest_frame_ref, ik, data, state, args, R_BQ
                 else ee_R_B.copy()
             )
             state["last_qtarget"] = joint_qpos(ik.model, data, ik.joint_ids)
-            print("Re-zeroed unified IK: current Quest wrist maps to current SO101 end-effector pose.")
+            print("Re-zeroed weighted IK: current Quest wrist maps to current SO101 end-effector pose.")
         elif key == "p":
             state["paused"] = not state["paused"]
             print(f"paused={state['paused']}")
@@ -138,7 +138,7 @@ def make_key_callback(arm_channel, latest_frame_ref, ik, data, state, args, R_BQ
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Quest wrist pose -> unified weighted SO101 5-joint IK, landmarks -> Aero Hand."
+        description="Quest wrist pose -> weighted SO101 5-joint IK, landmarks -> Aero Hand."
     )
     parser.add_argument("--model", "--model-path", dest="model", default=str(DEFAULT_MODEL))
     parser.add_argument("--host", default="0.0.0.0")
@@ -227,7 +227,7 @@ def main():
     print("Before running:")
     print(f"  1. Confirm: adb reverse tcp:{args.port} tcp:{args.port}")
     print(f"  2. Quest HTS: TCP, localhost, port {args.port}")
-    print("  3. Unified IK: wrist relative motion and orientation -> selected SO101 joints.")
+    print("  3. Weighted IK: wrist relative motion and orientation -> selected SO101 joints.")
     print("  4. Hand Channel: wrist-relative landmarks -> Aero Hand retargeting.")
     print("  5. Press R to re-zero, P to pause/resume arm.")
     print(f"model={model_path}")
@@ -304,7 +304,7 @@ def main():
                         else ee_R_B.copy()
                     )
                     state["last_qtarget"] = joint_qpos(model, data, ik.joint_ids)
-                    print("Teleop zero set: current Quest wrist maps to current SO101 end-effector pose.")
+                    print("Teleop zero set for weighted IK: current Quest wrist maps to current SO101 end-effector pose.")
 
                 target = arm_channel.compute_target(quest_frame)
                 state["target_pos_B"] = np.clip(target.target_pos_B, workspace_min, workspace_max)

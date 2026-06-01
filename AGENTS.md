@@ -15,7 +15,7 @@ Quest HTS -> TCP localhost:8000 -> hand-tracking-sdk -> Python scripts
 
 - `scripts/04_receive_quest_tcp.py`：最小 TCP 接收器冒烟测试。
 - `scripts/quest_tcp_aero_teleop.py`：仅针对 Aero Hand 的 Quest landmark 重定向。
-- `scripts/quest_arm_channel_so101_aero_full_teleop.py`：当前 SO101 机械臂加 Aero Hand 遥操作。
+- `scripts/quest_so101_aero_nullspace_ik_teleop.py`：当前 SO101 机械臂加 Aero Hand 遥操作。
 - `scripts/quest_arm_channel_so101_ik.py`：当前 Arm Channel 控制的仅机械臂版本。
 - `scripts/debug_quest_dual_channel.py`：轻量级解析器/通道调试脚本。
 
@@ -40,13 +40,13 @@ Quest HTS -> TCP localhost:8000 -> hand-tracking-sdk -> Python scripts
 
 ## 代码地图
 
-- 接收：`scripts/04_receive_quest_tcp.py`，完整遥操作在 `scripts/quest_arm_channel_so101_aero_full_teleop.py`。
+- 接收：`scripts/04_receive_quest_tcp.py`，完整遥操作在 `scripts/quest_so101_aero_nullspace_ik_teleop.py`。
 - 解析和类型化坐标帧模型：`aero_quest/quest_hand_frame.py`。
 - 机械臂控制和 SO101 IK 辅助：`aero_quest/arm_teleop.py`。
 - Aero Hand 重定向：`aero_quest/retargeting.py`。
 - SO101 + Aero 动作应用：`aero_quest/so101_aero_control.py`。
 - MuJoCo landmark 辅助：`aero_quest/mujoco_landmarks.py`。
-- 仿真入口点：`scripts/quest_arm_channel_so101_aero_full_teleop.py`、`scripts/quest_arm_channel_so101_ik.py`、`scripts/quest_arm_channel_target_ball.py`。
+- 仿真入口点：`scripts/quest_so101_aero_nullspace_ik_teleop.py`、`scripts/quest_arm_channel_so101_ik.py`、`scripts/quest_arm_channel_target_ball.py`。
 
 ## 安全规则
 

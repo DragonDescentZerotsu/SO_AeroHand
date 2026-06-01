@@ -3,7 +3,7 @@
 This document describes the current SO101 + Aero Hand teleoperation path:
 
 ```text
-scripts/quest_arm_channel_so101_aero_full_teleop.py
+scripts/quest_so101_aero_nullspace_ik_teleop.py
 ```
 
 The design goal is to keep the arm and hand data separate until they are applied to the combined MuJoCo model.
@@ -236,7 +236,7 @@ the operator palm rotated this much relative to calibration
 You can fall back to wrist-root orientation instead of palm landmarks:
 
 ```bash
-python scripts/quest_arm_channel_so101_aero_full_teleop.py --orientation-source wrist_pose
+python scripts/quest_so101_aero_nullspace_ik_teleop.py --orientation-source wrist_pose
 ```
 
 ## IK
@@ -279,7 +279,7 @@ Current full teleop:
 
 ```bash
 adb reverse tcp:8000 tcp:8000
-python scripts/quest_arm_channel_so101_aero_full_teleop.py
+python scripts/quest_so101_aero_nullspace_ik_teleop.py
 ```
 
 Arm-only controller with the same arm math:
@@ -315,6 +315,6 @@ Useful checks:
 
 ```bash
 python tests/test_quest_hand_frame.py
-python scripts/quest_arm_channel_so101_aero_full_teleop.py --dry-run
+python scripts/quest_so101_aero_nullspace_ik_teleop.py --dry-run
 python tests/test_arm_ik_minimal.py --model models/so101_aero_hand/scene.xml --ee_site so101_aero_attach_site
 ```

@@ -225,7 +225,7 @@ Quest teleop for the combined model:
 
 ```bash
 adb reverse tcp:8000 tcp:8000
-python scripts/quest_arm_channel_so101_aero_full_teleop.py
+python scripts/quest_so101_aero_nullspace_ik_teleop.py
 ```
 
 The current teleop path is split into:
