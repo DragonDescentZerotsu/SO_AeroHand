@@ -17,7 +17,7 @@ if str(PROJECT_ROOT) not in sys.path:
 from aero_quest.so101_aero_control import apply_so101_aero_action, print_combined_actuator_info
 
 
-DEFAULT_MODEL = PROJECT_ROOT / "models/so101_aero_hand/scene.xml"
+DEFAULT_MODEL = PROJECT_ROOT / "models/so101_aero_hand/SO101_aerohand.xml"
 
 
 def parse_args():

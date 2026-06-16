@@ -35,7 +35,7 @@ from aero_quest.retargeting import AeroHandRetargetingWrapper
 from aero_quest.so101_aero_control import normalized_aero_hand_to_ctrl, print_combined_actuator_info
 
 
-DEFAULT_MODEL = PROJECT_ROOT / "models/so101_aero_hand/scene.xml"
+DEFAULT_MODEL = PROJECT_ROOT / "models/so101_aero_hand/SO101_aerohand.xml"
 DEFAULT_ARM_JOINTS = "shoulder_pan,shoulder_lift,elbow_flex,wrist_flex,wrist_roll"
 SAFE_OPEN_HAND = np.array([1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float32)
 

@@ -16,7 +16,7 @@ if str(PROJECT_ROOT) not in sys.path:
 from aero_quest.arm_teleop import DampedLeastSquaresIK, clamp_norm, joint_qpos
 
 
-DEFAULT_MODEL = PROJECT_ROOT / "models/so101_aero_hand/scene.xml"
+DEFAULT_MODEL = PROJECT_ROOT / "models/so101_aero_hand/SO101_aerohand.xml"
 DEFAULT_ARM_JOINTS = "shoulder_pan,shoulder_lift,elbow_flex,wrist_flex,wrist_roll"
 
 

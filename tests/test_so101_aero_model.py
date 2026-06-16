@@ -17,7 +17,7 @@ from aero_quest.so101_aero_control import (
 )
 
 
-MODEL_PATH = PROJECT_ROOT / "models/so101_aero_hand/scene.xml"
+MODEL_PATH = PROJECT_ROOT / "models/so101_aero_hand/SO101_aerohand.xml"
 
 
 def test_combined_model_loads_and_steps():

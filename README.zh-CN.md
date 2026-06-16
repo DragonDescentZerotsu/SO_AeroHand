@@ -129,7 +129,7 @@ P  暂停/恢复机械臂运动
 完整遥操作脚本使用：
 
 ```text
-model:   models/so101_aero_hand/scene.xml
+model:   models/so101_aero_hand/SO101_aerohand.xml
 arm EE:  so101_aero_attach_site
 hand:    默认右手
 ```

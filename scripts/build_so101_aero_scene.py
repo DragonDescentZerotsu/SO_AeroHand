@@ -7,7 +7,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SO101_XML = PROJECT_ROOT / "third_party/SO-ARM100/Simulation/SO101/so101_new_calib.xml"
 AERO_XML = PROJECT_ROOT / "mujoco_menagerie/tetheria_aero_hand_open/right_hand.xml"
 OUTPUT_DIR = PROJECT_ROOT / "models/so101_aero_hand"
-OUTPUT_XML = OUTPUT_DIR / "scene.xml"
+OUTPUT_XML = OUTPUT_DIR / "SO101_aerohand.xml"
 
 # SO101's stock gripperframe is offset from the wrist_roll motor axis and near
 # the removed jaw tip. Use the roll-axis centerline with a closer axial depth so

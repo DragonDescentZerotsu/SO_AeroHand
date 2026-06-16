@@ -59,7 +59,7 @@ P  pause/resume arm motion
 The full teleop script uses:
 
 ```text
-model:   models/so101_aero_hand/scene.xml
+model:   models/so101_aero_hand/SO101_aerohand.xml
 arm EE:  so101_aero_attach_site
 hand:    right hand by default
 ```

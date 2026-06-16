@@ -88,6 +88,24 @@ python scripts/quest_tcp_aero_teleop.py --alpha 0.25
 python scripts/build_so101_aero_scene.py
 ```
 
+输出基础机器人模型：
+
+```text
+models/so101_aero_hand/SO101_aerohand.xml
+```
+
+从配置生成带任务物体的场景，例如带一个动态 pipette 的抓取测试场景：
+
+```bash
+python scripts/build_scene_from_config.py --config configs/scenes/pipette_grasp.yaml
+```
+
+输出：
+
+```text
+models/so101_aero_hand/scenes/SO101_aerohand_pipette.xml
+```
+
 查看组合模型：
 
 ```bash

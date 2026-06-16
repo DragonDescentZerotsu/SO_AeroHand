@@ -1,0 +1,39 @@
+name: SO101_aerohand_pipette_grasp
+base_model: models/so101_aero_hand/SO101_aerohand.xml
+output_model: models/so101_aero_hand/scenes/SO101_aerohand_pipette.xml
+
+objects:
+  - id: pipette_0
+    model_name: pipette_model
+    source: /data/tianang/projects/AutoBio/autobio/model/object/pipette.gen.xml
+    body: pipette
+    prefix: pipette_0/
+    freejoint: true
+    init:
+      # Wrapper pose in the SO101/Aero scene B frame. The attached pipette
+      # model has its own internal body offset, so this places the visible
+      # pipette handle in front of the Aero fingers for first-pass grasp tests.
+      pos: [0.39, 0.02, 0.32]
+      quat: [1.0, 0.0, 0.0, 0.0]
+    randomize:
+      pos:
+        x: [0.35, 0.45]
+        y: [-0.05, 0.07]
+        z: [0.28, 0.35]
+      yaw: [-0.8, 0.8]
+
+robot:
+  randomize:
+    arm_qpos:
+      shoulder_pan: [-0.4, 0.4]
+      shoulder_lift: [-0.8, 0.2]
+      elbow_flex: [-0.8, 0.8]
+      wrist_flex: [-0.5, 0.5]
+      wrist_roll: [-1.0, 1.0]
+
+task:
+  type: grasp_object
+  target_objects: [pipette_0]
+  success:
+    lift_height: 0.05
+    hold_steps: 20

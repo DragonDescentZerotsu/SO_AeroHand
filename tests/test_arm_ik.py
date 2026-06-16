@@ -15,7 +15,7 @@ if str(PROJECT_ROOT) not in sys.path:
 from aero_quest.arm_teleop import DampedLeastSquaresIK, joint_qpos
 
 
-DEFAULT_MODEL = PROJECT_ROOT / "models/so101_aero_hand/scene.xml"
+DEFAULT_MODEL = PROJECT_ROOT / "models/so101_aero_hand/SO101_aerohand.xml"
 
 
 def parse_args():

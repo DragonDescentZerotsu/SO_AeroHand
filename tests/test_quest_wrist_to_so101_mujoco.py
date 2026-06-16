@@ -17,7 +17,7 @@ from aero_quest.arm_teleop import MuJoCoSO101Adapter, QuestArmTeleopController
 from aero_quest.so101_aero_control import ctrl_midpoints
 
 
-DEFAULT_MODEL = PROJECT_ROOT / "models/so101_aero_hand/scene.xml"
+DEFAULT_MODEL = PROJECT_ROOT / "models/so101_aero_hand/SO101_aerohand.xml"
 DEFAULT_ARM_JOINTS = "shoulder_pan,shoulder_lift,elbow_flex,wrist_flex,wrist_roll"
 
 
