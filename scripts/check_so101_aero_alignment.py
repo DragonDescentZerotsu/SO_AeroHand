@@ -30,6 +30,13 @@ def body_pose(model, data, name):
     return model.body_pos[body_id].copy(), data.xpos[body_id].copy()
 
 
+def body_rotation(model, data, name):
+    body_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, name)
+    if body_id < 0:
+        raise RuntimeError(f"Missing body: {name}")
+    return data.xmat[body_id].reshape(3, 3).copy()
+
+
 def main():
     args = parse_args()
     model_path = Path(args.model).expanduser()
@@ -47,12 +54,24 @@ def main():
     palm_local, palm_world = body_pose(model, data, "palm")
 
     tetheria_body = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, "tetheria_mount")
+    wrist_roll_joint = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, "wrist_roll")
+    if wrist_roll_joint < 0:
+        raise RuntimeError("Missing joint: wrist_roll")
     removed_mount = tetheria_body < 0
     local_ok = np.allclose(wrist_local, wrist_lm_local, atol=args.tol)
-    world_ok = (
-        np.linalg.norm(attach_world - wrist_world) <= args.tol
-        and np.linalg.norm(attach_world - wrist_lm_world) <= args.tol
-    )
+    world_ok = np.linalg.norm(wrist_world - wrist_lm_world) <= args.tol
+    gripper_R = body_rotation(model, data, "gripper")
+    palm_R = body_rotation(model, data, "palm")
+    gripper_body = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, "gripper")
+    roll_axis_world = gripper_R @ model.jnt_axis[wrist_roll_joint]
+    roll_point_world = data.xpos[gripper_body] + gripper_R @ model.jnt_pos[wrist_roll_joint]
+    palm_mount_axis_world = -palm_R[:, 2]
+    axis_dot = float(np.dot(roll_axis_world, palm_mount_axis_world))
+    axis_ok = axis_dot >= 1.0 - args.tol
+    attach_delta = attach_world - roll_point_world
+    attach_radial = attach_delta - np.dot(attach_delta, roll_axis_world) * roll_axis_world
+    attach_axis_dist = float(np.linalg.norm(attach_radial))
+    position_ok = attach_axis_dist <= args.tol
 
     middle_tip = site_pose(model, data, "aero_middle_tip_site")[1]
     thumb_tip = site_pose(model, data, "aero_thumb_tip_site")[1]
@@ -74,12 +93,19 @@ def main():
     print(f"dist palm-gripperframe: {np.linalg.norm(palm_world - gripper_world):.12g}")
     print(f"dist wrist-gripperframe:{np.linalg.norm(wrist_world - gripper_world):.12g}")
     print(f"dist wrist-aero_attach: {np.linalg.norm(wrist_world - attach_world):.12g}")
+    print(f"roll_axis_world: {np.array2string(roll_axis_world, precision=8)}")
+    print(f"roll_point_world: {np.array2string(roll_point_world, precision=8)}")
+    print(f"palm_mount_axis_world: {np.array2string(palm_mount_axis_world, precision=8)}")
+    print(f"roll_palm_axis_dot: {axis_dot:.12g}")
+    print(f"attach_to_roll_axis_dist: {attach_axis_dist:.12g}")
     print(f"middle_tip_from_wrist: {np.array2string(middle_from_wrist, precision=8)}")
     print(f"thumb_tip_from_wrist:  {np.array2string(thumb_from_wrist, precision=8)}")
     print(f"local_alignment_ok: {local_ok}")
-    print(f"world_alignment_ok: {world_ok}")
+    print(f"wrist_landmark_world_ok: {world_ok}")
+    print(f"axis_alignment_ok: {axis_ok}")
+    print(f"axis_position_ok: {position_ok}")
 
-    if not removed_mount or not local_ok or not world_ok:
+    if not removed_mount or not local_ok or not world_ok or not axis_ok or not position_ok:
         raise SystemExit(1)
 
 
