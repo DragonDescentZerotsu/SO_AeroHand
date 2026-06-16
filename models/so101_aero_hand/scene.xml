@@ -222,8 +222,8 @@
                 <joint axis="0 0 1" name="wrist_roll" type="hinge" range="-2.7438472969992493 2.841206309382605" class="sts3215" />
                 <inertial pos="0.000213627 0.000245138 -0.025187" mass="0.087" fullinertia="2.75087e-05 4.33657e-05 3.45059e-05 -3.35241e-07 -5.7352e-06 -5.17847e-08" />
                 <site group="3" name="gripperframe" pos="-0.0079 -0.000218121 -0.0981274" quat="0.707107 -0 0.707107 -2.37788e-17" />
-                <site name="so101_aero_attach_site" pos="-0.0079 -0.000218121 -0.035" group="4" size="0.003" rgba="0.2 1 0.2 1" />
-                <body name="palm" pos="-0.0099 0.00589482981443 -0.0138131684214" quat="-0.173602777667 -0.984815757178 0 -2.77560197155e-17" childclass="aero_tetheria_rh">
+                <site name="so101_aero_attach_site" pos="0 0 -0.035" group="4" size="0.003" rgba="0.2 1 0.2 1" />
+                <body name="palm" pos="-0.0002 -0.0003 -0.013" quat="0 1 0 0" childclass="aero_tetheria_rh">
                   <geom type="mesh" class="aero_visual" mesh="right_frame_link" />
                   <geom name="palm_collision_1" size="0.006 0.006 0.006" pos="0.031 -0.0045 0.096" quat="-0.5 -0.5 -0.5 0.5" type="box" />
                   <site name="palm_collision_1" pos="0.031 -0.0170 0.076" group="3" size="0.0001" />
@@ -240,8 +240,6 @@
                   <geom name="palm_collision_9" size="0.022 0.020 0.023" pos="-0.003 -0.0015 0.022" quat="-0.5 -0.5 -0.5 0.5" type="box" group="3" />
                   <geom name="palm_collision_10" size="0.002 0.018 0.017" pos="0.041 0.004 0.002" quat="-0.5 -0.5 -0.5 0.5" type="box" group="3" />
                   <geom name="palm_collision_11" size="0.022 0.028 0.002" pos="0.047 0.02 0.022" quat="-0.5 -0.5 -0.5 0.5" type="box" group="3" />
-                  <site name="aero_wrist_site" pos="0.002 -0.0015 0.022" group="4" size="0.003" rgba="1 0.2 0.2 1" />
-                  <site name="aero_wrist_lm" pos="0.002 -0.0015 0.022" group="4" size="0.003" rgba="0.2 0.8 1 1" />
                   <body name="right_index_f_link" pos="0.031448 -0.004172 0.10003" quat="0.999505 0.000456857 0.026173 -0.0174466">
                     <inertial pos="0 0 0.0017" mass="0.000169697" diaginertia="1.29009e-09 1.29009e-09 7.6801e-10" />
                     <geom type="mesh" mesh="right_index_f_link" class="aero_visual" />
@@ -252,8 +250,6 @@
                       <joint name="right_index_mcp_flex" pos="0 0 0" axis="1 0 0" range="0 1.5708" class="aero_rot" />
                       <geom type="mesh" mesh="right_index_proximal_link" class="aero_visual" />
                       <geom size="0.006 0.006 0.013" pos="0 -0.003 0.019" type="box" />
-                      <site name="aero_index_proximal_site" pos="0 -0.003 0.019" group="4" size="0.003" rgba="1 0.2 0.2 1" />
-                      <site name="aero_index_proximal_lm" pos="0 -0.003 0.019" group="4" size="0.003" rgba="0.2 0.8 1 1" />
                       <site name="if_proximal_tendon0_s0" pos="0 -0.0110 0.0095" group="4" size="0.0001" />
                       <geom name="if_proximal_tendon0_g0" rgba="0 1 0 1" size="0.0025 0.005" pos="0 -0.0075 0.0095" quat="0.707 0 -0.707 0" type="cylinder" class="aero_visual" group="2" />
                       <site name="if_proximal_tendon0_s1" pos="0 -0.0063 0.0135" group="4" size="0.0001" />
@@ -273,8 +269,6 @@
                         <joint name="right_index_pip" pos="0 0 0" axis="1 0 0" range="0 1.5708" class="aero_pip" />
                         <geom type="mesh" mesh="right_index_middle_link" class="aero_visual" />
                         <geom size="0.006 0.005 0.010" pos="0 -0.001 0.006" type="box" />
-                        <site name="aero_index_intermediate_site" pos="0 -0.001 0.006" group="4" size="0.003" rgba="1 0.2 0.2 1" />
-                        <site name="aero_index_intermediate_lm" pos="0 -0.001 0.006" group="4" size="0.003" rgba="0.2 0.8 1 1" />
                         <site name="if_middle_spring0_s0" pos="0 0.004 0.003" group="4" size="0.0005" />
                         <body name="right_index_distal_link" pos="0 0.00036966 0.021997" quat="1 0.00052935 0 0">
                           <inertial pos="-0.00184412 0.000358323 0.0107277" quat="0.696253 -0.184428 0.0500635 0.69189" mass="0.00309312" diaginertia="1.89064e-07 1.75544e-07 6.39413e-08" />
@@ -282,19 +276,23 @@
                           <geom type="mesh" mesh="right_index_distal_link" class="aero_visual" />
                           <geom pos="0 0.0033789 0.024944" quat="0.999999 -0.0015829 0 0" type="mesh" mesh="right_index_tip_link" class="aero_visual" />
                           <geom name="if_tip" size="0.005 0.005 0.01" pos="0 -0.003 0.014" type="box" />
-                          <site name="aero_index_distal_site" pos="0 -0.003 0.014" group="4" size="0.003" rgba="1 0.2 0.2 1" />
-                          <site name="aero_index_distal_lm" pos="0 -0.003 0.014" group="4" size="0.003" rgba="0.2 0.8 1 1" />
                           <site name="if_tip" pos="0 -0.003 0.023" group="4" />
-                          <site name="aero_index_tip_site" pos="0 -0.003 0.023" group="4" size="0.003" rgba="1 0.2 0.2 1" />
-                          <site name="aero_index_tip_lm" pos="0 -0.003 0.023" group="4" size="0.003" rgba="0.2 0.8 1 1" />
                           <site name="if_dip_tendon0_s0" pos="0 -0.0086 0.003" group="4" size="0.0001" />
                           <geom name="if_dip_tendon0_g0" rgba="0 1 0 1" size="0.0025 0.005" pos="0 -0.006 0.002" quat="0.707 0 -0.707 0" type="cylinder" class="aero_visual" group="2" />
                           <site name="if_dip_tendon0_s2" pos="0 -0.0015 0.0075" group="4" size="0.0001" />
                           <site name="if_dip_tendon1_s0" pos="0 0.0025 0.015" group="4" size="0.0001" />
                           <geom name="if_dip_tendon1_g0" rgba="0 1 0 1" size="0.0025 0.005" pos="0 0 0" quat="0.707 0 -0.707 0" type="cylinder" class="aero_visual" group="2" />
                           <site name="if_dip_tendon1_s1" pos="0 0.0025 -0.002" group="4" size="0.0001" />
+                          <site name="aero_index_distal_site" pos="0 -0.003 0.014" group="4" size="0.003" rgba="1 0.2 0.2 1" />
+                          <site name="aero_index_distal_lm" pos="0 -0.003 0.014" group="4" size="0.003" rgba="0.2 0.8 1 1" />
+                          <site name="aero_index_tip_site" pos="0 -0.003 0.023" group="4" size="0.003" rgba="1 0.2 0.2 1" />
+                          <site name="aero_index_tip_lm" pos="0 -0.003 0.023" group="4" size="0.003" rgba="0.2 0.8 1 1" />
                         </body>
+                        <site name="aero_index_intermediate_site" pos="0 -0.001 0.006" group="4" size="0.003" rgba="1 0.2 0.2 1" />
+                        <site name="aero_index_intermediate_lm" pos="0 -0.001 0.006" group="4" size="0.003" rgba="0.2 0.8 1 1" />
                       </body>
+                      <site name="aero_index_proximal_site" pos="0 -0.003 0.019" group="4" size="0.003" rgba="1 0.2 0.2 1" />
+                      <site name="aero_index_proximal_lm" pos="0 -0.003 0.019" group="4" size="0.003" rgba="0.2 0.8 1 1" />
                     </body>
                   </body>
                   <body name="right_middle_f_link" pos="0.0085 -0.003 0.10061">
@@ -307,8 +305,6 @@
                       <joint name="right_middle_mcp_flex" pos="0 0 0" axis="1 0 0" range="0 1.5708" class="aero_rot" />
                       <geom type="mesh" mesh="right_middle_proximal_link" class="aero_visual" />
                       <geom size="0.006 0.006 0.013" pos="0 -0.003 0.019" type="box" />
-                      <site name="aero_middle_proximal_site" pos="0 -0.003 0.019" group="4" size="0.003" rgba="1 0.2 0.2 1" />
-                      <site name="aero_middle_proximal_lm" pos="0 -0.003 0.019" group="4" size="0.003" rgba="0.2 0.8 1 1" />
                       <site name="mf_proximal_tendon0_s0" pos="0 -0.0110 0.0125" group="4" size="0.0001" />
                       <geom name="mf_proximal_tendon0_g0" rgba="0 1 0 1" size="0.0025 0.005" pos="0 -0.0075 0.0095" quat="0.707 0 -0.707 0" type="cylinder" class="aero_visual" group="2" />
                       <site name="mf_proximal_tendon0_s1" pos="0 -0.0063 0.0135" group="4" size="0.0001" />
@@ -328,8 +324,6 @@
                         <joint name="right_middle_pip" pos="0 0 0" axis="1 0 0" range="0 1.5708" class="aero_pip" />
                         <geom type="mesh" mesh="right_middle_middle_link" class="aero_visual" />
                         <geom size="0.006 0.005 0.010" pos="0 -0.001 0.006" type="box" />
-                        <site name="aero_middle_intermediate_site" pos="0 -0.001 0.006" group="4" size="0.003" rgba="1 0.2 0.2 1" />
-                        <site name="aero_middle_intermediate_lm" pos="0 -0.001 0.006" group="4" size="0.003" rgba="0.2 0.8 1 1" />
                         <site name="mf_middle_spring0_s0" pos="0 0.004 0.003" group="4" size="0.0005" />
                         <body name="right_middle_distal_link" pos="0 0.00036966 0.021997" quat="1 0.00052935 0 0">
                           <inertial pos="-0.00184407 0.000358307 0.0107282" quat="0.696243 -0.184422 0.0500631 0.691902" mass="0.00309312" diaginertia="1.89075e-07 1.75556e-07 6.39407e-08" />
@@ -337,19 +331,23 @@
                           <geom type="mesh" mesh="right_middle_distal_link" class="aero_visual" />
                           <geom pos="0 0.0033789 0.024944" quat="0.999999 -0.0015829 0 0" type="mesh" mesh="right_middle_tip_link" class="aero_visual" />
                           <geom name="mf_tip" size="0.005 0.005 0.01" pos="0 -0.003 0.014" type="box" />
-                          <site name="aero_middle_distal_site" pos="0 -0.003 0.014" group="4" size="0.003" rgba="1 0.2 0.2 1" />
-                          <site name="aero_middle_distal_lm" pos="0 -0.003 0.014" group="4" size="0.003" rgba="0.2 0.8 1 1" />
                           <site name="mf_tip" pos="0 -0.003 0.023" group="4" />
-                          <site name="aero_middle_tip_site" pos="0 -0.003 0.023" group="4" size="0.003" rgba="1 0.2 0.2 1" />
-                          <site name="aero_middle_tip_lm" pos="0 -0.003 0.023" group="4" size="0.003" rgba="0.2 0.8 1 1" />
                           <site name="mf_dip_tendon0_s0" pos="0 -0.0086 0.003" group="4" size="0.0001" />
                           <geom name="mf_dip_tendon0_g0" rgba="0 1 0 1" size="0.0025 0.005" pos="0 -0.006 0.002" quat="0.707 0 -0.707 0" type="cylinder" class="aero_visual" group="2" />
                           <site name="mf_dip_tendon0_s2" pos="0 -0.0015 0.0075" group="4" size="0.0001" />
                           <site name="mf_dip_tendon1_s0" pos="0 0.0025 0.015" group="4" size="0.0001" />
                           <geom name="mf_dip_tendon1_g0" rgba="0 1 0 1" size="0.0025 0.005" pos="0 0 0" quat="0.707 0 -0.707 0" type="cylinder" class="aero_visual" group="2" />
                           <site name="mf_dip_tendon1_s1" pos="0 0.0025 -0.002" group="4" size="0.0001" />
+                          <site name="aero_middle_distal_site" pos="0 -0.003 0.014" group="4" size="0.003" rgba="1 0.2 0.2 1" />
+                          <site name="aero_middle_distal_lm" pos="0 -0.003 0.014" group="4" size="0.003" rgba="0.2 0.8 1 1" />
+                          <site name="aero_middle_tip_site" pos="0 -0.003 0.023" group="4" size="0.003" rgba="1 0.2 0.2 1" />
+                          <site name="aero_middle_tip_lm" pos="0 -0.003 0.023" group="4" size="0.003" rgba="0.2 0.8 1 1" />
                         </body>
+                        <site name="aero_middle_intermediate_site" pos="0 -0.001 0.006" group="4" size="0.003" rgba="1 0.2 0.2 1" />
+                        <site name="aero_middle_intermediate_lm" pos="0 -0.001 0.006" group="4" size="0.003" rgba="0.2 0.8 1 1" />
                       </body>
+                      <site name="aero_middle_proximal_site" pos="0 -0.003 0.019" group="4" size="0.003" rgba="1 0.2 0.2 1" />
+                      <site name="aero_middle_proximal_lm" pos="0 -0.003 0.019" group="4" size="0.003" rgba="0.2 0.8 1 1" />
                     </body>
                   </body>
                   <body name="right_ring_f_link" pos="-0.014448 -0.004172 0.10003" quat="0.999505 0.000456857 -0.026173 0.0174466">
@@ -362,8 +360,6 @@
                       <joint name="right_ring_mcp_flex" pos="0 0 0" axis="1 0 0" range="0 1.5708" class="aero_rot" />
                       <geom type="mesh" mesh="right_ring_proximal_link" class="aero_visual" />
                       <geom size="0.006 0.006 0.013" pos="0 -0.003 0.019" type="box" />
-                      <site name="aero_ring_proximal_site" pos="0 -0.003 0.019" group="4" size="0.003" rgba="1 0.2 0.2 1" />
-                      <site name="aero_ring_proximal_lm" pos="0 -0.003 0.019" group="4" size="0.003" rgba="0.2 0.8 1 1" />
                       <site name="rf_proximal_tendon0_s0" pos="0 -0.0110 0.0095" group="4" size="0.0001" />
                       <geom name="rf_proximal_tendon0_g0" rgba="0 1 0 1" size="0.0025 0.005" pos="0 -0.0075 0.0095" quat="0.707 0 -0.707 0" type="cylinder" class="aero_visual" group="2" />
                       <site name="rf_proximal_tendon0_s1" pos="0 -0.0063 0.0135" group="4" size="0.0001" />
@@ -383,8 +379,6 @@
                         <joint name="right_ring_pip" pos="0 0 0" axis="1 0 0" range="0 1.5708" class="aero_pip" />
                         <geom type="mesh" mesh="right_ring_middle_link" class="aero_visual" />
                         <geom size="0.006 0.005 0.010" pos="0 -0.001 0.006" type="box" />
-                        <site name="aero_ring_intermediate_site" pos="0 -0.001 0.006" group="4" size="0.003" rgba="1 0.2 0.2 1" />
-                        <site name="aero_ring_intermediate_lm" pos="0 -0.001 0.006" group="4" size="0.003" rgba="0.2 0.8 1 1" />
                         <site name="rf_middle_spring0_s0" pos="0 0.004 0.003" group="4" size="0.0005" />
                         <body name="right_ring_distal_link" pos="0 0.00036966 0.021997" quat="1 0.00052935 0 0">
                           <inertial pos="-0.00184407 0.000358289 0.0107282" quat="0.696244 -0.184422 0.050064 0.691901" mass="0.00309314" diaginertia="1.89076e-07 1.75558e-07 6.39409e-08" />
@@ -392,19 +386,23 @@
                           <geom type="mesh" mesh="right_ring_distal_link" class="aero_visual" />
                           <geom pos="0 0.0033789 0.024944" quat="0.999999 -0.0015829 0 0" type="mesh" mesh="right_ring_tip_link" class="aero_visual" />
                           <geom name="rf_tip" size="0.005 0.005 0.01" pos="0 -0.003 0.014" type="box" />
-                          <site name="aero_ring_distal_site" pos="0 -0.003 0.014" group="4" size="0.003" rgba="1 0.2 0.2 1" />
-                          <site name="aero_ring_distal_lm" pos="0 -0.003 0.014" group="4" size="0.003" rgba="0.2 0.8 1 1" />
                           <site name="rf_tip" pos="0 -0.003 0.023" group="4" />
-                          <site name="aero_ring_tip_site" pos="0 -0.003 0.023" group="4" size="0.003" rgba="1 0.2 0.2 1" />
-                          <site name="aero_ring_tip_lm" pos="0 -0.003 0.023" group="4" size="0.003" rgba="0.2 0.8 1 1" />
                           <site name="rf_dip_tendon0_s0" pos="0 -0.0086 0.003" group="4" size="0.0001" />
                           <geom name="rf_dip_tendon0_g0" rgba="0 1 0 1" size="0.0025 0.005" pos="0 -0.006 0.002" quat="0.707 0 -0.707 0" type="cylinder" class="aero_visual" group="2" />
                           <site name="rf_dip_tendon0_s2" pos="0 -0.0015 0.0075" group="4" size="0.0001" />
                           <site name="rf_dip_tendon1_s0" pos="0 0.0025 0.015" group="4" size="0.0001" />
                           <geom name="rf_dip_tendon1_g0" rgba="0 1 0 1" size="0.0025 0.005" pos="0 0 0" quat="0.707 0 -0.707 0" type="cylinder" class="aero_visual" group="2" />
                           <site name="rf_dip_tendon1_s1" pos="0 0.0025 -0.002" group="4" size="0.0001" />
+                          <site name="aero_ring_distal_site" pos="0 -0.003 0.014" group="4" size="0.003" rgba="1 0.2 0.2 1" />
+                          <site name="aero_ring_distal_lm" pos="0 -0.003 0.014" group="4" size="0.003" rgba="0.2 0.8 1 1" />
+                          <site name="aero_ring_tip_site" pos="0 -0.003 0.023" group="4" size="0.003" rgba="1 0.2 0.2 1" />
+                          <site name="aero_ring_tip_lm" pos="0 -0.003 0.023" group="4" size="0.003" rgba="0.2 0.8 1 1" />
                         </body>
+                        <site name="aero_ring_intermediate_site" pos="0 -0.001 0.006" group="4" size="0.003" rgba="1 0.2 0.2 1" />
+                        <site name="aero_ring_intermediate_lm" pos="0 -0.001 0.006" group="4" size="0.003" rgba="0.2 0.8 1 1" />
                       </body>
+                      <site name="aero_ring_proximal_site" pos="0 -0.003 0.019" group="4" size="0.003" rgba="1 0.2 0.2 1" />
+                      <site name="aero_ring_proximal_lm" pos="0 -0.003 0.019" group="4" size="0.003" rgba="0.2 0.8 1 1" />
                     </body>
                   </body>
                   <body name="right_pinky_f_link" pos="-0.036912 -0.0066167 0.087021" quat="0.998019 0.00182998 -0.0523041 0.034918">
@@ -417,8 +415,6 @@
                       <joint name="right_pinky_mcp_flex" pos="0 0 0" axis="1 0 0" range="0 1.5708" class="aero_rot" />
                       <geom type="mesh" mesh="right_pinky_proximal_link" class="aero_visual" />
                       <geom size="0.006 0.006 0.013" pos="0 -0.003 0.019" type="box" />
-                      <site name="aero_little_proximal_site" pos="0 -0.003 0.019" group="4" size="0.003" rgba="1 0.2 0.2 1" />
-                      <site name="aero_little_proximal_lm" pos="0 -0.003 0.019" group="4" size="0.003" rgba="0.2 0.8 1 1" />
                       <site name="pf_proximal_tendon0_s0" pos="0 -0.0110 0.0095" group="4" size="0.0001" />
                       <geom name="pf_proximal_tendon0_g0" rgba="0 1 0 1" size="0.0025 0.005" pos="0 -0.0075 0.0095" quat="0.707 0 -0.707 0" type="cylinder" class="aero_visual" group="2" />
                       <site name="pf_proximal_tendon0_s1" pos="0 -0.0063 0.0135" group="4" size="0.0001" />
@@ -438,8 +434,6 @@
                         <joint name="right_pinky_pip" pos="0 0 0" axis="1 0 0" range="0 1.5708" class="aero_pip" />
                         <geom type="mesh" mesh="right_pinky_middle_link" class="aero_visual" />
                         <geom size="0.006 0.005 0.010" pos="0 -0.001 0.006" type="box" />
-                        <site name="aero_little_intermediate_site" pos="0 -0.001 0.006" group="4" size="0.003" rgba="1 0.2 0.2 1" />
-                        <site name="aero_little_intermediate_lm" pos="0 -0.001 0.006" group="4" size="0.003" rgba="0.2 0.8 1 1" />
                         <site name="pf_middle_spring0_s0" pos="0 0.004 0.003" group="4" size="0.0005" />
                         <body name="right_pinky_distal_link" pos="0 0.00036966 0.021997" quat="1 0.00052935 0 0">
                           <inertial pos="-0.00184407 0.000358264 0.0107282" quat="0.696242 -0.184421 0.0500633 0.691903" mass="0.00309314" diaginertia="1.89076e-07 1.75557e-07 6.3941e-08" />
@@ -447,19 +441,23 @@
                           <geom type="mesh" mesh="right_pinky_distal_link" class="aero_visual" />
                           <geom pos="0 0.0033789 0.024944" quat="0.999999 -0.0015829 0 0" type="mesh" mesh="right_pinky_tip_link" class="aero_visual" />
                           <geom name="pf_tip" size="0.005 0.005 0.01" pos="0 -0.003 0.014" type="box" />
-                          <site name="aero_little_distal_site" pos="0 -0.003 0.014" group="4" size="0.003" rgba="1 0.2 0.2 1" />
-                          <site name="aero_little_distal_lm" pos="0 -0.003 0.014" group="4" size="0.003" rgba="0.2 0.8 1 1" />
                           <site name="pf_tip" pos="0 -0.003 0.023" group="4" />
-                          <site name="aero_little_tip_site" pos="0 -0.003 0.023" group="4" size="0.003" rgba="1 0.2 0.2 1" />
-                          <site name="aero_little_tip_lm" pos="0 -0.003 0.023" group="4" size="0.003" rgba="0.2 0.8 1 1" />
                           <site name="pf_dip_tendon0_s0" pos="0 -0.0086 0.003" group="4" size="0.002" />
                           <geom name="pf_dip_tendon0_g0" rgba="0 1 0 1" size="0.0025 0.005" pos="0 -0.006 0.002" quat="0.707 0 -0.707 0" type="cylinder" class="aero_visual" group="2" />
                           <site name="pf_dip_tendon0_s2" pos="0 -0.0015 0.0075" group="4" size="0.0001" />
                           <site name="pf_dip_tendon1_s0" pos="0 0.0025 0.015" group="4" size="0.0001" />
                           <geom name="pf_dip_tendon1_g0" rgba="0 1 0 1" size="0.0025 0.005" pos="0 0 0" quat="0.707 0 -0.707 0" type="cylinder" class="aero_visual" group="2" />
                           <site name="pf_dip_tendon1_s1" pos="0 0.0025 -0.002" group="4" size="0.0001" />
+                          <site name="aero_little_distal_site" pos="0 -0.003 0.014" group="4" size="0.003" rgba="1 0.2 0.2 1" />
+                          <site name="aero_little_distal_lm" pos="0 -0.003 0.014" group="4" size="0.003" rgba="0.2 0.8 1 1" />
+                          <site name="aero_little_tip_site" pos="0 -0.003 0.023" group="4" size="0.003" rgba="1 0.2 0.2 1" />
+                          <site name="aero_little_tip_lm" pos="0 -0.003 0.023" group="4" size="0.003" rgba="0.2 0.8 1 1" />
                         </body>
+                        <site name="aero_little_intermediate_site" pos="0 -0.001 0.006" group="4" size="0.003" rgba="1 0.2 0.2 1" />
+                        <site name="aero_little_intermediate_lm" pos="0 -0.001 0.006" group="4" size="0.003" rgba="0.2 0.8 1 1" />
                       </body>
+                      <site name="aero_little_proximal_site" pos="0 -0.003 0.019" group="4" size="0.003" rgba="1 0.2 0.2 1" />
+                      <site name="aero_little_proximal_lm" pos="0 -0.003 0.019" group="4" size="0.003" rgba="0.2 0.8 1 1" />
                     </body>
                   </body>
                   <body name="right_t_link" pos="0.026317 -0.0175 0.02956" quat="0.579233 -0.40557 0.405572 -0.579235">
@@ -467,8 +465,6 @@
                     <joint name="right_thumb_cmc_abd" pos="0 0 0" axis="0 1 0" range="0 1.7453" class="aero_thumb_cmc" />
                     <geom type="mesh" mesh="right_t_link" class="aero_visual" />
                     <geom name="th_mp_collision" size="0.015 0.008 0.008" pos="-0.01 0.015 0.005" type="box" />
-                    <site name="aero_thumb_metacarpal_site" pos="-0.01 0.015 0.005" group="4" size="0.003" rgba="1 0.2 0.2 1" />
-                    <site name="aero_thumb_metacarpal_lm" pos="-0.01 0.015 0.005" group="4" size="0.003" rgba="0.2 0.8 1 1" />
                     <site name="th_t_tendon0_s0" pos="0 0.0018 -0.0030" group="4" size="0.0001" />
                     <geom name="th_t_tendon0_g0" rgba="0 1 0 1" size="0.0025 0.0012" pos="0 0.0018 0" quat="0.707 -0.707 0 0" type="cylinder" class="aero_visual" group="2" />
                     <site name="th_t_tendon0_s1" pos="0.00185 0.0018 0.00275" group="4" size="0.0001" />
@@ -489,8 +485,6 @@
                       <joint name="right_thumb_cmc_flex" pos="0 0 0" axis="1 0 0" range="0 0.9559" class="aero_thumb_axl" />
                       <geom type="mesh" mesh="right_thumb_mcp_link" class="aero_visual" />
                       <geom name="th_bs_collision_1" size="0.008 0.01 0.016" pos="0 0.0 00.014" type="box" />
-                      <site name="aero_thumb_proximal_site" pos="0 0 0.014" group="4" size="0.003" rgba="1 0.2 0.2 1" />
-                      <site name="aero_thumb_proximal_lm" pos="0 0 0.014" group="4" size="0.003" rgba="0.2 0.8 1 1" />
                       <site name="th_mcp_tendon0_s0" pos="0 -0.012 0.015" group="4" size="0.0001" />
                       <geom name="th_mcp_tendon1_g0" rgba="0 1 0 1" size="0.0025 0.0025" pos="0 -0.005 0.024" quat="0.707 0 -0.707 0" type="cylinder" class="aero_visual" group="2" />
                       <site name="th_mcp_tendon1_s0" pos="0 -0.002 0.028" group="4" size="0.002" />
@@ -501,8 +495,6 @@
                         <joint name="right_thumb_mcp" pos="0 0 0" axis="1 0 0" range="0 1.5708" class="aero_thumb_mcp" />
                         <geom type="mesh" mesh="right_thumb_proximal_link" class="aero_visual" />
                         <geom name="th_px_collision_1" size="0.008 0.006 0.012" pos="0 -0.002 0.012" type="box" />
-                        <site name="aero_thumb_distal_site" pos="0 -0.002 0.012" group="4" size="0.003" rgba="1 0.2 0.2 1" />
-                        <site name="aero_thumb_distal_lm" pos="0 -0.002 0.012" group="4" size="0.003" rgba="0.2 0.8 1 1" />
                         <site name="th_proximal_spring1_s0" pos="0 0.005 -0.0015" group="4" size="0.0005" />
                         <geom name="th_proximal_spring1_g0" rgba="0 1 0 1" size="0.0045 0.005" pos="0 0 0" quat="0.707 0 -0.707 0" type="cylinder" class="aero_visual" group="2" />
                         <site name="th_proximal_spring1_s1" pos="0 0.005 0.006" group="4" size="0.0005" />
@@ -513,15 +505,23 @@
                           <geom pos="0 0.0024685 0.029987" quat="0.999982 0.00592597 0 0" type="mesh" mesh="right_thumb_tip_link" class="aero_visual" />
                           <geom name="th_tip" size="0.008 0.006 0.012" pos="0 -0.002 0.015" type="box" />
                           <site name="th_tip" pos="0 -0.005 0.027" group="4" />
-                          <site name="aero_thumb_tip_site" pos="0 -0.005 0.027" group="4" size="0.003" rgba="1 0.2 0.2 1" />
-                          <site name="aero_thumb_tip_lm" pos="0 -0.005 0.027" group="4" size="0.003" rgba="0.2 0.8 1 1" />
                           <site name="th_tendon1_ip_s0" pos="0 -0.0106 0.002" group="4" size="0.001" />
                           <geom name="th_tendon1_ip_g0" rgba="0 1 0 1" size="0.0025 0.005" pos="0 -0.008 0.002" quat="0.707 0 -0.707 0" type="cylinder" class="aero_visual" group="2" />
                           <site name="th_tendon1_ip_s1" pos="0 -0.0003 0.0115" group="4" size="0.0001" />
+                          <site name="aero_thumb_tip_site" pos="0 -0.005 0.027" group="4" size="0.003" rgba="1 0.2 0.2 1" />
+                          <site name="aero_thumb_tip_lm" pos="0 -0.005 0.027" group="4" size="0.003" rgba="0.2 0.8 1 1" />
                         </body>
+                        <site name="aero_thumb_distal_site" pos="0 -0.002 0.012" group="4" size="0.003" rgba="1 0.2 0.2 1" />
+                        <site name="aero_thumb_distal_lm" pos="0 -0.002 0.012" group="4" size="0.003" rgba="0.2 0.8 1 1" />
                       </body>
+                      <site name="aero_thumb_proximal_site" pos="0 0 0.014" group="4" size="0.003" rgba="1 0.2 0.2 1" />
+                      <site name="aero_thumb_proximal_lm" pos="0 0 0.014" group="4" size="0.003" rgba="0.2 0.8 1 1" />
                     </body>
+                    <site name="aero_thumb_metacarpal_site" pos="-0.01 0.015 0.005" group="4" size="0.003" rgba="1 0.2 0.2 1" />
+                    <site name="aero_thumb_metacarpal_lm" pos="-0.01 0.015 0.005" group="4" size="0.003" rgba="0.2 0.8 1 1" />
                   </body>
+                  <site name="aero_wrist_site" pos="0.002 -0.0015 0.022" group="4" size="0.003" rgba="1 0.2 0.2 1" />
+                  <site name="aero_wrist_lm" pos="0.002 -0.0015 0.022" group="4" size="0.003" rgba="0.2 0.8 1 1" />
                   <site name="grasp_site" pos="0.01000192 -0.0662211328 0.0503935104" group="4" quat="0.4056 0.5792 -0.5792 0.4056" />
                 </body>
               </body>

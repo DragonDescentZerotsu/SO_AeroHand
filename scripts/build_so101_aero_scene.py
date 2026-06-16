@@ -9,10 +9,17 @@ AERO_XML = PROJECT_ROOT / "mujoco_menagerie/tetheria_aero_hand_open/right_hand.x
 OUTPUT_DIR = PROJECT_ROOT / "models/so101_aero_hand"
 OUTPUT_XML = OUTPUT_DIR / "scene.xml"
 
-# SO101's stock gripperframe is near the removed jaw tip, about 9.8 cm past the
-# visible wrist-roll hardware. Use a closer fixed point so the mountless Aero
-# palm visually sits on the arm instead of floating beyond the stripped gripper.
-SO101_AERO_ATTACH_POS = [-0.0079, -0.000218121, -0.035]
+# SO101's stock gripperframe is offset from the wrist_roll motor axis and near
+# the removed jaw tip. Use the roll-axis centerline with a closer axial depth so
+# the mountless Aero palm sits squarely on the wrist-roll motor.
+SO101_AERO_ATTACH_POS = [0.0, 0.0, -0.035]
+SO101_AERO_PALM_VISUAL_OFFSET = [0.0018, 0.0012, 0.0]
+
+# MuJoCo wxyz quaternion for the Aero palm body relative to the SO101 gripper
+# frame. This maps the palm bottom/connector axis (-Z_palm) onto the SO101
+# wrist_roll axis (+Z_gripper), so the palm base plane is square to the roll
+# motor instead of inheriting the original Tetheria mount's angled palm pose.
+SO101_AERO_PALM_ATTACH_QUAT = [0.0, 1.0, 0.0, 0.0]
 
 AERO_CLASS_RENAMES = {
     "tetheria_rh": "aero_tetheria_rh",
@@ -381,16 +388,16 @@ def build_scene() -> ET.ElementTree:
 
     # Remove the Tetheria mounting plate and use the exposed hand wrist/bottom
     # site as the new fixed connection point to the SO101 wrist roll frame.
-    mount_quat = [0.5, -0.5, 0.5, 0.5]
     attach_pos = SO101_AERO_ATTACH_POS
     palm_quat = parse_floats(direct_palm.get("quat"), "1 0 0 0")
-    direct_quat = normalize_quat(quat_mul(mount_quat, palm_quat))
+    direct_quat = SO101_AERO_PALM_ATTACH_QUAT
     wrist_site = direct_palm.find("site[@name='aero_wrist_site']")
     if wrist_site is None:
         raise RuntimeError("Could not find Aero Hand site named 'aero_wrist_site'")
     wrist_local = parse_floats(wrist_site.get("pos"), "0 0 0")
     wrist_offset = mat_vec_mul(quat_to_mat(direct_quat), wrist_local)
     direct_pos = [attach_pos[i] - wrist_offset[i] for i in range(3)]
+    direct_pos = [direct_pos[i] + SO101_AERO_PALM_VISUAL_OFFSET[i] for i in range(3)]
     direct_palm.set("pos", format_floats(direct_pos))
     direct_palm.set("quat", format_floats(direct_quat))
 

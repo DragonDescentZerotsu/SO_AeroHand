@@ -29,6 +29,24 @@ def test_combined_model_loads_and_steps():
     expected = list(SO101_ARM_ACTUATOR_NAMES) + [item[1] for item in AERO_HAND_ACTION_MAP]
     assert sorted(actuator_names) == sorted(expected)
     assert get_missing_robot_landmark_sites(model) == []
+    gripper_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, "gripper")
+    palm_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, "palm")
+    wrist_roll_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, "wrist_roll")
+    assert gripper_id >= 0
+    assert palm_id >= 0
+    assert wrist_roll_id >= 0
+    mujoco.mj_forward(model, data)
+    gripper_R = data.xmat[gripper_id].reshape(3, 3)
+    palm_R = data.xmat[palm_id].reshape(3, 3)
+    roll_axis_world = gripper_R @ model.jnt_axis[wrist_roll_id]
+    roll_point_world = data.xpos[gripper_id] + gripper_R @ model.jnt_pos[wrist_roll_id]
+    palm_mount_axis_world = -palm_R[:, 2]
+    assert np.dot(roll_axis_world, palm_mount_axis_world) > 1.0 - 1e-6
+    attach_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, "so101_aero_attach_site")
+    assert attach_id >= 0
+    attach_delta = data.site_xpos[attach_id] - roll_point_world
+    attach_radial = attach_delta - np.dot(attach_delta, roll_axis_world) * roll_axis_world
+    assert np.linalg.norm(attach_radial) <= 1e-6
 
     arm_action = np.zeros(5, dtype=np.float32)
     hand_action = np.array([1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float32)

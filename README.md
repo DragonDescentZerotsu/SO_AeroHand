@@ -46,7 +46,7 @@ Hand: Right
 Start full SO101 + Aero Hand teleoperation:
 
 ```bash
-python scripts/quest_arm_channel_so101_aero_full_teleop.py
+python scripts/quest_so101_aero_nullspace_ik_teleop.py
 ```
 
 Useful keys in the MuJoCo viewer:
@@ -157,7 +157,7 @@ The logged frame keeps the arm channel (`wrist_pos_world`, `wrist_quat_world`) s
 Full current teleop:
 
 ```bash
-python scripts/quest_arm_channel_so101_aero_full_teleop.py
+python scripts/quest_so101_aero_nullspace_ik_teleop.py
 ```
 
 Arm channel only, same SO101 IK control mode:
@@ -202,7 +202,7 @@ Run core checks:
 
 ```bash
 pytest tests/test_quest_hand_frame.py tests/test_so101_aero_model.py
-python scripts/quest_arm_channel_so101_aero_full_teleop.py --dry-run
+python scripts/quest_so101_aero_nullspace_ik_teleop.py --dry-run
 ```
 
 ## Repository Layout
@@ -230,13 +230,13 @@ submodule before redistributing models or derived assets.
 The older command:
 
 ```bash
-python scripts/06_quest_to_mujoco_tcp.py
+python scripts/legacy/06_quest_to_mujoco_tcp.py
 ```
 
 is kept as a compatibility wrapper for Aero Hand-only teleoperation. It does not control the SO101 arm. For current full robot teleoperation, use:
 
 ```bash
-python scripts/quest_arm_channel_so101_aero_full_teleop.py
+python scripts/quest_so101_aero_nullspace_ik_teleop.py
 ```
 
 ## Troubleshooting
