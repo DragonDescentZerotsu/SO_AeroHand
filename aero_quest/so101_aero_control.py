@@ -107,16 +107,17 @@ def apply_so101_aero_action(model, data, arm_action: np.ndarray, hand_action: np
     data.ctrl[:] = normalized_so101_aero_to_ctrl(model, arm_action, hand_action)
 
 
-def print_combined_actuator_info(model) -> None:
+def print_combined_actuator_info(model, arm_actuator_names: list[str] | tuple[str, ...] | None = None) -> None:
     """Print combined model actuator order and semantic mapping."""
     _require_mujoco()
+    arm_actuator_names = tuple(SO101_ARM_ACTUATOR_NAMES if arm_actuator_names is None else arm_actuator_names)
     print(f"model.nu = {model.nu}")
     print("Actuators:")
     for idx in range(model.nu):
         name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_ACTUATOR, idx)
         print(idx, name, model.actuator_ctrlrange[idx])
-    print("SO101 arm action order [-1, 1]:")
-    for idx, name in enumerate(SO101_ARM_ACTUATOR_NAMES):
+    print("Robot arm action order [-1, 1]:")
+    for idx, name in enumerate(arm_actuator_names):
         print(f"  arm[{idx}] -> {name}")
     print("Aero hand action order [0, 1]:")
     for idx, (semantic, actuator_name, inverted) in enumerate(AERO_HAND_ACTION_MAP):

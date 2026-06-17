@@ -3,7 +3,7 @@ import os
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 SO101_XML = PROJECT_ROOT / "third_party/SO-ARM100/Simulation/SO101/so101_new_calib.xml"
 AERO_XML = PROJECT_ROOT / "mujoco_menagerie/tetheria_aero_hand_open/right_hand.xml"
 OUTPUT_DIR = PROJECT_ROOT / "models/so101_aero_hand"

@@ -13,7 +13,7 @@ try:
 except ImportError as exc:
     raise SystemExit("Missing runtime dependency. Install with: pip install mujoco numpy") from exc
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
@@ -26,8 +26,9 @@ from aero_quest.arm_teleop import (
 from aero_quest.quest_hand_frame import RelativeWristArmController, quest_hand_frame_from_sdk
 
 
-DEFAULT_MODEL = PROJECT_ROOT / "mujoco_menagerie/robotstudio_so101/scene.xml"
+DEFAULT_MODEL = PROJECT_ROOT / "models/so101_aero_hand/SO101_aerohand.xml"
 DEFAULT_ARM_JOINTS = "shoulder_pan,shoulder_lift,elbow_flex,wrist_flex,wrist_roll"
+DEFAULT_EE_SITE = "aero_wrist_site"
 
 # Same verified Arm Channel axis map as the target-ball stage:
 # Quest/Unity Q: +X right, +Y up, +Z forward.
@@ -170,7 +171,7 @@ def parse_args():
     parser.add_argument("--host", default="0.0.0.0")
     parser.add_argument("--port", type=int, default=8000)
     parser.add_argument("--hand", choices=["right", "left", "any"], default="right")
-    parser.add_argument("--ee-site", default="so101_aero_attach_site")
+    parser.add_argument("--ee-site", default=DEFAULT_EE_SITE)
     parser.add_argument("--ee-body", default=None)
     parser.add_argument("--arm-joint-names", default=DEFAULT_ARM_JOINTS)
     parser.add_argument("--arm-joint-prefix", default=None)

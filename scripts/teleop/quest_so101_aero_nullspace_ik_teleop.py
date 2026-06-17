@@ -13,7 +13,7 @@ try:
 except ImportError as exc:
     raise SystemExit("Missing runtime dependency. Install with: pip install mujoco numpy") from exc
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
@@ -35,8 +35,20 @@ from aero_quest.retargeting import AeroHandRetargetingWrapper
 from aero_quest.so101_aero_control import normalized_aero_hand_to_ctrl, print_combined_actuator_info
 
 
+DEFAULT_DESCRIPTION = "Quest wrist pose -> position-priority SO101 IK with nullspace orientation, landmarks -> Aero Hand."
 DEFAULT_MODEL = PROJECT_ROOT / "models/so101_aero_hand/SO101_aerohand.xml"
 DEFAULT_ARM_JOINTS = "shoulder_pan,shoulder_lift,elbow_flex,wrist_flex,wrist_roll"
+DEFAULT_EE_SITE = "aero_wrist_site"
+DEFAULT_SCALE = 0.9
+DEFAULT_WORKSPACE_MIN = ["0.05", "-0.35", "0.03"]
+DEFAULT_WORKSPACE_MAX = ["0.55", "0.35", "1.35"]
+DEFAULT_KP_POS = 10.0
+DEFAULT_KP_ROT = 1.2
+DEFAULT_MAX_LINEAR_SPEED = 0.45
+DEFAULT_MAX_ANGULAR_SPEED = 0.8
+DEFAULT_MAX_JOINT_SPEED = 3.0
+DEFAULT_IK_MODE = "position_nullspace"
+DEFAULT_ROBOT_GRAVITY_ROOT = "base"
 SAFE_OPEN_HAND = np.array([1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float32)
 
 # Quest/Unity Q: +X right, +Y up, +Z forward.
@@ -80,6 +92,42 @@ def resolve_model(path_text):
 
 def ctrl_midpoints(model):
     return 0.5 * (model.actuator_ctrlrange[:, 0] + model.actuator_ctrlrange[:, 1])
+
+
+def body_name(model, body_id: int) -> str:
+    return mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, int(body_id)) or f"<body_{body_id}>"
+
+
+def body_subtree_ids(model, root_body_name: str) -> list[int]:
+    root_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, root_body_name)
+    if root_id < 0:
+        raise ValueError(f"Robot gravity compensation root body not found: {root_body_name!r}")
+
+    selected = []
+    for body_id in range(1, model.nbody):
+        cursor = body_id
+        while cursor != 0:
+            if cursor == root_id:
+                selected.append(body_id)
+                break
+            cursor = int(model.body_parentid[cursor])
+    return selected
+
+
+def apply_robot_gravity_compensation(model, root_body_name: str, value: float = 1.0) -> list[str]:
+    body_ids = body_subtree_ids(model, root_body_name)
+    model.body_gravcomp[body_ids] = float(value)
+    return [body_name(model, body_id) for body_id in body_ids]
+
+
+def initialize_viewer_camera(viewer, model) -> None:
+    """Initialize the passive viewer free camera from MJCF statistic/global options."""
+    viewer.cam.type = mujoco.mjtCamera.mjCAMERA_FREE
+    viewer.cam.fixedcamid = -1
+    viewer.cam.lookat[:] = np.asarray(model.stat.center, dtype=np.float64)
+    viewer.cam.distance = max(0.1, 1.5 * float(model.stat.extent))
+    viewer.cam.azimuth = float(model.vis.global_.azimuth)
+    viewer.cam.elevation = float(model.vis.global_.elevation)
 
 
 def quest_orientation_frame_Q(frame, orientation_source: str) -> np.ndarray:
@@ -316,6 +364,42 @@ def solve_nullspace_task_space_ik(
     return q_target, qdot, qdot_pos, qdot_null
 
 
+def solve_full_task_space_ik(
+    ik: DampedLeastSquaresIK,
+    data,
+    xdot_cmd: np.ndarray,
+    dt: float,
+    control_orientation: bool,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Solve resolved-rate IK with position and orientation in one task.
+
+    This is the better default for 6-DoF arms such as Piper. SO101 keeps using
+    the nullspace mode because it has only 5 arm joints and cannot independently
+    satisfy an arbitrary 6D end-effector pose.
+    """
+    xdot_cmd = np.asarray(xdot_cmd, dtype=np.float64)
+    if control_orientation:
+        if xdot_cmd.shape != (6,):
+            raise ValueError(f"Expected 6D task velocity, got {xdot_cmd.shape}")
+        J = ik.jacobian(data, control_orientation=True)
+    else:
+        if xdot_cmd.shape != (3,):
+            raise ValueError(f"Expected 3D task velocity, got {xdot_cmd.shape}")
+        J = ik.jacobian(data, control_orientation=False)
+
+    qdot = _damped_right_pinv(J, ik.damping) @ xdot_cmd
+    qdot = np.clip(qdot, -ik.max_joint_speed, ik.max_joint_speed)
+
+    q_current = joint_qpos(ik.model, data, ik.joint_ids)
+    q_target = q_current + qdot * float(dt)
+    lo, hi = joint_ranges(ik.model, ik.joint_ids)
+    q_target = np.clip(q_target, lo, hi)
+    if ik.smoothing_alpha > 0.0 and ik.prev_qtarget is not None:
+        q_target = ik.smoothing_alpha * ik.prev_qtarget + (1.0 - ik.smoothing_alpha) * q_target
+    ik.prev_qtarget = q_target.copy()
+    return q_target, qdot, qdot.copy(), np.zeros_like(qdot)
+
+
 def make_key_callback(arm_channel, latest_frame_ref, latest_head_ref, ik, data, state, args, R_BQ):
     def on_key(keycode):
         try:
@@ -351,7 +435,7 @@ def make_key_callback(arm_channel, latest_frame_ref, latest_head_ref, ik, data, 
             )
             state["last_qtarget"] = joint_qpos(ik.model, data, ik.joint_ids)
             state["raw_wrist_zero_Q"] = np.asarray(latest_frame_ref["frame"].wrist_pos_world, dtype=np.float64).copy()
-            print(f"Re-zeroed nullspace IK in {args.reference_frame} frame: current Quest wrist maps to current SO101 end-effector pose.")
+            print(f"Re-zeroed IK in {args.reference_frame} frame: current Quest wrist maps to current robot end-effector pose.")
         elif key == "p":
             state["paused"] = not state["paused"]
             print(f"paused={state['paused']}")
@@ -360,30 +444,34 @@ def make_key_callback(arm_channel, latest_frame_ref, latest_head_ref, ik, data, 
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(
-        description="Quest wrist pose -> position-priority SO101 IK with nullspace orientation, landmarks -> Aero Hand."
-    )
+    parser = argparse.ArgumentParser(description=DEFAULT_DESCRIPTION)
     parser.add_argument("--model", "--model-path", dest="model", default=str(DEFAULT_MODEL))
     parser.add_argument("--host", default="0.0.0.0")
     parser.add_argument("--port", type=int, default=8000)
     parser.add_argument("--hand", choices=["right", "left", "any"], default="right")
-    parser.add_argument("--ee-site", default="aero_wrist_site")
+    parser.add_argument("--ee-site", default=DEFAULT_EE_SITE)
     parser.add_argument("--ee-body", default=None)
     parser.add_argument("--arm-joint-names", default=DEFAULT_ARM_JOINTS)
     parser.add_argument("--arm-joint-prefix", default=None)
-    parser.add_argument("--scale", type=float, default=0.9)
+    parser.add_argument("--scale", type=float, default=DEFAULT_SCALE)
     parser.add_argument("--R_BQ", type=parse_matrix, default=None)
-    parser.add_argument("--workspace-min", nargs=3, default=["0.05", "-0.35", "0.03"])
-    parser.add_argument("--workspace-max", nargs=3, default=["0.55", "0.35", "0.60"])
+    parser.add_argument("--workspace-min", nargs=3, default=DEFAULT_WORKSPACE_MIN)
+    parser.add_argument("--workspace-max", nargs=3, default=DEFAULT_WORKSPACE_MAX)
     parser.add_argument("--deadzone", type=float, default=0.005)
     parser.add_argument("--target-smoothing-alpha", type=float, default=0.10)
-    parser.add_argument("--kp-pos", type=float, default=10.0)
-    parser.add_argument("--kp-rot", type=float, default=1.2)
-    parser.add_argument("--max-linear-speed", type=float, default=0.45)
-    parser.add_argument("--max-angular-speed", type=float, default=0.8)
+    parser.add_argument("--kp-pos", type=float, default=DEFAULT_KP_POS)
+    parser.add_argument("--kp-rot", type=float, default=DEFAULT_KP_ROT)
+    parser.add_argument("--max-linear-speed", type=float, default=DEFAULT_MAX_LINEAR_SPEED)
+    parser.add_argument("--max-angular-speed", type=float, default=DEFAULT_MAX_ANGULAR_SPEED)
     parser.add_argument("--ik-damping", type=float, default=0.05)
-    parser.add_argument("--max-joint-speed", type=float, default=3.0)
+    parser.add_argument("--max-joint-speed", type=float, default=DEFAULT_MAX_JOINT_SPEED)
     parser.add_argument("--joint-target-smoothing-alpha", type=float, default=0.0)
+    parser.add_argument(
+        "--ik-mode",
+        choices=["position_nullspace", "full_pose"],
+        default=DEFAULT_IK_MODE,
+        help="position_nullspace keeps position primary and uses remaining motion for orientation; full_pose solves the selected task rows together.",
+    )
     parser.add_argument("--control-orientation", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--orientation-source", choices=["palm_landmarks", "wrist_pose"], default="palm_landmarks")
     parser.add_argument("--orientation-tracking", choices=["absolute", "relative"], default="relative")
@@ -394,7 +482,25 @@ def parse_args():
     parser.add_argument("--disable-hand-retargeting", action="store_true")
     parser.add_argument("--timeout", type=float, default=0.30)
     parser.add_argument("--debug-interval", type=float, default=0.25)
-    parser.add_argument("--disable-gravity", action=argparse.BooleanOptionalAction, default=True)
+    parser.add_argument(
+        "--disable-gravity",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="Disable MuJoCo gravity at runtime. By default, keep the gravity defined in the XML model.",
+    )
+    parser.add_argument(
+        "--robot-gravity-compensation",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Compensate gravity for the robot body subtree only. Objects such as pipettes remain affected by gravity.",
+    )
+    parser.add_argument("--robot-gravity-root", default=DEFAULT_ROBOT_GRAVITY_ROOT, help="Root body of the robot subtree for gravity compensation.")
+    parser.add_argument(
+        "--viewer-camera-init-seconds",
+        type=float,
+        default=1.0,
+        help="Seconds to keep applying the MJCF viewer camera after launch, avoiding passive viewer startup overrides.",
+    )
     parser.add_argument("--dry-run", action="store_true")
     return parser.parse_args()
 
@@ -409,6 +515,9 @@ def main():
     model = mujoco.MjModel.from_xml_path(str(model_path))
     if args.disable_gravity:
         model.opt.gravity[:] = 0.0
+    gravity_compensated_bodies = []
+    if args.robot_gravity_compensation:
+        gravity_compensated_bodies = apply_robot_gravity_compensation(model, args.robot_gravity_root)
     data = mujoco.MjData(model)
     data.ctrl[:] = ctrl_midpoints(model)
     mujoco.mj_forward(model, data)
@@ -451,22 +560,35 @@ def main():
     print("Before running:")
     print(f"  1. Confirm: adb reverse tcp:{args.port} tcp:{args.port}")
     print(f"  2. Quest HTS: TCP, localhost, port {args.port}")
-    print("  3. Nullspace IK: wrist relative motion -> position priority, orientation -> remaining joint motion.")
+    print(f"  3. IK mode: {args.ik_mode}.")
     print("  4. Hand Channel: wrist-relative landmarks -> Aero Hand retargeting.")
     print("  5. Press R to re-zero, P to pause/resume arm.")
     print(f"model={model_path}")
     print(f"ee_site={args.ee_site} arm_joints={ik.joint_names}")
     print(f"ee_start_B={np.array2string(ee_pos_B, precision=5)}")
     print(f"workspace_min={np.array2string(workspace_min, precision=3)} workspace_max={np.array2string(workspace_max, precision=3)}")
+    if np.any(ee_pos_B < workspace_min) or np.any(ee_pos_B > workspace_max):
+        print("WARNING: ee_start_B is outside the workspace; teleop targets will be clipped until the workspace is adjusted.")
     print(f"scale={args.scale} R_BQ=\n{np.array2string(R_BQ, precision=4, suppress_small=True)}")
+    print(
+        f"viewer_camera lookat={np.array2string(model.stat.center, precision=4, suppress_small=True)} "
+        f"distance={1.5 * float(model.stat.extent):.4f} "
+        f"azimuth={float(model.vis.global_.azimuth):.2f} elevation={float(model.vis.global_.elevation):.2f} "
+        f"init_seconds={args.viewer_camera_init_seconds:.2f}"
+    )
+    print(f"gravity={np.array2string(model.opt.gravity, precision=4, suppress_small=True)} disable_gravity={args.disable_gravity}")
+    print(
+        f"robot_gravity_compensation={args.robot_gravity_compensation} "
+        f"root={args.robot_gravity_root!r} compensated_bodies={len(gravity_compensated_bodies)}"
+    )
     print(
         f"control_orientation={args.control_orientation} orientation_source={args.orientation_source} "
         f"orientation_tracking={args.orientation_tracking} "
-        f"position_weight={args.position_weight} nullspace_orientation_gain={args.orientation_weight} "
+        f"position_weight={args.position_weight} orientation_weight={args.orientation_weight} "
         f"reference_frame={args.reference_frame}"
     )
     print(f"disable_hand_retargeting={args.disable_hand_retargeting}")
-    print_combined_actuator_info(model)
+    print_combined_actuator_info(model, arm_actuator_names=ik.joint_names)
 
     if args.dry_run:
         _raw_hand, filtered_hand = hand_retargeter(np.zeros((21, 3), dtype=np.float32))
@@ -511,6 +633,9 @@ def main():
         data,
         key_callback=make_key_callback(arm_channel, latest_frame_ref, latest_head_ref, ik, data, state, args, R_BQ),
     ) as viewer:
+        viewer_camera_init_until = time.time() + max(0.0, float(args.viewer_camera_init_seconds))
+        initialize_viewer_camera(viewer, model)
+        viewer.sync()
         while viewer.is_running():
             latest_head, latest_hand, drained = drain_latest_events(frame_queue)
             got_new_frame = latest_hand is not None
@@ -550,7 +675,7 @@ def main():
                         )
                         state["last_qtarget"] = joint_qpos(model, data, ik.joint_ids)
                         state["raw_wrist_zero_Q"] = np.asarray(quest_frame_raw.wrist_pos_world, dtype=np.float64).copy()
-                        print(f"Teleop zero set in {args.reference_frame} frame: current Quest wrist maps to current SO101 end-effector pose.")
+                        print(f"Teleop zero set in {args.reference_frame} frame: current Quest wrist maps to current robot end-effector pose.")
 
                     target = arm_channel.compute_target(quest_frame)
                     state["target_pos_B"] = np.clip(target.target_pos_B, workspace_min, workspace_max)
@@ -577,14 +702,29 @@ def main():
                 last_velocity = cmd.xdot
                 last_error = cmd.position_error
                 last_rot_error = np.zeros(3, dtype=np.float64) if cmd.rotation_error is None else cmd.rotation_error
-                qtarget, last_qdot, last_qdot_pos, last_qdot_null = solve_nullspace_task_space_ik(
-                    ik,
-                    data,
-                    cmd.xdot,
-                    dt=last_control_dt,
-                    orientation_gain=args.orientation_weight,
-                    control_orientation=args.control_orientation,
-                )
+                if args.ik_mode == "full_pose":
+                    weighted_xdot = cmd.xdot.copy()
+                    weighted_xdot[:3] *= float(args.position_weight)
+                    if args.control_orientation:
+                        weighted_xdot[3:] *= float(args.orientation_weight)
+                    qtarget, last_qdot, last_qdot_pos, last_qdot_null = solve_full_task_space_ik(
+                        ik,
+                        data,
+                        weighted_xdot,
+                        dt=last_control_dt,
+                        control_orientation=args.control_orientation,
+                    )
+                else:
+                    weighted_xdot = cmd.xdot.copy()
+                    weighted_xdot[:3] *= float(args.position_weight)
+                    qtarget, last_qdot, last_qdot_pos, last_qdot_null = solve_nullspace_task_space_ik(
+                        ik,
+                        data,
+                        weighted_xdot,
+                        dt=last_control_dt,
+                        orientation_gain=args.orientation_weight,
+                        control_orientation=args.control_orientation,
+                    )
                 state["last_qtarget"] = qtarget.copy()
                 ik.apply_position_targets(data, qtarget)
             else:
@@ -608,6 +748,8 @@ def main():
                 last_sim_steps += 1
             if last_sim_steps >= 10:
                 sim_accumulator = 0.0
+            if time.time() <= viewer_camera_init_until:
+                initialize_viewer_camera(viewer, model)
             viewer.sync()
 
             if now - last_debug_time >= args.debug_interval:

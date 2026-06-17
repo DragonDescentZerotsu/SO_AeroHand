@@ -46,7 +46,13 @@ Hand: Right
 Start full SO101 + Aero Hand teleoperation:
 
 ```bash
-python scripts/quest_so101_aero_nullspace_ik_teleop.py
+python scripts/teleop/quest_so101_aero_nullspace_ik_teleop.py
+```
+
+Start full Piper + Aero Hand teleoperation:
+
+```bash
+python scripts/teleop/quest_piper_aero_ik_teleop.py
 ```
 
 Useful keys in the MuJoCo viewer:
@@ -60,7 +66,7 @@ The full teleop script uses:
 
 ```text
 model:   models/so101_aero_hand/SO101_aerohand.xml
-arm EE:  so101_aero_attach_site
+arm EE:  aero_wrist_site
 hand:    right hand by default
 ```
 
@@ -157,25 +163,33 @@ The logged frame keeps the arm channel (`wrist_pos_world`, `wrist_quat_world`) s
 Full current teleop:
 
 ```bash
-python scripts/quest_so101_aero_nullspace_ik_teleop.py
+python scripts/teleop/quest_so101_aero_nullspace_ik_teleop.py
 ```
+
+Piper + Aero Hand 6-DoF full teleop:
+
+```bash
+python scripts/teleop/quest_piper_aero_ik_teleop.py
+```
+
+The Piper entry defaults to `--ik-mode full_pose` because the arm has 6 DoF and can solve position and orientation together as a 6D task-space IK problem. The SO101 entry keeps `--ik-mode position_nullspace` because the arm has 5 DoF, so it prioritizes position and uses the remaining motion for orientation.
 
 Arm channel only, same SO101 IK control mode:
 
 ```bash
-python scripts/quest_arm_channel_so101_ik.py
+python scripts/teleop/quest_arm_channel_so101_ik.py
 ```
 
 Target-ball stage for checking Quest-to-robot translation axes:
 
 ```bash
-python scripts/quest_arm_channel_target_ball.py
+python scripts/teleop/quest_arm_channel_target_ball.py
 ```
 
 Aero Hand only:
 
 ```bash
-python scripts/quest_tcp_aero_teleop.py --alpha 0.25
+python scripts/teleop/quest_tcp_aero_teleop.py --alpha 0.25
 ```
 
 Debug incoming Quest channels without controlling the robot:
@@ -195,14 +209,15 @@ python scripts/so101_aero_viewer.py
 Refresh the combined SO101 + Aero Hand MJCF:
 
 ```bash
-python scripts/build_so101_aero_scene.py
+python scripts/scenes/build_so101_aero_scene.py
 ```
 
 Run core checks:
 
 ```bash
 pytest tests/test_quest_hand_frame.py tests/test_so101_aero_model.py
-python scripts/quest_so101_aero_nullspace_ik_teleop.py --dry-run
+python scripts/teleop/quest_so101_aero_nullspace_ik_teleop.py --dry-run
+python scripts/teleop/quest_piper_aero_ik_teleop.py --dry-run
 ```
 
 ## Repository Layout
@@ -236,7 +251,8 @@ python scripts/legacy/06_quest_to_mujoco_tcp.py
 is kept as a compatibility wrapper for Aero Hand-only teleoperation. It does not control the SO101 arm. For current full robot teleoperation, use:
 
 ```bash
-python scripts/quest_so101_aero_nullspace_ik_teleop.py
+python scripts/teleop/quest_so101_aero_nullspace_ik_teleop.py
+python scripts/teleop/quest_piper_aero_ik_teleop.py
 ```
 
 ## Troubleshooting

@@ -11,7 +11,7 @@ aero_quest/retargeting.py
 The live teleop entry point is:
 
 ```text
-scripts/quest_tcp_aero_teleop.py
+scripts/teleop/quest_tcp_aero_teleop.py
 ```
 
 ## 1. Goal
@@ -414,7 +414,7 @@ Port: 8000
 Run teleop:
 
 ```bash
-python scripts/quest_tcp_aero_teleop.py --alpha 0.25
+python scripts/teleop/quest_tcp_aero_teleop.py --alpha 0.25
 ```
 
 Run synthetic formula tests:

@@ -1,0 +1,75 @@
+name: SO101_aerohand_pipette_rack_table_grasp
+base_model: models/so101_aero_hand/SO101_aerohand.xml
+output_model: models/so101_aero_hand/scenes/SO101_aerohand_pipette_rack_table.xml
+
+# Table-top task layout. The SO101 base is lifted so it stands on the tabletop.
+base_pose:
+  body_path: [base]
+  pos: [0.0, -0.25, 0.827]
+  quat: [1.0, 0.0, 0.0, 0.0]
+
+viewer:
+  statistic:
+    center: [0.32, -0.05, 0.98]
+    extent: 0.75
+    meansize: 0.01
+  global:
+    azimuth: 0
+    elevation: -25
+
+static_models:
+  - id: table_0
+    model_name: table_model
+    source: models/so101_aero_hand/objects/vention_table_top.xml
+    body: vention_table_top
+    prefix: table_0/
+    init:
+      pos: [0.0, 0.0, 0.0]
+      quat: [1.0, 0.0, 0.0, 0.0]
+
+  - id: pipette_rack_0
+    model_name: pipette_rack_model
+    source: /data/tianang/projects/AutoBio/autobio/model/object/pipette_rack.gen.xml
+    body: pipette_rack
+    prefix: pipette_rack_0/
+    init:
+      # The rack mesh bottom is at local z=0, so z=0.836 puts it on the table.
+      pos: [0.34, -0.08, 0.827]
+      quat: [1.0, 0.0, 0.0, 0.0]
+
+objects:
+  - id: pipette_0
+    model_name: pipette_model
+    source: /data/tianang/projects/AutoBio/autobio/model/object/pipette.gen.xml
+    body: pipette
+    prefix: pipette_0/
+    freejoint: true
+    init:
+      # Settled freejoint pose with the pipette resting on the pipette rack.
+      # The attached AutoBio pipette has an internal body offset, so the
+      # wrapper body sits lower than the visible pipette body.
+      pos: [0.39918, -0.165, 1.07]
+      quat: [0.7044, -0.0616, 0.0616, 0.7044]
+    randomize:
+      pos:
+        x: [0.385, 0.415]
+        y: [0.030, 0.065]
+        z: [0.855, 0.875]
+      yaw: [-0.10, 0.10]
+
+robot:
+  randomize:
+    arm_qpos:
+      shoulder_pan: [-0.4, 0.4]
+      shoulder_lift: [-0.8, 0.2]
+      elbow_flex: [-0.8, 0.8]
+      wrist_flex: [-0.5, 0.5]
+      wrist_roll: [-1.0, 1.0]
+
+task:
+  type: rack_grasp_object
+  target_objects: [pipette_0]
+  support: pipette_rack_0
+  success:
+    lift_height: 0.05
+    hold_steps: 20

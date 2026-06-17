@@ -34,7 +34,7 @@ DEFAULT_MODEL = PROJECT_ROOT / "models/so101_aero_hand/SO101_aerohand.xml"
 DEFAULT_ARM_JOINTS = "shoulder_pan,shoulder_lift,elbow_flex"
 SAFE_OPEN_HAND = np.array([1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float32)
 
-# Same verified Arm Channel axis map as scripts/quest_arm_channel_so101_ik.py:
+# Same verified Arm Channel axis map as scripts/teleop/quest_arm_channel_so101_ik.py:
 # Quest/Unity Q: +X right, +Y up, +Z forward.
 # SO101/MuJoCo debug B: +X forward, +Y left, +Z up.
 DEFAULT_R_BQ = np.asarray(

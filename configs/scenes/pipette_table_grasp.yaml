@@ -1,0 +1,57 @@
+name: SO101_aerohand_pipette_table_grasp
+base_model: models/so101_aero_hand/SO101_aerohand.xml
+output_model: models/so101_aero_hand/scenes/SO101_aerohand_pipette_table.xml
+
+# The base SO101 model places the robot on the floor. For table-top tasks, lift
+# the robot base so it stands on the AutoBio Vention table surface.
+base_pose:
+  body_path: [base]
+  pos: [0.0, -0.25, 0.836]
+  quat: [1.0, 0.0, 0.0, 0.0]
+
+static_models:
+  - id: table_0
+    model_name: table_model
+    source: models/so101_aero_hand/objects/vention_table_top.xml
+    body: vention_table_top
+    prefix: table_0/
+    init:
+      pos: [0.0, 0.0, 0.0]
+      quat: [1.0, 0.0, 0.0, 0.0]
+
+objects:
+  - id: pipette_0
+    model_name: pipette_model
+    source: /data/tianang/projects/AutoBio/autobio/model/object/pipette.gen.xml
+    body: pipette
+    prefix: pipette_0/
+    freejoint: true
+    init:
+      # Settled freejoint pose for the wrapper body. The attached AutoBio
+      # pipette has internal body offsets, so these wrapper coordinates place
+      # the visible pipette lying on the tabletop near x ~= 0.37, y ~= 0.05.
+      pos: [0.21985, 0.05181, 0.79854]
+      quat: [0.72864, -0.00355, -0.68487, -0.00410]
+    randomize:
+      pos:
+        x: [0.17, 0.30]
+        y: [-0.08, 0.14]
+        z: [0.790, 0.820]
+      yaw: [-0.8, 0.8]
+
+robot:
+  randomize:
+    arm_qpos:
+      shoulder_pan: [-0.4, 0.4]
+      shoulder_lift: [-0.8, 0.2]
+      elbow_flex: [-0.8, 0.8]
+      wrist_flex: [-0.5, 0.5]
+      wrist_roll: [-1.0, 1.0]
+
+task:
+  type: table_grasp_object
+  target_objects: [pipette_0]
+  support: table_0
+  success:
+    lift_height: 0.05
+    hold_steps: 20

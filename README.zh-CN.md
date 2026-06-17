@@ -46,7 +46,13 @@ Hand: Right
 启动完整的 SO101 + Aero Hand 遥操作：
 
 ```bash
-python scripts/quest_so101_aero_nullspace_ik_teleop.py
+python scripts/teleop/quest_so101_aero_nullspace_ik_teleop.py
+```
+
+启动完整的 Piper + Aero Hand 遥操作：
+
+```bash
+python scripts/teleop/quest_piper_aero_ik_teleop.py
 ```
 
 ### 仿真在 remote，Quest 接在本地 Mac
@@ -116,7 +122,7 @@ python scripts/debug_quest_dual_channel.py --host 127.0.0.1 --port 8000 --hand a
 确认有 `frame_id` 和腕部/landmark 数据持续输出后，再启动完整遥操作：
 
 ```bash
-python scripts/quest_so101_aero_nullspace_ik_teleop.py --host 127.0.0.1 --port 8000 --hand any
+python scripts/teleop/quest_so101_aero_nullspace_ik_teleop.py --host 127.0.0.1 --port 8000 --hand any
 ```
 
 MuJoCo viewer 中常用按键：
@@ -130,7 +136,7 @@ P  暂停/恢复机械臂运动
 
 ```text
 model:   models/so101_aero_hand/SO101_aerohand.xml
-arm EE:  so101_aero_attach_site
+arm EE:  aero_wrist_site
 hand:    默认右手
 ```
 
@@ -227,25 +233,33 @@ python scripts/replay_quest_dual_channel.py --log logs/test.jsonl --realtime
 当前完整遥操作：
 
 ```bash
-python scripts/quest_so101_aero_nullspace_ik_teleop.py
+python scripts/teleop/quest_so101_aero_nullspace_ik_teleop.py
 ```
+
+Piper + Aero Hand 6DoF 完整遥操作：
+
+```bash
+python scripts/teleop/quest_piper_aero_ik_teleop.py
+```
+
+Piper 入口默认使用 `--ik-mode full_pose`，因为 Piper 有 6 个 arm DoF，可以把位置和姿态一起作为 6D task-space IK 求解。SO101 入口默认使用 `--ik-mode position_nullspace`，因为 SO101 只有 5 个 arm DoF，优先保证位置，再用剩余自由度尽量跟随姿态。
 
 仅 Arm Channel，使用相同的 SO101 IK 控制模式：
 
 ```bash
-python scripts/quest_arm_channel_so101_ik.py
+python scripts/teleop/quest_arm_channel_so101_ik.py
 ```
 
 用于检查 Quest 到机器人平移坐标轴的 target-ball 阶段：
 
 ```bash
-python scripts/quest_arm_channel_target_ball.py
+python scripts/teleop/quest_arm_channel_target_ball.py
 ```
 
 仅 Aero Hand：
 
 ```bash
-python scripts/quest_tcp_aero_teleop.py --alpha 0.25
+python scripts/teleop/quest_tcp_aero_teleop.py --alpha 0.25
 ```
 
 只调试传入的 Quest 通道，不控制机器人：
@@ -265,14 +279,15 @@ python scripts/so101_aero_viewer.py
 刷新组合后的 SO101 + Aero Hand MJCF：
 
 ```bash
-python scripts/build_so101_aero_scene.py
+python scripts/scenes/build_so101_aero_scene.py
 ```
 
 运行核心检查：
 
 ```bash
 pytest tests/test_quest_hand_frame.py tests/test_so101_aero_model.py
-python scripts/quest_so101_aero_nullspace_ik_teleop.py --dry-run
+python scripts/teleop/quest_so101_aero_nullspace_ik_teleop.py --dry-run
+python scripts/teleop/quest_piper_aero_ik_teleop.py --dry-run
 ```
 
 ## 仓库布局
@@ -304,7 +319,8 @@ python scripts/legacy/06_quest_to_mujoco_tcp.py
 保留为仅 Aero Hand 遥操作的兼容包装器。它不会控制 SO101 机械臂。当前完整机器人遥操作请使用：
 
 ```bash
-python scripts/quest_so101_aero_nullspace_ik_teleop.py
+python scripts/teleop/quest_so101_aero_nullspace_ik_teleop.py
+python scripts/teleop/quest_piper_aero_ik_teleop.py
 ```
 
 ## 故障排查

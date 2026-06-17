@@ -13,7 +13,7 @@ cd /data/tianang/projects/SO_AeroHand
 
 ```bash
 adb reverse tcp:8000 tcp:8000
-python scripts/quest_so101_aero_nullspace_ik_teleop.py
+python scripts/teleop/quest_so101_aero_nullspace_ik_teleop.py
 ```
 
 当前教学/默认控制器的数据流：
@@ -24,6 +24,15 @@ python scripts/quest_so101_aero_nullspace_ik_teleop.py
 头部位姿              -> 稳定的 Quest 参考坐标帧
 腕部局部 landmarks    -> Aero Hand 7D 手指动作
 ```
+
+### Piper + Aero Hand 完整遥操作
+
+```bash
+adb reverse tcp:8000 tcp:8000
+python scripts/teleop/quest_piper_aero_ik_teleop.py
+```
+
+Piper 有 6 个 arm DoF，默认使用 `--ik-mode full_pose`，把末端位置和姿态一起作为 6D task-space IK 求解。SO101 入口默认保留 `--ik-mode position_nullspace`，因为 5DoF 臂无法稳定满足任意 6D 姿态。
 
 注意这里的 “arm” 是项目里的机器人控制命名，指 SO101 机械臂，不是 Quest 端提供了人体手臂追踪。Quest 原始数据仍然主要是 head tracking 和 hand tracking；本项目把 Quest 手部 root/wrist pose 派生为机器人机械臂控制输入。
 
@@ -43,8 +52,8 @@ python scripts/quest_so101_aero_nullspace_ik_teleop.py
 ```bash
 python scripts/04_receive_quest_tcp.py
 python scripts/debug_quest_dual_channel.py
-python scripts/quest_arm_channel_so101_ik.py
-python scripts/quest_arm_channel_target_ball.py
+python scripts/teleop/quest_arm_channel_so101_ik.py
+python scripts/teleop/quest_arm_channel_target_ball.py
 ```
 
 这些脚本用于验证 TCP 接收、查看 head/hand 帧、检查 Quest 双通道数据、运行仅机械臂控制，或在控制完整机器人前确认平移轴方向。
@@ -53,6 +62,8 @@ python scripts/quest_arm_channel_target_ball.py
 
 - `quest_arm_channel_so101_ik.py`：只控制 SO101 机械臂，不做 Aero Hand 手指重定向。
 - `quest_arm_channel_target_ball.py`：用目标球可视化机械臂控制通道的目标位置，用于检查 `R_BQ` 和平移轴方向。
+
+这两个调试脚本都不是 Piper + Aero Hand 的推荐入口；Piper 请使用 `scripts/teleop/quest_piper_aero_ik_teleop.py`。
 
 ### Quest 日志工具
 
@@ -75,7 +86,7 @@ python scripts/test_latest_frame_buffer.py
 ### 仅 Aero Hand
 
 ```bash
-python scripts/quest_tcp_aero_teleop.py --alpha 0.25
+python scripts/teleop/quest_tcp_aero_teleop.py --alpha 0.25
 ```
 
 该脚本只控制 `mujoco_menagerie/tetheria_aero_hand_open/scene_right.xml` 中的 Aero Hand，不控制 SO101 机械臂。
@@ -85,7 +96,7 @@ python scripts/quest_tcp_aero_teleop.py --alpha 0.25
 构建组合后的 SO101 + Aero Hand 场景：
 
 ```bash
-python scripts/build_so101_aero_scene.py
+python scripts/scenes/build_so101_aero_scene.py
 ```
 
 输出基础机器人模型：
@@ -94,10 +105,22 @@ python scripts/build_so101_aero_scene.py
 models/so101_aero_hand/SO101_aerohand.xml
 ```
 
+构建 AgileX Piper + Aero Hand 场景：
+
+```bash
+python scripts/scenes/build_piper_aero_scene.py
+```
+
+输出基础机器人模型：
+
+```text
+models/piper_aero_hand/Piper_aerohand.xml
+```
+
 从配置生成带任务物体的场景，例如带一个动态 pipette 的抓取测试场景：
 
 ```bash
-python scripts/build_scene_from_config.py --config configs/scenes/pipette_grasp.yaml
+python scripts/scenes/build_scene_from_config.py --config configs/scenes/pipette_grasp.yaml
 ```
 
 输出：
@@ -106,10 +129,28 @@ python scripts/build_scene_from_config.py --config configs/scenes/pipette_grasp.
 models/so101_aero_hand/scenes/SO101_aerohand_pipette.xml
 ```
 
+生成桌面上的 pipette 抓取场景：
+
+```bash
+python scripts/scenes/build_scene_from_config.py --config configs/scenes/pipette_table_grasp.yaml
+```
+
+输出：
+
+```text
+models/so101_aero_hand/scenes/SO101_aerohand_pipette_table.xml
+```
+
 查看组合模型：
 
 ```bash
 python scripts/so101_aero_viewer.py
+```
+
+查看 Piper + Aero Hand 模型：
+
+```bash
+python -m mujoco.viewer --mjcf=models/piper_aero_hand/Piper_aerohand.xml
 ```
 
 检查 SO101 与 Aero Hand 的连接和对齐：
@@ -152,6 +193,6 @@ scripts/legacy/quest_tcp_arm_ik_teleop_minimal.py
 scripts/legacy/quest_tcp_so101_teleop.py
 ```
 
-当前完整机器人遥操作请优先使用 `quest_so101_aero_nullspace_ik_teleop.py`。
+当前完整机器人遥操作请优先使用 `scripts/teleop/quest_so101_aero_nullspace_ik_teleop.py` 或 `scripts/teleop/quest_piper_aero_ik_teleop.py`。
 
 Legacy 文件名里的 `arm` 也沿用同一含义：由 Quest hand root/wrist pose 派生出来的机器人机械臂控制输入。

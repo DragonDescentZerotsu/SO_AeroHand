@@ -14,9 +14,10 @@ Quest HTS -> TCP localhost:8000 -> hand-tracking-sdk -> Python scripts
 主要接收端位于：
 
 - `scripts/04_receive_quest_tcp.py`：最小 TCP 接收器冒烟测试。
-- `scripts/quest_tcp_aero_teleop.py`：仅针对 Aero Hand 的 Quest landmark 重定向。
-- `scripts/quest_so101_aero_nullspace_ik_teleop.py`：当前 SO101 机械臂加 Aero Hand 遥操作。
-- `scripts/quest_arm_channel_so101_ik.py`：当前 Arm Channel 控制的仅机械臂版本。
+- `scripts/teleop/quest_tcp_aero_teleop.py`：仅针对 Aero Hand 的 Quest landmark 重定向。
+- `scripts/teleop/quest_so101_aero_nullspace_ik_teleop.py`：当前 SO101 机械臂加 Aero Hand 遥操作。
+- `scripts/teleop/quest_piper_aero_ik_teleop.py`：当前 Piper 6DoF 机械臂加 Aero Hand 遥操作，默认使用 full-pose IK。
+- `scripts/teleop/quest_arm_channel_so101_ik.py`：当前 Arm Channel 控制的仅机械臂版本。
 - `scripts/debug_quest_dual_channel.py`：轻量级解析器/通道调试脚本。
 
 共享的类型化解析和坐标帧转换位于 `aero_quest/quest_hand_frame.py`。
@@ -40,31 +41,48 @@ Quest HTS -> TCP localhost:8000 -> hand-tracking-sdk -> Python scripts
 
 ## 代码地图
 
-- 接收：`scripts/04_receive_quest_tcp.py`，完整遥操作在 `scripts/quest_so101_aero_nullspace_ik_teleop.py`。
+- 接收：`scripts/04_receive_quest_tcp.py`，完整遥操作在 `scripts/teleop/`。
 - 解析和类型化坐标帧模型：`aero_quest/quest_hand_frame.py`。
 - 机械臂控制和 SO101 IK 辅助：`aero_quest/arm_teleop.py`。
 - Aero Hand 重定向：`aero_quest/retargeting.py`。
 - SO101 + Aero 动作应用：`aero_quest/so101_aero_control.py`。
 - MuJoCo landmark 辅助：`aero_quest/mujoco_landmarks.py`。
-- 仿真入口点：`scripts/quest_so101_aero_nullspace_ik_teleop.py`、`scripts/quest_arm_channel_so101_ik.py`、`scripts/quest_arm_channel_target_ball.py`。
+- 仿真入口点：`scripts/teleop/quest_so101_aero_nullspace_ik_teleop.py`、`scripts/teleop/quest_piper_aero_ik_teleop.py`、`scripts/teleop/quest_arm_channel_so101_ik.py`、`scripts/teleop/quest_arm_channel_target_ball.py`。
+
+## 遥操作入口选择
+
+- `scripts/teleop/quest_so101_aero_nullspace_ik_teleop.py`：SO101 + Aero Hand。SO101 只有 5 个 arm DoF，所以默认 `--ik-mode position_nullspace`，先保证末端位置，再用剩余自由度尽量跟随姿态。
+- `scripts/teleop/quest_piper_aero_ik_teleop.py`：Piper + Aero Hand。Piper 有 6 个 arm DoF，所以默认 `--ik-mode full_pose`，位置和姿态作为同一个 6D 任务求解。
+- `scripts/teleop/quest_arm_channel_so101_ik.py`：仅机械臂 Arm Channel 调试，不做 Aero Hand 手指重定向。
+- `scripts/teleop/quest_arm_channel_target_ball.py`：只移动 MuJoCo target ball，用来验证 Quest 到机器人坐标轴映射，不适合作为真实机械臂控制器。
 
 ## MuJoCo 模型和场景生成
 
 基础机器人模型和任务场景分开管理：
 
 - `models/so101_aero_hand/SO101_aerohand.xml`：基础 SO101 机械臂 + Aero Hand 组合模型。这个文件只描述机器人本体和手，不要把 pipette、rack、桌面任务物体等直接塞进这里。
-- `scripts/build_so101_aero_scene.py`：只负责生成基础机器人模型 `SO101_aerohand.xml`。
+- `scripts/scenes/build_so101_aero_scene.py`：只负责生成基础机器人模型 `SO101_aerohand.xml`。
+- `models/piper_aero_hand/Piper_aerohand.xml`：基础 AgileX Piper 机械臂 + Aero Hand 组合模型。这里保留 Piper 的 `link6/joint6` wrist roll，删除原平行夹爪 `link7/link8`，把 Aero palm 的安装轴对齐到 `link6` 的 `+Z` 末端轴。
+- `scripts/scenes/build_piper_aero_scene.py`：生成基础 Piper + Aero Hand 模型。
 - `configs/scenes/*.yaml`：任务场景 recipe。这里描述基础模型、要放入的物体、物体初始位姿、是否添加 `freejoint`，以及之后训练用的随机化/任务字段。
 - `aero_quest/scene_builder.py`：通用场景组合器。它读取 recipe，把外部 MJCF 物体通过 MuJoCo `<model>` / `<attach>` 组合到基础机器人场景中，并按输出目录重写 mesh/model 路径。
-- `scripts/build_scene_from_config.py`：从 `configs/scenes/*.yaml` 生成具体任务场景。
+- `scripts/scenes/build_scene_from_config.py`：从 `configs/scenes/*.yaml` 生成具体任务场景。
 - `models/so101_aero_hand/scenes/*.xml`：生成后的任务场景，例如 `SO101_aerohand_pipette.xml`。
 
 当前 pipette 示例：
 
 ```bash
-python scripts/build_so101_aero_scene.py
-python scripts/build_scene_from_config.py --config configs/scenes/pipette_grasp.yaml
+python scripts/scenes/build_so101_aero_scene.py
+python scripts/scenes/build_piper_aero_scene.py
+python scripts/scenes/build_scene_from_config.py --config configs/scenes/pipette_grasp.yaml
 python -m mujoco.viewer --mjcf=models/so101_aero_hand/scenes/SO101_aerohand_pipette.xml
+```
+
+桌面 pipette 抓取示例：
+
+```bash
+python scripts/scenes/build_scene_from_config.py --config configs/scenes/pipette_table_grasp.yaml
+python -m mujoco.viewer --mjcf=models/so101_aero_hand/scenes/SO101_aerohand_pipette_table.xml
 ```
 
 新增任务场景时，优先新增 `configs/scenes/<task>.yaml`，不要复制粘贴基础机器人 XML。需要训练 policy 时，MJCF 负责拓扑和碰撞，episode reset 时再由 Python 环境根据 YAML 中的 `randomize` 字段随机化 arm qpos、object freejoint pose 和 target object。可抓取物体必须放在带 `freejoint` 的 wrapper body 下，否则只是固定场景物体，无法被抓起来。

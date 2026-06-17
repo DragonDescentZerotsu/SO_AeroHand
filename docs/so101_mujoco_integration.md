@@ -212,7 +212,7 @@ models/so101_aero_hand/SO101_aerohand.xml
 Refresh it from the source XML files with:
 
 ```bash
-python scripts/build_so101_aero_scene.py
+python scripts/scenes/build_so101_aero_scene.py
 ```
 
 Open it:
@@ -225,7 +225,7 @@ Quest teleop for the combined model:
 
 ```bash
 adb reverse tcp:8000 tcp:8000
-python scripts/quest_so101_aero_nullspace_ik_teleop.py
+python scripts/teleop/quest_so101_aero_nullspace_ik_teleop.py
 ```
 
 The current teleop path is split into:
