@@ -35,20 +35,43 @@ DEFAULT_MODEL = PROJECT_ROOT / "models/piper_aero_hand/Piper_aerohand.xml"
 DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "outputs/piper_ik_benchmark"
 ARM_JOINTS = ["joint1", "joint2", "joint3", "joint4", "joint5", "joint6"]
 HOME_QPOS = np.array([0.0, 1.57, -1.3485, 0.0, 0.0, 0.0], dtype=np.float64)
+TRAJECTORY_ANCHOR_QPOS = np.array([0.18, 1.48, -1.30, 0.82, 0.62, 0.30], dtype=np.float64)
 JOINT_MOTION_WEIGHTS = np.array([0.7, 1.0, 1.0, 0.35, 0.22, 0.08], dtype=np.float64)
 TASK_WEIGHTS = np.array([1.0, 1.0, 1.0, 1.2, 1.2, 1.2], dtype=np.float64)
 ACTUATOR_KP = np.array([140.0, 140.0, 140.0, 100.0, 90.0, 90.0], dtype=np.float64)
 ACTUATOR_KV = np.array([10.0, 10.0, 10.0, 7.0, 5.0, 5.0], dtype=np.float64)
 
-# Targets are converted to Cartesian poses by FK before the benchmark starts.
-# This guarantees that every requested palm pose is reachable by construction.
-TARGET_JOINT_CONFIGS = (
+# Targets are converted to Cartesian poses by FK before the benchmark starts,
+# which guarantees that every requested palm pose is reachable by construction.
+SMOKE_TARGET_JOINT_CONFIGS = (
     ("forward_left", np.array([0.35, 1.30, -1.22, 0.30, 0.28, 0.45])),
     ("forward_right", np.array([-0.32, 1.38, -1.48, -0.28, 0.36, -0.55])),
     ("high_wrist_roll", np.array([0.12, 1.72, -1.55, 0.42, -0.35, 1.05])),
     ("low_wrist_flex", np.array([-0.12, 1.48, -1.16, -0.48, 0.48, -0.85])),
     ("return_home", HOME_QPOS.copy()),
 )
+
+FULL_CHALLENGE_JOINT_CONFIGS = (
+    ("center_forward", np.array([0.00, 1.28, -1.12, 0.00, 0.00, 0.00])),
+    ("left_mid", np.array([0.48, 1.36, -1.30, 0.18, 0.18, 0.35])),
+    ("right_mid", np.array([-0.48, 1.36, -1.30, -0.18, 0.18, -0.35])),
+    ("left_high", np.array([0.55, 1.82, -1.62, 0.28, -0.22, 0.55])),
+    ("right_high", np.array([-0.55, 1.82, -1.62, -0.28, -0.22, -0.55])),
+    ("left_low", np.array([0.38, 1.16, -1.02, -0.34, 0.38, 0.25])),
+    ("right_low", np.array([-0.38, 1.16, -1.02, 0.34, 0.38, -0.25])),
+    ("far_reach", np.array([0.00, 0.82, -0.58, 0.10, 0.12, 0.00])),
+    ("compact_reach", np.array([0.00, 2.08, -2.08, -0.18, 0.22, 0.00])),
+    ("wrist_roll_positive", np.array([0.12, 1.58, -1.42, 0.10, -0.18, 1.55])),
+    ("wrist_roll_negative", np.array([-0.12, 1.58, -1.42, -0.10, -0.18, -1.55])),
+    ("wrist_flex_positive", np.array([0.18, 1.48, -1.30, 0.82, 0.62, 0.30])),
+    ("wrist_flex_negative", np.array([-0.18, 1.48, -1.30, -0.82, 0.62, -0.30])),
+    ("combined_orientation_a", np.array([0.34, 1.70, -1.58, 0.62, -0.58, 1.10])),
+    ("combined_orientation_b", np.array([-0.34, 1.70, -1.58, -0.62, -0.58, -1.10])),
+    ("near_singular_extension", np.array([0.05, 0.62, -0.34, 0.08, 0.05, 0.40])),
+)
+
+RANDOM_QPOS_MIN = np.array([-0.75, 0.90, -1.90, -0.70, -0.60, -1.40], dtype=np.float64)
+RANDOM_QPOS_MAX = np.array([0.75, 1.90, -0.70, 0.70, 0.60, 1.40], dtype=np.float64)
 
 
 @dataclass(frozen=True)
@@ -74,6 +97,27 @@ class TargetResult:
     p95_osqp_wall_time_ms: float
     max_osqp_wall_time_ms: float
     mean_osqp_iterations: float
+    min_jacobian_singular_value: float
+    max_effective_damping: float
+    osqp_failures: int
+
+
+@dataclass
+class TrajectoryResult:
+    name: str
+    success: bool
+    duration_s: float
+    rms_position_error_m: float
+    p95_position_error_m: float
+    max_position_error_m: float
+    rms_orientation_error_deg: float
+    p95_orientation_error_deg: float
+    max_orientation_error_deg: float
+    max_abs_qdot_rad_s: float
+    max_abs_qacc_rad_s2: float
+    mean_osqp_wall_time_ms: float
+    p95_osqp_wall_time_ms: float
+    max_osqp_wall_time_ms: float
     min_jacobian_singular_value: float
     max_effective_damping: float
     osqp_failures: int
@@ -126,11 +170,17 @@ def robot_subtree_gravity_compensation(model, root_name: str = "base_link") -> N
             cursor = int(model.body_parentid[cursor])
 
 
-def generate_targets(model, data, ik: DampedLeastSquaresIK) -> list[PoseTarget]:
+def random_joint_configs(count: int, seed: int) -> tuple[tuple[str, np.ndarray], ...]:
+    rng = np.random.default_rng(seed)
+    samples = rng.uniform(RANDOM_QPOS_MIN, RANDOM_QPOS_MAX, size=(max(0, count), 6))
+    return tuple((f"random_{index + 1:03d}", qpos) for index, qpos in enumerate(samples))
+
+
+def generate_targets(model, data, ik: DampedLeastSquaresIK, configs) -> list[PoseTarget]:
     original_qpos = data.qpos.copy()
     original_qvel = data.qvel.copy()
     targets = []
-    for name, qpos in TARGET_JOINT_CONFIGS:
+    for name, qpos in configs:
         set_arm_state(model, data, ik.joint_ids, qpos)
         mujoco.mj_forward(model, data)
         position, rotation = ik.ee_pose(data)
@@ -195,6 +245,14 @@ def annotate_frame(
 
 def percentile(values: list[float], q: float) -> float:
     return float(np.percentile(np.asarray(values, dtype=np.float64), q)) if values else float("nan")
+
+
+def mean_or_nan(values: list[float]) -> float:
+    return float(np.mean(values)) if values else float("nan")
+
+
+def max_or_nan(values: list[float]) -> float:
+    return float(np.max(values)) if values else float("nan")
 
 
 def run_target(
@@ -341,10 +399,183 @@ def run_target(
         minimum_orientation_error_deg=float(np.degrees(min_orientation_error)),
         max_abs_qdot_rad_s=max_abs_qdot,
         max_abs_qacc_rad_s2=max_abs_qacc,
-        mean_osqp_wall_time_ms=1000.0 * float(np.mean(wall_times)),
+        mean_osqp_wall_time_ms=1000.0 * mean_or_nan(wall_times),
         p95_osqp_wall_time_ms=1000.0 * percentile(wall_times, 95),
-        max_osqp_wall_time_ms=1000.0 * float(np.max(wall_times)),
-        mean_osqp_iterations=float(np.mean(iterations)),
+        max_osqp_wall_time_ms=1000.0 * max_or_nan(wall_times),
+        mean_osqp_iterations=mean_or_nan(iterations),
+        min_jacobian_singular_value=min_singular,
+        max_effective_damping=max_damping,
+        osqp_failures=failures,
+    )
+
+
+def rotation_from_rotvec(rotvec: np.ndarray) -> np.ndarray:
+    rotvec = np.asarray(rotvec, dtype=np.float64)
+    angle = float(np.linalg.norm(rotvec))
+    if angle < 1e-12:
+        return np.eye(3, dtype=np.float64)
+    axis = rotvec / angle
+    cross = np.array(
+        [
+            [0.0, -axis[2], axis[1]],
+            [axis[2], 0.0, -axis[0]],
+            [-axis[1], axis[0], 0.0],
+        ],
+        dtype=np.float64,
+    )
+    return np.eye(3) + np.sin(angle) * cross + (1.0 - np.cos(angle)) * (cross @ cross)
+
+
+def run_continuous_trajectory(
+    model,
+    data,
+    ik: DampedLeastSquaresIK,
+    solver: OSQPVelocityIK,
+    velocity_controller: VelocityTeleopController,
+    anchor_target: PoseTarget,
+    duration_s: float,
+    period_s: float,
+    renderer,
+    render_camera,
+    video_writer,
+    video_fps: int,
+    min_command_lead: float,
+    max_command_lead: float,
+    p95_position_limit_m: float,
+    p95_orientation_limit_rad: float,
+) -> TrajectoryResult:
+    dt = float(model.opt.timestep)
+    lower, upper = joint_ranges(model, ik.joint_ids)
+    total_steps = int(np.ceil(duration_s / dt))
+    command_qpos = joint_qpos(model, data, ik.joint_ids)
+    qdot_previous = np.zeros(len(ik.joint_ids), dtype=np.float64)
+    position_errors = []
+    orientation_errors = []
+    wall_times = []
+    min_singular = float("inf")
+    max_damping = 0.0
+    max_abs_qdot = 0.0
+    max_abs_qacc = 0.0
+    failures = 0
+    frame_period = 1.0 / float(video_fps)
+    next_frame_time = 0.0
+    solver.reset()
+
+    for step in range(total_steps):
+        sim_time = step * dt
+        phase = 2.0 * np.pi * sim_time / period_s
+        target_position = anchor_target.position + np.array(
+            [
+                0.055 * np.sin(phase),
+                0.045 * np.sin(2.0 * phase),
+                0.030 * (1.0 - np.cos(phase)),
+            ],
+            dtype=np.float64,
+        )
+        target_rotation = rotation_from_rotvec(
+            np.array(
+                [
+                    0.24 * np.sin(phase),
+                    0.28 * np.sin(2.0 * phase),
+                    0.42 * np.sin(phase),
+                ],
+                dtype=np.float64,
+            )
+        ) @ anchor_target.rotation
+
+        current_position, current_rotation = ik.ee_pose(data)
+        position_error = float(np.linalg.norm(target_position - current_position))
+        orientation_error = rotation_angle(target_rotation, current_rotation)
+        position_errors.append(position_error)
+        orientation_errors.append(orientation_error)
+
+        command = velocity_controller.compute(
+            target_position,
+            target_rotation,
+            current_position,
+            current_rotation,
+        )
+        task_velocity = command.xdot.copy()
+        task_velocity[3:] *= 1.5
+        jacobian = ik.jacobian(data, control_orientation=True)
+        q_current = joint_qpos(model, data, ik.joint_ids)
+        try:
+            result = solver.solve(jacobian, task_velocity, q_current, lower, upper, dt)
+            qdot = result.qdot
+            wall_times.append(result.wall_time_s)
+            min_singular = min(min_singular, result.min_singular)
+            max_damping = max(max_damping, result.effective_damping)
+            status = result.status
+        except RuntimeError:
+            qdot = np.zeros_like(qdot_previous)
+            failures += 1
+            status = "failed"
+
+        qacc = (qdot - qdot_previous) / dt
+        max_abs_qdot = max(max_abs_qdot, float(np.max(np.abs(qdot))))
+        max_abs_qacc = max(max_abs_qacc, float(np.max(np.abs(qacc))))
+        qdot_previous = qdot.copy()
+        command_qpos = np.clip(command_qpos + qdot * dt, lower, upper)
+        error_scale = max(
+            position_error / 0.10,
+            orientation_error / np.radians(30.0),
+        )
+        command_lead = abs(float(min_command_lead)) + (
+            abs(float(max_command_lead)) - abs(float(min_command_lead))
+        ) * float(np.clip(error_scale, 0.0, 1.0))
+        command_qpos = np.clip(
+            command_qpos,
+            q_current - command_lead,
+            q_current + command_lead,
+        )
+        apply_arm_targets(model, data, ik.joint_ids, command_qpos)
+        mujoco.mj_step(model, data)
+
+        if renderer is not None and sim_time + 1e-12 >= next_frame_time:
+            target = PoseTarget(
+                name="continuous_6d",
+                position=target_position,
+                rotation=target_rotation,
+                source_qpos=anchor_target.source_qpos,
+            )
+            renderer.update_scene(data, camera=render_camera)
+            add_target_visuals(renderer.scene, target)
+            frame = renderer.render()
+            frame = annotate_frame(
+                frame,
+                target,
+                sim_time,
+                position_error,
+                orientation_error,
+                status,
+            )
+            video_writer.append_data(frame)
+            next_frame_time += frame_period
+
+    position_errors = np.asarray(position_errors, dtype=np.float64)
+    orientation_errors = np.asarray(orientation_errors, dtype=np.float64)
+    p95_position = float(np.percentile(position_errors, 95))
+    p95_orientation = float(np.percentile(orientation_errors, 95))
+    success = bool(
+        p95_position <= p95_position_limit_m
+        and p95_orientation <= p95_orientation_limit_rad
+        and failures == 0
+    )
+    return TrajectoryResult(
+        name="continuous_6d",
+        success=success,
+        duration_s=duration_s,
+        rms_position_error_m=float(np.sqrt(np.mean(position_errors**2))),
+        p95_position_error_m=p95_position,
+        max_position_error_m=float(np.max(position_errors)),
+        rms_orientation_error_deg=float(np.degrees(np.sqrt(np.mean(orientation_errors**2)))),
+        p95_orientation_error_deg=float(np.degrees(p95_orientation)),
+        max_orientation_error_deg=float(np.degrees(np.max(orientation_errors))),
+        max_abs_qdot_rad_s=max_abs_qdot,
+        max_abs_qacc_rad_s2=max_abs_qacc,
+        mean_osqp_wall_time_ms=1000.0 * mean_or_nan(wall_times),
+        p95_osqp_wall_time_ms=1000.0 * percentile(wall_times, 95),
+        max_osqp_wall_time_ms=1000.0 * max_or_nan(wall_times),
         min_jacobian_singular_value=min_singular,
         max_effective_damping=max_damping,
         osqp_failures=failures,
@@ -355,12 +586,20 @@ def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--model", default=str(DEFAULT_MODEL))
     parser.add_argument("--output-dir", default=str(DEFAULT_OUTPUT_DIR))
+    parser.add_argument("--suite", choices=("smoke", "full"), default="full")
+    parser.add_argument("--random-targets", type=int, default=100)
+    parser.add_argument("--random-seed", type=int, default=20260619)
     parser.add_argument("--timeout", type=float, default=4.0)
     parser.add_argument("--position-tolerance-mm", type=float, default=10.0)
     parser.add_argument("--orientation-tolerance-deg", type=float, default=4.0)
     parser.add_argument("--hold-seconds", type=float, default=0.15)
     parser.add_argument("--max-settle-seconds", type=float, default=3.0)
+    parser.add_argument("--min-random-success-rate", type=float, default=0.95)
     parser.add_argument("--max-osqp-p95-ms", type=float, default=1.0)
+    parser.add_argument("--trajectory-duration", type=float, default=16.0)
+    parser.add_argument("--trajectory-period", type=float, default=8.0)
+    parser.add_argument("--trajectory-p95-position-mm", type=float, default=25.0)
+    parser.add_argument("--trajectory-p95-orientation-deg", type=float, default=8.0)
     parser.add_argument("--min-command-lead", type=float, default=0.08)
     parser.add_argument("--max-command-lead", type=float, default=0.20)
     parser.add_argument("--record-video", action=argparse.BooleanOptionalAction, default=False)
@@ -388,7 +627,18 @@ def main() -> int:
     set_actuator_gains(model, ik.joint_ids)
     set_arm_state(model, data, ik.joint_ids, HOME_QPOS)
     mujoco.mj_forward(model, data)
-    targets = generate_targets(model, data, ik)
+    fixed_configs = SMOKE_TARGET_JOINT_CONFIGS if args.suite == "smoke" else FULL_CHALLENGE_JOINT_CONFIGS
+    fixed_targets = generate_targets(model, data, ik, fixed_configs)
+    random_targets = (
+        []
+        if args.suite == "smoke"
+        else generate_targets(
+            model,
+            data,
+            ik,
+            random_joint_configs(args.random_targets, args.random_seed),
+        )
+    )
     set_arm_state(model, data, ik.joint_ids, HOME_QPOS)
     mujoco.mj_forward(model, data)
 
@@ -439,10 +689,17 @@ def main() -> int:
             macro_block_size=1,
         )
 
-    results = []
+    fixed_results = []
+    random_results = []
+    video_results = []
+    trajectory_result = None
     start = time.perf_counter()
     try:
-        for target in targets:
+        for target in fixed_targets:
+            if args.suite == "full":
+                set_arm_state(model, data, ik.joint_ids, HOME_QPOS)
+                mujoco.mj_forward(model, data)
+                solver.reset()
             result = run_target(
                 model=model,
                 data=data,
@@ -454,20 +711,142 @@ def main() -> int:
                 position_tolerance_m=args.position_tolerance_mm / 1000.0,
                 orientation_tolerance_rad=np.radians(args.orientation_tolerance_deg),
                 hold_s=args.hold_seconds,
+                renderer=renderer if args.suite == "smoke" else None,
+                render_camera=render_camera if args.suite == "smoke" else None,
+                video_writer=video_writer if args.suite == "smoke" else None,
+                video_fps=args.video_fps,
+                min_command_lead=args.min_command_lead,
+                max_command_lead=args.max_command_lead,
+            )
+            fixed_results.append(result)
+            print(
+                f"fixed/{result.name}: success={result.success} settle={result.settle_time_s} "
+                f"pos={result.final_position_error_m * 1000:.2f}mm "
+                f"rot={result.final_orientation_error_deg:.2f}deg "
+                f"osqp_p95={result.p95_osqp_wall_time_ms:.3f}ms"
+            )
+
+        if args.suite == "full":
+            if args.record_video:
+                video_targets = generate_targets(model, data, ik, SMOKE_TARGET_JOINT_CONFIGS)
+                set_arm_state(model, data, ik.joint_ids, HOME_QPOS)
+                mujoco.mj_forward(model, data)
+                for target in video_targets:
+                    result = run_target(
+                        model=model,
+                        data=data,
+                        ik=ik,
+                        solver=solver,
+                        velocity_controller=velocity_controller,
+                        target=target,
+                        timeout_s=args.timeout,
+                        position_tolerance_m=args.position_tolerance_mm / 1000.0,
+                        orientation_tolerance_rad=np.radians(args.orientation_tolerance_deg),
+                        hold_s=args.hold_seconds,
+                        renderer=renderer,
+                        render_camera=render_camera,
+                        video_writer=video_writer,
+                        video_fps=args.video_fps,
+                        min_command_lead=args.min_command_lead,
+                        max_command_lead=args.max_command_lead,
+                    )
+                    video_results.append(result)
+                    print(
+                        f"video/{result.name}: success={result.success} settle={result.settle_time_s} "
+                        f"pos={result.final_position_error_m * 1000:.2f}mm "
+                        f"rot={result.final_orientation_error_deg:.2f}deg"
+                    )
+
+            trajectory_target = generate_targets(
+                model,
+                data,
+                ik,
+                (("trajectory_anchor", TRAJECTORY_ANCHOR_QPOS.copy()),),
+            )[0]
+            if args.record_video:
+                anchor_result = run_target(
+                    model=model,
+                    data=data,
+                    ik=ik,
+                    solver=solver,
+                    velocity_controller=velocity_controller,
+                    target=trajectory_target,
+                    timeout_s=args.timeout,
+                    position_tolerance_m=args.position_tolerance_mm / 1000.0,
+                    orientation_tolerance_rad=np.radians(args.orientation_tolerance_deg),
+                    hold_s=args.hold_seconds,
+                    renderer=renderer,
+                    render_camera=render_camera,
+                    video_writer=video_writer,
+                    video_fps=args.video_fps,
+                    min_command_lead=args.min_command_lead,
+                    max_command_lead=args.max_command_lead,
+                )
+                video_results.append(anchor_result)
+                print(
+                    f"video/{anchor_result.name}: success={anchor_result.success} "
+                    f"settle={anchor_result.settle_time_s} "
+                    f"pos={anchor_result.final_position_error_m * 1000:.2f}mm "
+                    f"rot={anchor_result.final_orientation_error_deg:.2f}deg"
+                )
+            else:
+                set_arm_state(model, data, ik.joint_ids, TRAJECTORY_ANCHOR_QPOS)
+                mujoco.mj_forward(model, data)
+            trajectory_result = run_continuous_trajectory(
+                model=model,
+                data=data,
+                ik=ik,
+                solver=solver,
+                velocity_controller=velocity_controller,
+                anchor_target=trajectory_target,
+                duration_s=args.trajectory_duration,
+                period_s=args.trajectory_period,
                 renderer=renderer,
                 render_camera=render_camera,
                 video_writer=video_writer,
                 video_fps=args.video_fps,
                 min_command_lead=args.min_command_lead,
                 max_command_lead=args.max_command_lead,
+                p95_position_limit_m=args.trajectory_p95_position_mm / 1000.0,
+                p95_orientation_limit_rad=np.radians(args.trajectory_p95_orientation_deg),
             )
-            results.append(result)
             print(
-                f"{result.name}: success={result.success} settle={result.settle_time_s} "
-                f"pos={result.final_position_error_m * 1000:.2f}mm "
-                f"rot={result.final_orientation_error_deg:.2f}deg "
-                f"osqp_p95={result.p95_osqp_wall_time_ms:.3f}ms"
+                f"trajectory/{trajectory_result.name}: success={trajectory_result.success} "
+                f"pos_rms={trajectory_result.rms_position_error_m * 1000:.2f}mm "
+                f"pos_p95={trajectory_result.p95_position_error_m * 1000:.2f}mm "
+                f"rot_rms={trajectory_result.rms_orientation_error_deg:.2f}deg "
+                f"rot_p95={trajectory_result.p95_orientation_error_deg:.2f}deg"
             )
+
+            for target in random_targets:
+                set_arm_state(model, data, ik.joint_ids, HOME_QPOS)
+                mujoco.mj_forward(model, data)
+                solver.reset()
+                result = run_target(
+                    model=model,
+                    data=data,
+                    ik=ik,
+                    solver=solver,
+                    velocity_controller=velocity_controller,
+                    target=target,
+                    timeout_s=args.timeout,
+                    position_tolerance_m=args.position_tolerance_mm / 1000.0,
+                    orientation_tolerance_rad=np.radians(args.orientation_tolerance_deg),
+                    hold_s=args.hold_seconds,
+                    renderer=None,
+                    render_camera=None,
+                    video_writer=None,
+                    video_fps=args.video_fps,
+                    min_command_lead=args.min_command_lead,
+                    max_command_lead=args.max_command_lead,
+                )
+                random_results.append(result)
+                print(
+                    f"random/{result.name}: success={result.success} settle={result.settle_time_s} "
+                    f"pos={result.final_position_error_m * 1000:.2f}mm "
+                    f"rot={result.final_orientation_error_deg:.2f}deg "
+                    f"osqp_p95={result.p95_osqp_wall_time_ms:.3f}ms"
+                )
     finally:
         if video_writer is not None:
             video_writer.close()
@@ -475,18 +854,35 @@ def main() -> int:
             renderer.close()
 
     elapsed = time.perf_counter() - start
-    all_success = all(result.success for result in results)
-    settle_times = [result.settle_time_s for result in results if result.settle_time_s is not None]
-    p95_solve_ms = max(result.p95_osqp_wall_time_ms for result in results)
+    all_results = fixed_results + random_results + video_results
+    fixed_success = all(result.success for result in fixed_results)
+    random_success_rate = (
+        sum(result.success for result in random_results) / len(random_results)
+        if random_results
+        else 1.0
+    )
+    settle_times = [result.settle_time_s for result in all_results if result.settle_time_s is not None]
+    p95_solve_candidates = [result.p95_osqp_wall_time_ms for result in all_results]
+    if trajectory_result is not None:
+        p95_solve_candidates.append(trajectory_result.p95_osqp_wall_time_ms)
+    p95_solve_ms = max(p95_solve_candidates, default=float("inf"))
     pass_criteria = {
-        "all_targets_reached": all_success,
+        "all_fixed_targets_reached": fixed_success,
+        "random_success_rate": random_success_rate >= args.min_random_success_rate,
+        "continuous_trajectory": trajectory_result is None or trajectory_result.success,
+        "video_sequence": not video_results or all(result.success for result in video_results),
         "max_settle_time_s": max(settle_times, default=float("inf")) <= args.max_settle_seconds,
         "osqp_p95_wall_time_ms": p95_solve_ms <= args.max_osqp_p95_ms,
-        "zero_osqp_failures": sum(result.osqp_failures for result in results) == 0,
+        "zero_osqp_failures": (
+            sum(result.osqp_failures for result in all_results)
+            + (trajectory_result.osqp_failures if trajectory_result is not None else 0)
+        )
+        == 0,
     }
     passed = all(pass_criteria.values())
     summary = {
         "passed": passed,
+        "suite": args.suite,
         "model": str(Path(args.model).resolve()),
         "elapsed_wall_time_s": elapsed,
         "criteria": {
@@ -494,20 +890,69 @@ def main() -> int:
             "orientation_tolerance_deg": args.orientation_tolerance_deg,
             "hold_seconds": args.hold_seconds,
             "max_settle_seconds": args.max_settle_seconds,
+            "min_random_success_rate": args.min_random_success_rate,
             "max_osqp_p95_ms": args.max_osqp_p95_ms,
+            "trajectory_p95_position_mm": args.trajectory_p95_position_mm,
+            "trajectory_p95_orientation_deg": args.trajectory_p95_orientation_deg,
             "min_command_lead_rad": args.min_command_lead,
             "max_command_lead_rad": args.max_command_lead,
         },
         "pass_criteria": pass_criteria,
-        "targets": [
+        "coverage": {
+            "fixed_target_count": len(fixed_targets),
+            "fixed_challenge_count": (
+                len(SMOKE_TARGET_JOINT_CONFIGS) - 1
+                if args.suite == "smoke"
+                else len(FULL_CHALLENGE_JOINT_CONFIGS)
+            ),
+            "random_target_count": len(random_targets),
+            "random_seed": args.random_seed,
+            "random_success_rate": random_success_rate,
+            "trajectory_duration_s": args.trajectory_duration if trajectory_result is not None else 0.0,
+        },
+        "aggregate": {
+            "fixed_success_count": sum(result.success for result in fixed_results),
+            "fixed_total_count": len(fixed_results),
+            "random_success_count": sum(result.success for result in random_results),
+            "random_total_count": len(random_results),
+            "random_success_rate": random_success_rate,
+            "successful_settle_mean_s": mean_or_nan(settle_times),
+            "successful_settle_p95_s": percentile(settle_times, 95),
+            "successful_settle_max_s": max_or_nan(settle_times),
+            "fixed_max_final_position_error_mm": 1000.0
+            * max((result.final_position_error_m for result in fixed_results), default=float("nan")),
+            "fixed_max_final_orientation_error_deg": max(
+                (result.final_orientation_error_deg for result in fixed_results),
+                default=float("nan"),
+            ),
+            "random_p95_final_position_error_mm": 1000.0
+            * percentile([result.final_position_error_m for result in random_results], 95),
+            "random_p95_final_orientation_error_deg": percentile(
+                [result.final_orientation_error_deg for result in random_results],
+                95,
+            ),
+            "max_osqp_p95_wall_time_ms": p95_solve_ms,
+        },
+        "fixed_targets": [
             {
                 **asdict(result),
-                "target_position": targets[index].position.tolist(),
-                "target_rotation": targets[index].rotation.tolist(),
-                "source_qpos": targets[index].source_qpos.tolist(),
+                "target_position": fixed_targets[index].position.tolist(),
+                "target_rotation": fixed_targets[index].rotation.tolist(),
+                "source_qpos": fixed_targets[index].source_qpos.tolist(),
             }
-            for index, result in enumerate(results)
+            for index, result in enumerate(fixed_results)
         ],
+        "random_targets": [
+            {
+                **asdict(result),
+                "target_position": random_targets[index].position.tolist(),
+                "target_rotation": random_targets[index].rotation.tolist(),
+                "source_qpos": random_targets[index].source_qpos.tolist(),
+            }
+            for index, result in enumerate(random_results)
+        ],
+        "trajectory": asdict(trajectory_result) if trajectory_result is not None else None,
+        "video_sequence": [asdict(result) for result in video_results],
         "video": str(video_path.resolve()) if args.record_video else None,
     }
     summary_path = output_dir / "summary.json"
