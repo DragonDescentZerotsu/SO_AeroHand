@@ -6,12 +6,6 @@ import time
 from pathlib import Path
 
 import numpy as np
-from scipy import sparse
-
-try:
-    import osqp
-except ImportError:
-    osqp = None
 
 try:
     import mujoco
@@ -37,11 +31,12 @@ from aero_quest.quest_hand_frame import (
     quat_xyzw_to_matrix,
     quest_hand_frame_from_sdk,
 )
+from aero_quest.osqp_ik import OSQPIKConfig, OSQPVelocityIK
 from aero_quest.retargeting import AeroHandRetargetingWrapper
 from aero_quest.so101_aero_control import normalized_aero_hand_to_ctrl, print_combined_actuator_info
 
 
-DEFAULT_DESCRIPTION = "Quest wrist pose -> position-priority SO101 IK with nullspace orientation, landmarks -> Aero Hand."
+DEFAULT_DESCRIPTION = "Quest wrist pose -> configurable robot-arm IK, wrist-local landmarks -> Aero Hand."
 DEFAULT_MODEL = PROJECT_ROOT / "models/so101_aero_hand/SO101_aerohand.xml"
 DEFAULT_ARM_JOINTS = "shoulder_pan,shoulder_lift,elbow_flex,wrist_flex,wrist_roll"
 DEFAULT_EE_SITE = "aero_wrist_site"
@@ -62,6 +57,10 @@ DEFAULT_INITIAL_ARM_QPOS = None
 DEFAULT_JOINT_MOTION_WEIGHTS = None
 DEFAULT_ARM_ACTUATOR_KP = None
 DEFAULT_ARM_ACTUATOR_KV = None
+DEFAULT_MIN_JOINT_COMMAND_LEAD = 0.08
+DEFAULT_MAX_JOINT_COMMAND_LEAD = 0.20
+DEFAULT_POSE_CAPTURE_POSITION_M = 0.006
+DEFAULT_POSE_CAPTURE_ORIENTATION_DEG = 2.0
 DEFAULT_QP_TASK_WEIGHTS = "1 1 1 1 1 1"
 DEFAULT_QP_ACCEL_WEIGHT = 0.02
 DEFAULT_QP_MAX_JOINT_ACCEL = 80.0
@@ -70,7 +69,7 @@ DEFAULT_QP_SINGULAR_DAMPING_GAIN = 0.08
 SAFE_OPEN_HAND = np.array([1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float32)
 
 # Quest/Unity Q: +X right, +Y up, +Z forward.
-# SO101/MuJoCo debug B: +X forward, +Y left, +Z up.
+# Default robot/MuJoCo B: +X forward, +Y left, +Z up.
 DEFAULT_R_BQ = np.asarray(
     [
         [0.0, 0.0, 1.0],
@@ -481,41 +480,16 @@ def solve_full_task_space_ik(
     return q_target, qdot, qdot.copy(), np.zeros_like(qdot)
 
 
-def effective_singular_damping(J: np.ndarray, base_damping: float, threshold: float, gain: float) -> tuple[float, float]:
-    singular_values = np.linalg.svd(np.asarray(J, dtype=np.float64), compute_uv=False)
-    min_singular = float(singular_values[-1]) if singular_values.size else 0.0
-    threshold = max(float(threshold), 0.0)
-    gain = max(float(gain), 0.0)
-    if threshold <= 0.0 or min_singular >= threshold:
-        return float(base_damping), min_singular
-    scale = 1.0 - min_singular / max(threshold, 1e-12)
-    return float(base_damping) + gain * scale * scale, min_singular
-
-
 def solve_osqp_task_space_ik(
     ik: DampedLeastSquaresIK,
     data,
     xdot_cmd: np.ndarray,
     dt: float,
     control_orientation: bool,
-    joint_motion_weights: np.ndarray | None = None,
-    task_weights: np.ndarray | None = None,
-    prev_qdot: np.ndarray | None = None,
-    accel_weight: float = 0.0,
-    max_joint_accel: float = 0.0,
-    singular_damping_threshold: float = 0.0,
-    singular_damping_gain: float = 0.0,
+    solver: OSQPVelocityIK,
+    qtarget_base: np.ndarray | None = None,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, dict[str, object]]:
-    """Solve one resolved-rate IK step as a bounded QP with OSQP.
-
-    The QP minimizes task velocity error, weighted joint motion, and optional
-    qdot continuity while enforcing velocity, joint-limit, and acceleration
-    bounds. The damping term is increased continuously near small singular
-    values of the current task Jacobian.
-    """
-    if osqp is None:
-        raise RuntimeError("osqp is not installed. Install it with: pip install osqp")
-
+    """Adapt the reusable OSQP velocity IK solver to MuJoCo joint targets."""
     xdot_cmd = np.asarray(xdot_cmd, dtype=np.float64)
     if control_orientation:
         if xdot_cmd.shape != (6,):
@@ -526,105 +500,28 @@ def solve_osqp_task_space_ik(
             raise ValueError(f"Expected 3D task velocity, got {xdot_cmd.shape}")
         J = ik.jacobian(data, control_orientation=False)
 
-    n = len(ik.joint_ids)
-    task_weights = np.ones(J.shape[0], dtype=np.float64) if task_weights is None else np.asarray(task_weights, dtype=np.float64)
-    if task_weights.shape != (J.shape[0],):
-        raise ValueError(f"Task weights expected shape ({J.shape[0]},), got {task_weights.shape}")
-    if np.any(task_weights <= 0.0):
-        raise ValueError(f"Task weights must be positive, got {task_weights}")
-
-    joint_motion_weights = (
-        np.ones(n, dtype=np.float64)
-        if joint_motion_weights is None
-        else np.asarray(joint_motion_weights, dtype=np.float64).reshape(n)
-    )
-    if np.any(joint_motion_weights <= 0.0):
-        raise ValueError(f"Joint motion weights must be positive, got {joint_motion_weights}")
-
-    effective_damping, min_singular = effective_singular_damping(
-        J,
-        base_damping=ik.damping,
-        threshold=singular_damping_threshold,
-        gain=singular_damping_gain,
-    )
-
-    weighted_J = task_weights[:, None] * J
-    weighted_xdot = task_weights * xdot_cmd
-    regularization = np.diag((effective_damping * joint_motion_weights) ** 2)
-    H = weighted_J.T @ weighted_J + regularization
-    g = -(weighted_J.T @ weighted_xdot)
-
-    prev_qdot = np.zeros(n, dtype=np.float64) if prev_qdot is None else np.asarray(prev_qdot, dtype=np.float64).reshape(n)
-    accel_weight = max(float(accel_weight), 0.0)
-    if accel_weight > 0.0:
-        H += accel_weight * np.eye(n, dtype=np.float64)
-        g += -accel_weight * prev_qdot
-
     q_current = joint_qpos(ik.model, data, ik.joint_ids)
     lo, hi = joint_ranges(ik.model, ik.joint_ids)
-    max_speed = abs(float(ik.max_joint_speed))
-    lower = np.full(n, -max_speed, dtype=np.float64)
-    upper = np.full(n, max_speed, dtype=np.float64)
-    dt = max(float(dt), 1e-6)
-    finite_lo = np.isfinite(lo)
-    finite_hi = np.isfinite(hi)
-    lower[finite_lo] = np.maximum(lower[finite_lo], (lo[finite_lo] - q_current[finite_lo]) / dt)
-    upper[finite_hi] = np.minimum(upper[finite_hi], (hi[finite_hi] - q_current[finite_hi]) / dt)
-
-    max_joint_accel = abs(float(max_joint_accel))
-    if max_joint_accel > 0.0:
-        accel_lower = prev_qdot - max_joint_accel * dt
-        accel_upper = prev_qdot + max_joint_accel * dt
-        for index in range(n):
-            clipped_lower = max(lower[index], accel_lower[index])
-            clipped_upper = min(upper[index], accel_upper[index])
-            if clipped_lower <= clipped_upper:
-                lower[index] = clipped_lower
-                upper[index] = clipped_upper
-
-    if np.any(lower > upper):
-        raise RuntimeError(f"Infeasible qdot bounds: lower={lower}, upper={upper}")
-
-    P = sparse.csc_matrix(2.0 * 0.5 * (H + H.T))
-    q = np.asarray(2.0 * g, dtype=np.float64)
-    A = sparse.eye(n, format="csc")
-    solver = osqp.OSQP()
-    solver.setup(
-        P=P,
-        q=q,
-        A=A,
-        l=lower,
-        u=upper,
-        verbose=False,
-        warm_starting=True,
-        polish=False,
-        max_iter=80,
-        eps_abs=1e-4,
-        eps_rel=1e-4,
-        check_termination=10,
-    )
-    solver.warm_start(x=np.clip(prev_qdot, lower, upper))
-    result = solver.solve()
-    status = str(result.info.status).lower()
-    if result.x is None or status not in {"solved", "solved inaccurate"}:
-        raise RuntimeError(f"OSQP IK failed with status={result.info.status}")
-
-    qdot = np.asarray(result.x, dtype=np.float64)
-    q_target = q_current + qdot * dt
+    result = solver.solve(J, xdot_cmd, q_current, lo, hi, dt)
+    qdot = result.qdot
+    qtarget_base = q_current if qtarget_base is None else np.asarray(qtarget_base, dtype=np.float64)
+    q_target = qtarget_base + qdot * float(dt)
     q_target = np.clip(q_target, lo, hi)
     if ik.smoothing_alpha > 0.0 and ik.prev_qtarget is not None:
         q_target = ik.smoothing_alpha * ik.prev_qtarget + (1.0 - ik.smoothing_alpha) * q_target
     ik.prev_qtarget = q_target.copy()
     diagnostics = {
-        "status": result.info.status,
-        "iterations": int(result.info.iter),
-        "min_singular": min_singular,
-        "effective_damping": effective_damping,
+        "status": result.status,
+        "iterations": result.iterations,
+        "min_singular": result.min_singular,
+        "effective_damping": result.effective_damping,
+        "solve_time_s": result.solve_time_s,
+        "wall_time_s": result.wall_time_s,
     }
     return q_target, qdot, qdot.copy(), np.zeros_like(qdot), diagnostics
 
 
-def make_key_callback(arm_channel, latest_frame_ref, latest_head_ref, ik, data, state, args, R_BQ):
+def make_key_callback(arm_channel, latest_frame_ref, latest_head_ref, ik, data, state, args, R_BQ, osqp_solver=None):
     def on_key(keycode):
         try:
             key = chr(keycode).lower()
@@ -659,6 +556,8 @@ def make_key_callback(arm_channel, latest_frame_ref, latest_head_ref, ik, data, 
             )
             state["last_qtarget"] = joint_qpos(ik.model, data, ik.joint_ids)
             state["raw_wrist_zero_Q"] = np.asarray(latest_frame_ref["frame"].wrist_pos_world, dtype=np.float64).copy()
+            if osqp_solver is not None:
+                osqp_solver.reset()
             print(f"Re-zeroed IK in {args.reference_frame} frame: current Quest wrist maps to current robot end-effector pose.")
         elif key == "p":
             state["paused"] = not state["paused"]
@@ -717,6 +616,20 @@ def parse_args():
         help="Optional per-arm-joint MuJoCo position actuator kv override in --arm-joint-names order.",
     )
     parser.add_argument(
+        "--max-joint-command-lead",
+        type=float,
+        default=DEFAULT_MAX_JOINT_COMMAND_LEAD,
+        help="Maximum absolute gap in radians between integrated arm command and measured qpos.",
+    )
+    parser.add_argument(
+        "--min-joint-command-lead",
+        type=float,
+        default=DEFAULT_MIN_JOINT_COMMAND_LEAD,
+        help="Near-target command lead limit in radians; the controller interpolates up to the maximum when errors are large.",
+    )
+    parser.add_argument("--pose-capture-position-mm", type=float, default=1000.0 * DEFAULT_POSE_CAPTURE_POSITION_M)
+    parser.add_argument("--pose-capture-orientation-deg", type=float, default=DEFAULT_POSE_CAPTURE_ORIENTATION_DEG)
+    parser.add_argument(
         "--qp-task-weights",
         default=DEFAULT_QP_TASK_WEIGHTS,
         help="OSQP IK task weights. Use 6 floats for full pose [vx vy vz wx wy wz], or 3 floats when orientation is disabled.",
@@ -760,8 +673,6 @@ def parse_args():
 
 def main():
     args = parse_args()
-    if args.ik_mode == "osqp_full_pose" and osqp is None:
-        raise SystemExit("OSQP IK requested but osqp is not installed. Install with: pip install osqp")
     workspace_min = parse_vec3(args.workspace_min, "--workspace-min")
     workspace_max = parse_vec3(args.workspace_max, "--workspace-max")
     R_BQ = DEFAULT_R_BQ.copy() if args.R_BQ is None else np.asarray(args.R_BQ, dtype=np.float64).reshape(3, 3)
@@ -806,6 +717,26 @@ def main():
             qp_task_weights = qp_task_weights[:3]
         if qp_task_weights.shape != (expected_task_dim,):
             raise ValueError(f"--qp-task-weights expected {expected_task_dim} floats, got {qp_task_weights.shape}")
+    osqp_solver = None
+    if args.ik_mode == "osqp_full_pose":
+        osqp_solver = OSQPVelocityIK(
+            joint_count=len(ik.joint_ids),
+            task_dimension=6 if args.control_orientation else 3,
+            joint_motion_weights=(
+                np.ones(len(ik.joint_ids), dtype=np.float64)
+                if joint_motion_weights is None
+                else joint_motion_weights
+            ),
+            task_weights=qp_task_weights,
+            config=OSQPIKConfig(
+                base_damping=args.ik_damping,
+                accel_weight=args.qp_accel_weight,
+                max_joint_speed=args.max_joint_speed,
+                max_joint_accel=args.qp_max_joint_accel,
+                singular_damping_threshold=args.qp_singular_damping_threshold,
+                singular_damping_gain=args.qp_singular_damping_gain,
+            ),
+        )
     vel_controller = VelocityTeleopController(
         VelocityTeleopConfig(
             kp_pos=args.kp_pos,
@@ -872,7 +803,7 @@ def main():
         f"{None if arm_actuator_kv is None else np.array2string(arm_actuator_kv, precision=4, suppress_small=True)}"
     )
     print(
-        f"osqp_available={osqp is not None} qp_task_weights={np.array2string(qp_task_weights, precision=4, suppress_small=True)} "
+        f"osqp_enabled={osqp_solver is not None} qp_task_weights={np.array2string(qp_task_weights, precision=4, suppress_small=True)} "
         f"qp_accel_weight={args.qp_accel_weight:.4f} qp_max_joint_accel={args.qp_max_joint_accel:.4f} "
         f"qp_singular_damping_threshold={args.qp_singular_damping_threshold:.4f} "
         f"qp_singular_damping_gain={args.qp_singular_damping_gain:.4f}"
@@ -926,7 +857,17 @@ def main():
     with mujoco.viewer.launch_passive(
         model,
         data,
-        key_callback=make_key_callback(arm_channel, latest_frame_ref, latest_head_ref, ik, data, state, args, R_BQ),
+        key_callback=make_key_callback(
+            arm_channel,
+            latest_frame_ref,
+            latest_head_ref,
+            ik,
+            data,
+            state,
+            args,
+            R_BQ,
+            osqp_solver=osqp_solver,
+        ),
     ) as viewer:
         viewer_camera_init_until = time.time() + max(0.0, float(args.viewer_camera_init_seconds))
         initialize_viewer_camera(viewer, model)
@@ -1002,39 +943,71 @@ def main():
                     weighted_xdot[:3] *= float(args.position_weight)
                     if args.control_orientation:
                         weighted_xdot[3:] *= float(args.orientation_weight)
-                    try:
-                        qtarget, last_qdot, last_qdot_pos, last_qdot_null, ik_diag = solve_osqp_task_space_ik(
-                            ik,
-                            data,
-                            weighted_xdot,
-                            dt=last_control_dt,
-                            control_orientation=args.control_orientation,
-                            joint_motion_weights=joint_motion_weights,
-                            task_weights=qp_task_weights,
-                            prev_qdot=last_qdot,
-                            accel_weight=args.qp_accel_weight,
-                            max_joint_accel=args.qp_max_joint_accel,
-                            singular_damping_threshold=args.qp_singular_damping_threshold,
-                            singular_damping_gain=args.qp_singular_damping_gain,
+                    pose_captured = (
+                        float(np.linalg.norm(last_error)) <= args.pose_capture_position_mm / 1000.0
+                        and (
+                            not args.control_orientation
+                            or float(np.linalg.norm(last_rot_error)) <= np.radians(args.pose_capture_orientation_deg)
                         )
-                        last_ik_status = f"osqp:{ik_diag['status']}"
-                        last_ik_iterations = int(ik_diag["iterations"])
-                        last_min_singular = float(ik_diag["min_singular"])
-                        last_effective_damping = float(ik_diag["effective_damping"])
-                    except RuntimeError as exc:
-                        print(f"OSQP IK failed, falling back to DLS for this step: {exc}")
-                        qtarget, last_qdot, last_qdot_pos, last_qdot_null = solve_full_task_space_ik(
-                            ik,
-                            data,
-                            weighted_xdot,
-                            dt=last_control_dt,
-                            control_orientation=args.control_orientation,
-                            joint_motion_weights=joint_motion_weights,
-                        )
-                        last_ik_status = "osqp_fallback_dls"
+                    )
+                    if pose_captured:
+                        qtarget = joint_qpos(model, data, ik.joint_ids)
+                        last_qdot = np.zeros(len(ik.joint_ids), dtype=np.float64)
+                        last_qdot_pos = last_qdot.copy()
+                        last_qdot_null = last_qdot.copy()
+                        osqp_solver.reset()
+                        last_ik_status = "osqp_pose_captured"
                         last_ik_iterations = 0
                         last_min_singular = float("nan")
                         last_effective_damping = float(args.ik_damping)
+                    else:
+                        try:
+                            qtarget, last_qdot, last_qdot_pos, last_qdot_null, ik_diag = solve_osqp_task_space_ik(
+                                ik,
+                                data,
+                                weighted_xdot,
+                                dt=last_control_dt,
+                                control_orientation=args.control_orientation,
+                                solver=osqp_solver,
+                                qtarget_base=state["last_qtarget"],
+                            )
+                            min_lead = abs(float(args.min_joint_command_lead))
+                            max_lead = max(min_lead, abs(float(args.max_joint_command_lead)))
+                            error_scale = max(
+                                float(np.linalg.norm(last_error)) / 0.10,
+                                float(np.linalg.norm(last_rot_error)) / np.radians(30.0),
+                            )
+                            command_lead = min_lead + (max_lead - min_lead) * float(np.clip(error_scale, 0.0, 1.0))
+                            if (
+                                float(np.linalg.norm(last_error)) < 0.025
+                                and float(np.linalg.norm(last_rot_error)) < np.radians(8.0)
+                            ):
+                                command_lead = min_lead
+                            if command_lead > 0.0:
+                                q_measured = joint_qpos(model, data, ik.joint_ids)
+                                qtarget = np.clip(
+                                    qtarget,
+                                    q_measured - command_lead,
+                                    q_measured + command_lead,
+                                )
+                            last_ik_status = f"osqp:{ik_diag['status']}"
+                            last_ik_iterations = int(ik_diag["iterations"])
+                            last_min_singular = float(ik_diag["min_singular"])
+                            last_effective_damping = float(ik_diag["effective_damping"])
+                        except RuntimeError as exc:
+                            print(f"OSQP IK failed, falling back to DLS for this step: {exc}")
+                            qtarget, last_qdot, last_qdot_pos, last_qdot_null = solve_full_task_space_ik(
+                                ik,
+                                data,
+                                weighted_xdot,
+                                dt=last_control_dt,
+                                control_orientation=args.control_orientation,
+                                joint_motion_weights=joint_motion_weights,
+                            )
+                            last_ik_status = "osqp_fallback_dls"
+                            last_ik_iterations = 0
+                            last_min_singular = float("nan")
+                            last_effective_damping = float(args.ik_damping)
                 elif args.ik_mode == "full_pose":
                     weighted_xdot = cmd.xdot.copy()
                     weighted_xdot[:3] *= float(args.position_weight)
@@ -1080,6 +1053,8 @@ def main():
                 last_qtarget_error = state["last_qtarget"] - joint_qpos(model, data, ik.joint_ids)
                 last_ik_status = "paused_or_stale"
                 last_ik_iterations = 0
+                if osqp_solver is not None:
+                    osqp_solver.reset()
                 ik.apply_position_targets(data, state["last_qtarget"])
                 if stale:
                     alpha = float(np.clip(args.hand_smoothing_alpha, 0.0, 1.0))

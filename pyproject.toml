@@ -5,8 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "aero-quest-sim"
 version = "0.1.0"
-description = "Meta Quest hand tracking to MuJoCo teleoperation for an SO101 arm with an Aero Hand."
-readme = "README.md"
+description = "Meta Quest hand tracking to MuJoCo teleoperation for SO101 and Piper arms with an Aero Hand."
 requires-python = ">=3.10"
 dependencies = [
     "gymnasium>=0.29",

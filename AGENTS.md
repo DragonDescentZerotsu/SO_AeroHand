@@ -1,6 +1,27 @@
 # Aero Quest Sim 智能体说明
 
-本项目将 Meta Quest 手部追踪连接到 MuJoCo 遥操作，用于控制带有 Aero Hand 的 SO101 机械臂。当前里程碑是建立清晰的双通道数据流，而不是实现完美的机器人控制。
+本项目将 Meta Quest 手部追踪连接到 MuJoCo 遥操作，用于控制带有 Aero Hand 的 SO101 或 Piper 机械臂。当前里程碑是建立清晰的双通道数据流和可靠的机械臂 IK 控制。
+
+## 文档和记忆规则
+
+- 根目录 `AGENTS.md` 是项目架构、长期约束和跨目录工作流的唯一主记录。
+- 子目录有特殊规则时写入就近的 `AGENTS.md`，例如遥操作见 `scripts/teleop/AGENTS.md`，benchmark 见 `scripts/benchmarks/AGENTS.md`。
+- `docs/` 用于需要公式、背景或长篇教程的专题文档，不要把同一份操作说明重复维护在多个入口文档中。
+- 修改入口、文件名、默认算法或验证流程时，应同步更新相关 `AGENTS.md` 和直接受影响的专题文档。
+
+## 环境初始化
+
+从项目根目录使用 `aero_sim` 环境：
+
+```bash
+conda activate aero_sim
+python -m pip install -e ".[dev,quest]"
+git submodule update --init --recursive
+```
+
+主要 Python 依赖在 `pyproject.toml`。`mujoco_menagerie/` 和 `third_party/` 中的模型作为 git submodule 管理。
+
+Quest Hand Tracking Streamer 的 Python SDK 由 `hand-tracking-sdk` 提供。本地如需查看或修改上游 streamer，可克隆到被 git 忽略的 `external/hand-tracking-streamer/`，但项目专用解析、记录和控制逻辑必须留在 `aero_quest/` 与 `scripts/`。
 
 ## Quest 数据入口
 
@@ -15,12 +36,22 @@ Quest HTS -> TCP localhost:8000 -> hand-tracking-sdk -> Python scripts
 
 - `scripts/04_receive_quest_tcp.py`：最小 TCP 接收器冒烟测试。
 - `scripts/teleop/quest_tcp_aero_teleop.py`：仅针对 Aero Hand 的 Quest landmark 重定向。
-- `scripts/teleop/quest_so101_aero_nullspace_ik_teleop.py`：当前 SO101 机械臂加 Aero Hand 遥操作。
-- `scripts/teleop/quest_piper_aero_ik_teleop.py`：当前 Piper 6DoF 机械臂加 Aero Hand 遥操作，默认使用 full-pose IK。
+- `scripts/teleop/quest_aero_arm_ik_teleop.py`：共享的 Quest、机械臂 IK、MuJoCo 和 Aero Hand 遥操作实现；通常不直接运行。
+- `scripts/teleop/quest_so101_aero_ik_teleop.py`：当前 SO101 机械臂加 Aero Hand 遥操作。
+- `scripts/teleop/quest_piper_aero_ik_teleop.py`：当前 Piper 6DoF 机械臂加 Aero Hand 遥操作，默认使用 `osqp_full_pose` IK。
 - `scripts/teleop/quest_arm_channel_so101_ik.py`：当前 Arm Channel 控制的仅机械臂版本。
 - `scripts/debug_quest_dual_channel.py`：轻量级解析器/通道调试脚本。
 
 共享的类型化解析和坐标帧转换位于 `aero_quest/quest_hand_frame.py`。
+
+Quest 直接通过 USB 接在运行 MuJoCo 的同一台机器时：
+
+```bash
+adb devices
+adb reverse tcp:8000 tcp:8000
+```
+
+Quest HTS 使用 TCP、`localhost` 或 `127.0.0.1`、端口 `8000`。Quest 接在本地 Mac 而 MuJoCo 运行在远端 workstation 时，使用 `scripts/teleop/AGENTS.md` 中的 SSH tunnel 流程。
 
 ## 双通道架构
 
@@ -43,16 +74,25 @@ Quest HTS -> TCP localhost:8000 -> hand-tracking-sdk -> Python scripts
 
 - 接收：`scripts/04_receive_quest_tcp.py`，完整遥操作在 `scripts/teleop/`。
 - 解析和类型化坐标帧模型：`aero_quest/quest_hand_frame.py`。
-- 机械臂控制和 SO101 IK 辅助：`aero_quest/arm_teleop.py`。
+- 机械臂速度控制和 DLS IK 辅助：`aero_quest/arm_teleop.py`。
+- 通用 OSQP IK：`aero_quest/osqp_ik.py`。
 - Aero Hand 重定向：`aero_quest/retargeting.py`。
 - SO101 + Aero 动作应用：`aero_quest/so101_aero_control.py`。
 - MuJoCo landmark 辅助：`aero_quest/mujoco_landmarks.py`。
-- 仿真入口点：`scripts/teleop/quest_so101_aero_nullspace_ik_teleop.py`、`scripts/teleop/quest_piper_aero_ik_teleop.py`、`scripts/teleop/quest_arm_channel_so101_ik.py`、`scripts/teleop/quest_arm_channel_target_ball.py`。
+- Quest 双通道记录、质量分析和回放：`aero_quest/quest_logger.py`、`aero_quest/quest_data_quality.py`、`aero_quest/quest_replay.py`。
+- 仿真入口点：`scripts/teleop/quest_so101_aero_ik_teleop.py`、`scripts/teleop/quest_piper_aero_ik_teleop.py`、`scripts/teleop/quest_arm_channel_so101_ik.py`、`scripts/teleop/quest_arm_channel_target_ball.py`。
+- Piper IK 自动验证：`scripts/benchmarks/piper_ik_benchmark.py`。修改 Piper IK 或控制参数后应先运行该 benchmark，再进行人工遥操作验证。
+
+更详细的专题资料：
+
+- `docs/quest_dual_channel_pipeline.md`：双通道坐标帧、映射和控制公式。
+- `docs/quest_telemetry_layer.md`：Quest 日志、质量检查和回放。
+- `docs/formula_retargeting_tutorial.md`：Aero Hand 公式重定向。
 
 ## 遥操作入口选择
 
-- `scripts/teleop/quest_so101_aero_nullspace_ik_teleop.py`：SO101 + Aero Hand。SO101 只有 5 个 arm DoF，所以默认 `--ik-mode position_nullspace`，先保证末端位置，再用剩余自由度尽量跟随姿态。
-- `scripts/teleop/quest_piper_aero_ik_teleop.py`：Piper + Aero Hand。Piper 有 6 个 arm DoF，所以默认 `--ik-mode full_pose`，位置和姿态作为同一个 6D 任务求解。
+- `scripts/teleop/quest_so101_aero_ik_teleop.py`：SO101 + Aero Hand。SO101 只有 5 个 arm DoF，所以默认 `--ik-mode position_nullspace`，先保证末端位置，再用剩余自由度尽量跟随姿态。
+- `scripts/teleop/quest_piper_aero_ik_teleop.py`：Piper + Aero Hand。Piper 有 6 个 arm DoF，所以默认 `--ik-mode osqp_full_pose`，位置和姿态作为同一个 6D QP 任务求解。
 - `scripts/teleop/quest_arm_channel_so101_ik.py`：仅机械臂 Arm Channel 调试，不做 Aero Hand 手指重定向。
 - `scripts/teleop/quest_arm_channel_target_ball.py`：只移动 MuJoCo target ball，用来验证 Quest 到机器人坐标轴映射，不适合作为真实机械臂控制器。
 
@@ -88,6 +128,57 @@ python -m mujoco.viewer --mjcf=models/so101_aero_hand/scenes/SO101_aerohand_pipe
 新增任务场景时，优先新增 `configs/scenes/<task>.yaml`，不要复制粘贴基础机器人 XML。需要训练 policy 时，MJCF 负责拓扑和碰撞，episode reset 时再由 Python 环境根据 YAML 中的 `randomize` 字段随机化 arm qpos、object freejoint pose 和 target object。可抓取物体必须放在带 `freejoint` 的 wrapper body 下，否则只是固定场景物体，无法被抓起来。
 
 当前 `pipette_grasp.yaml` 直接引用本机 `/data/tianang/projects/AutoBio/autobio/model/object/pipette.gen.xml`。如果场景需要脱离这台机器运行，应先把相关 AutoBio MJCF 和 mesh assets 复制或子模块化到本项目，再更新 recipe 的 `source` 路径。
+
+## Quest 遥测和离线回放
+
+需要把 Quest 输入问题与 IK/机器人问题分开时，先记录并分析双通道数据：
+
+```bash
+python scripts/record_quest_dual_channel.py \
+  --transport tcp \
+  --host 0.0.0.0 \
+  --port 8000 \
+  --out logs/test.jsonl \
+  --duration 30
+python scripts/analyze_quest_latency.py --log logs/test.jsonl
+python scripts/replay_quest_dual_channel.py --log logs/test.jsonl --realtime
+```
+
+日志必须继续分开保存 Arm Channel 的 `wrist_pos_world`、`wrist_quat_world` 和 Hand Channel 的 `landmarks_wrist`。实时控制使用 latest-frame buffer，旧帧应被覆盖而不是排队积压。
+
+## 验证流程
+
+修改共享坐标帧、模型或 IK 后，至少运行与改动相关的检查：
+
+```bash
+pytest tests/test_quest_hand_frame.py tests/test_so101_aero_model.py
+python tests/test_osqp_ik.py
+python tests/test_piper_aero_model.py
+python scripts/teleop/quest_so101_aero_ik_teleop.py --dry-run
+python scripts/teleop/quest_piper_aero_ik_teleop.py --dry-run
+python scripts/benchmarks/piper_ik_benchmark.py
+```
+
+窄改动可以只运行直接相关的测试；修改共享遥操作引擎、OSQP IK 或模型拓扑时，应运行完整的对应机器人 dry-run 和 benchmark。
+
+## 仓库布局
+
+- `aero_quest/`：坐标帧、重定向、IK、控制、遥测和场景组合 Python 包。
+- `scripts/teleop/`：当前遥操作入口。
+- `scripts/scenes/`：基础组合模型和配置场景生成入口。
+- `scripts/benchmarks/`：自动性能与轨迹验证。
+- `scripts/legacy/`：只为历史兼容或对照保留，不作为新功能入口。
+- `models/`：项目生成的基础模型和任务场景。
+- `configs/scenes/`：任务场景 recipe。
+- `docs/`：专题设计、公式和教程。
+- `tests/`：离线单元测试及 MuJoCo 冒烟测试。
+- `mujoco_menagerie/`、`third_party/`：第三方资产和子模块。
+
+`logs/`、`outputs/` 和 `external/` 中的本地运行产物或上游 checkout 不应提交，除非任务明确要求。
+
+## 许可证和第三方资产
+
+项目尚未选择统一许可证。重新分发模型、mesh 或生成的派生资产前，检查 `THIRD_PARTY_NOTICES.md` 以及对应子模块或源资产的许可证，不要默认第三方资产可随项目任意再分发。
 
 ## 安全规则
 

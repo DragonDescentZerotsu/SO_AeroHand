@@ -9,12 +9,9 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from aero_quest.arm_teleop import DampedLeastSquaresIK
-from scripts.teleop.quest_so101_aero_nullspace_ik_teleop import (
-    set_arm_ctrl_targets,
-    set_arm_qpos,
-    solve_osqp_task_space_ik,
-)
+from aero_quest.arm_teleop import DampedLeastSquaresIK, joint_qpos, joint_ranges
+from aero_quest.osqp_ik import OSQPIKConfig, OSQPVelocityIK
+from scripts.teleop.quest_aero_arm_ik_teleop import set_arm_ctrl_targets, set_arm_qpos
 
 
 def test_piper_osqp_ik_respects_bounds_and_damps_near_singularity():
@@ -33,29 +30,51 @@ def test_piper_osqp_ik_respects_bounds_and_damps_near_singularity():
     set_arm_ctrl_targets(model, data, ik.joint_ids, qhome)
     mujoco.mj_forward(model, data)
 
-    qtarget, qdot, _qdot_pos, _qdot_null, diag = solve_osqp_task_space_ik(
-        ik,
-        data,
-        np.array([0.0, 0.0, 0.0, 3.0, 0.0, 0.0], dtype=np.float64),
-        dt=0.005,
-        control_orientation=True,
+    solver = OSQPVelocityIK(
+        joint_count=6,
+        task_dimension=6,
         joint_motion_weights=np.array([0.7, 1.0, 1.0, 0.35, 0.22, 0.08], dtype=np.float64),
         task_weights=np.array([1.0, 1.0, 1.0, 1.2, 1.2, 1.2], dtype=np.float64),
-        prev_qdot=np.zeros(6, dtype=np.float64),
-        accel_weight=0.04,
-        max_joint_accel=120.0,
-        singular_damping_threshold=0.10,
-        singular_damping_gain=0.10,
+        config=OSQPIKConfig(
+            base_damping=0.035,
+            accel_weight=0.04,
+            max_joint_speed=5.0,
+            max_joint_accel=120.0,
+            singular_damping_threshold=0.10,
+            singular_damping_gain=0.10,
+        ),
     )
+    lower, upper = joint_ranges(model, ik.joint_ids)
+    result = solver.solve(
+        ik.jacobian(data, control_orientation=True),
+        np.array([0.0, 0.0, 0.0, 3.0, 0.0, 0.0], dtype=np.float64),
+        joint_qpos(model, data, ik.joint_ids),
+        lower,
+        upper,
+        dt=0.005,
+    )
+    qdot = result.qdot
+    qtarget = joint_qpos(model, data, ik.joint_ids) + qdot * 0.005
 
-    assert diag["status"].lower().startswith("solved")
+    assert result.status.lower().startswith("solved")
     assert np.all(np.isfinite(qtarget))
     assert np.all(np.isfinite(qdot))
     assert np.all(np.abs(qdot) <= 5.0 + 1e-6)
     assert np.all(np.abs(qdot) <= 120.0 * 0.005 + 1e-4)
-    assert diag["min_singular"] < 0.10
-    assert diag["effective_damping"] > ik.damping
+    assert result.min_singular < 0.10
+    assert result.effective_damping > ik.damping
     assert abs(qdot[5]) > 1e-3
+
+    second = solver.solve(
+        ik.jacobian(data, control_orientation=True),
+        np.array([0.0, 0.0, 0.0, 3.0, 0.0, 0.0], dtype=np.float64),
+        joint_qpos(model, data, ik.joint_ids),
+        lower,
+        upper,
+        dt=0.005,
+    )
+    assert second.status.lower().startswith("solved")
+    assert second.wall_time_s < 0.01
 
 
 if __name__ == "__main__":

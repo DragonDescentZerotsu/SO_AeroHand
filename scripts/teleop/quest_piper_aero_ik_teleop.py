@@ -8,7 +8,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from scripts.teleop import quest_so101_aero_nullspace_ik_teleop as teleop
+from scripts.teleop import quest_aero_arm_ik_teleop as teleop
 
 
 teleop.DEFAULT_DESCRIPTION = "Quest wrist pose -> full-pose Piper IK, landmarks -> Aero Hand."
