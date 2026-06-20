@@ -29,6 +29,19 @@ from aero_quest.quest_hand_frame import RelativeWristArmController, quest_hand_f
 DEFAULT_MODEL = PROJECT_ROOT / "models/so101_aero_hand/SO101_aerohand.xml"
 DEFAULT_ARM_JOINTS = "shoulder_pan,shoulder_lift,elbow_flex,wrist_flex,wrist_roll"
 DEFAULT_EE_SITE = "aero_wrist_site"
+DEFAULT_DESCRIPTION = "Quest Arm Channel wrist motion -> SO101 IK."
+DEFAULT_ROBOT_NAME = "SO101"
+DEFAULT_SCALE = 0.6
+DEFAULT_WORKSPACE_MIN = ["0.05", "-0.35", "0.03"]
+DEFAULT_WORKSPACE_MAX = ["0.55", "0.35", "0.60"]
+DEFAULT_KP_POS = 5.0
+DEFAULT_KP_ROT = 3.0
+DEFAULT_MAX_LINEAR_SPEED = 0.18
+DEFAULT_MAX_ANGULAR_SPEED = 1.0
+DEFAULT_MAX_JOINT_SPEED = 1.2
+DEFAULT_IK_SOLVER = "dls"
+DEFAULT_ARM_HOME_QPOS = None
+DEFAULT_SHOW_TARGET = True
 
 # Same verified Arm Channel axis map as the target-ball stage:
 # Quest/Unity Q: +X right, +Y up, +Z forward.
@@ -59,6 +72,15 @@ def parse_matrix(text):
     if len(values) != 9:
         raise argparse.ArgumentTypeError("--R_BQ expects 9 floats, row-major")
     return np.asarray(values, dtype=np.float64).reshape(3, 3)
+
+
+def parse_optional_joint_values(text):
+    if text is None or str(text).strip().lower() in {"", "none", "model"}:
+        return None
+    return np.asarray(
+        [float(value) for value in str(text).replace(",", " ").split()],
+        dtype=np.float64,
+    )
 
 
 def resolve_model(path_text):
@@ -104,7 +126,7 @@ def start_quest_receiver(args, frame_queue):
             if hand_matches(quest_frame, args.hand):
                 frame_queue.put((time.time(), quest_frame))
 
-    thread = threading.Thread(target=run, name="quest-arm-channel-so101-ik-receiver", daemon=True)
+    thread = threading.Thread(target=run, name="quest-arm-channel-ik-receiver", daemon=True)
     thread.start()
     return thread
 
@@ -141,7 +163,7 @@ def make_key_callback(arm_channel, latest_frame_ref, ik, data, state):
             )
             state["target_pos_B"] = ee_pos_B.copy()
             state["target_R_B"] = ee_R_B.copy()
-            print("Re-zeroed: current Quest wrist maps to current SO101 end-effector pose.")
+            print(f"Re-zeroed: current Quest wrist maps to current {DEFAULT_ROBOT_NAME} end-effector pose.")
         elif key == "p":
             state["paused"] = not state["paused"]
             print(f"paused={state['paused']}")
@@ -166,7 +188,7 @@ def draw_target_sphere(viewer, pos_B, radius):
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Step 2: Quest Arm Channel wrist motion -> SO101 IK -> MuJoCo arm follows.")
+    parser = argparse.ArgumentParser(description=DEFAULT_DESCRIPTION)
     parser.add_argument("--model", "--model-path", dest="model", default=str(DEFAULT_MODEL))
     parser.add_argument("--host", default="0.0.0.0")
     parser.add_argument("--port", type=int, default=8000)
@@ -175,23 +197,31 @@ def parse_args():
     parser.add_argument("--ee-body", default=None)
     parser.add_argument("--arm-joint-names", default=DEFAULT_ARM_JOINTS)
     parser.add_argument("--arm-joint-prefix", default=None)
-    parser.add_argument("--scale", type=float, default=0.6)
+    parser.add_argument("--arm-home-qpos", default=DEFAULT_ARM_HOME_QPOS)
+    parser.add_argument("--scale", type=float, default=DEFAULT_SCALE)
     parser.add_argument("--R_BQ", type=parse_matrix, default=None)
-    parser.add_argument("--workspace-min", nargs=3, default=["0.05", "-0.35", "0.03"])
-    parser.add_argument("--workspace-max", nargs=3, default=["0.55", "0.35", "0.60"])
+    parser.add_argument("--workspace-min", nargs=3, default=DEFAULT_WORKSPACE_MIN)
+    parser.add_argument("--workspace-max", nargs=3, default=DEFAULT_WORKSPACE_MAX)
     parser.add_argument("--deadzone", type=float, default=0.005)
     parser.add_argument("--target-smoothing-alpha", type=float, default=0.10)
-    parser.add_argument("--kp-pos", type=float, default=5.0)
-    parser.add_argument("--kp-rot", type=float, default=3.0)
-    parser.add_argument("--max-linear-speed", type=float, default=0.18)
-    parser.add_argument("--max-angular-speed", type=float, default=1.0)
+    parser.add_argument("--kp-pos", type=float, default=DEFAULT_KP_POS)
+    parser.add_argument("--kp-rot", type=float, default=DEFAULT_KP_ROT)
+    parser.add_argument("--max-linear-speed", type=float, default=DEFAULT_MAX_LINEAR_SPEED)
+    parser.add_argument("--max-angular-speed", type=float, default=DEFAULT_MAX_ANGULAR_SPEED)
     parser.add_argument("--ik-damping", type=float, default=0.05)
-    parser.add_argument("--max-joint-speed", type=float, default=1.2)
+    parser.add_argument("--max-joint-speed", type=float, default=DEFAULT_MAX_JOINT_SPEED)
     parser.add_argument("--joint-target-smoothing-alpha", type=float, default=0.0)
+    parser.add_argument("--ik-solver", choices=["dls", "osqp"], default=DEFAULT_IK_SOLVER)
     parser.add_argument("--control-orientation", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--orientation-source", choices=["palm_landmarks", "wrist_pose"], default="palm_landmarks")
     parser.add_argument("--timeout", type=float, default=0.30)
     parser.add_argument("--debug-interval", type=float, default=0.25)
+    parser.add_argument(
+        "--show-target",
+        action=argparse.BooleanOptionalAction,
+        default=DEFAULT_SHOW_TARGET,
+        help="Show the red end-effector target marker.",
+    )
     parser.add_argument("--target-radius", type=float, default=0.025)
     parser.add_argument("--disable-gravity", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--dry-run", action="store_true")
@@ -204,6 +234,7 @@ def main():
     workspace_max = parse_vec3(args.workspace_max, "--workspace-max")
     R_BQ = DEFAULT_R_BQ.copy() if args.R_BQ is None else np.asarray(args.R_BQ, dtype=np.float64).reshape(3, 3)
     model_path = resolve_model(args.model)
+    arm_home_qpos = parse_optional_joint_values(args.arm_home_qpos)
 
     model = mujoco.MjModel.from_xml_path(str(model_path))
     if args.disable_gravity:
@@ -223,6 +254,8 @@ def main():
         max_joint_speed=args.max_joint_speed,
         smoothing_alpha=args.joint_target_smoothing_alpha,
     )
+    if arm_home_qpos is not None:
+        arm_home_qpos = ik.set_joint_positions(data, arm_home_qpos)
     vel_controller = VelocityTeleopController(
         VelocityTeleopConfig(
             kp_pos=args.kp_pos,
@@ -245,11 +278,12 @@ def main():
     print("Before running:")
     print(f"  1. Confirm: adb reverse tcp:{args.port} tcp:{args.port}")
     print(f"  2. Quest HTS: TCP, localhost, port {args.port}")
-    print("  3. This stage uses Arm Channel only: wrist relative motion -> SO101 IK.")
+    print(f"  3. Arm Channel only: wrist relative motion -> {DEFAULT_ROBOT_NAME} IK.")
     print("  4. Aero Hand retargeting is disabled/not used.")
     print("  5. Press R to re-zero, P to pause/resume.")
     print(f"model={model_path}")
     print(f"ee_site={args.ee_site} arm_joints={ik.joint_names}")
+    print(f"ik_solver={args.ik_solver} arm_home_qpos={arm_home_qpos}")
     print(f"ee_start_B={np.array2string(ee_pos_B, precision=5)}")
     print(f"workspace_min={np.array2string(workspace_min, precision=3)} workspace_max={np.array2string(workspace_max, precision=3)}")
     print(f"scale={args.scale} R_BQ=\n{np.array2string(R_BQ, precision=4, suppress_small=True)}")
@@ -306,7 +340,7 @@ def main():
                     )
                     state["target_pos_B"] = ee_pos_B.copy()
                     state["target_R_B"] = ee_R_B.copy()
-                    print("Teleop zero set: current Quest wrist maps to current SO101 end-effector pose.")
+                    print(f"Teleop zero set: current Quest wrist maps to current {DEFAULT_ROBOT_NAME} end-effector pose.")
                 target = arm_channel.compute_target(quest_frame)
                 unclipped_target_B = target.target_pos_B
                 state["target_pos_B"] = np.clip(unclipped_target_B, workspace_min, workspace_max)
@@ -323,7 +357,8 @@ def main():
                 last_velocity = cmd.xdot
                 last_error = cmd.position_error
                 last_rot_error = np.zeros(3, dtype=np.float64) if cmd.rotation_error is None else cmd.rotation_error
-                qtarget, _qdot = ik.solve(
+                solve = ik.solve_osqp if args.ik_solver == "osqp" else ik.solve
+                qtarget, _qdot = solve(
                     data,
                     last_velocity,
                     dt=float(model.opt.timestep),
@@ -338,7 +373,10 @@ def main():
                 ik.apply_position_targets(data, state["last_qtarget"])
 
             viewer.user_scn.ngeom = 0
-            draw_target_sphere(viewer, state["target_pos_B"], args.target_radius)
+            if args.show_target:
+                draw_target_sphere(
+                    viewer, state["target_pos_B"], args.target_radius
+                )
             mujoco.mj_step(model, data)
             viewer.sync()
 

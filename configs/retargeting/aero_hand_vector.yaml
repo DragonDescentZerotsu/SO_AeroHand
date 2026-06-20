@@ -1,0 +1,75 @@
+retargeting:
+  purpose: debug_and_evaluation
+  source_frame: wrist
+  canonicalize: palm_local
+
+  action_names:
+    - thumb_abduction
+    - thumb_flexion_1
+    - thumb_flexion_2
+    - index_curl
+    - middle_curl
+    - ring_curl
+    - little_curl
+
+  vector_tasks:
+    - name: wrist_thumb
+      origin_human: 0
+      target_human: 4
+      origin_robot: aero_wrist_lm
+      target_robot: aero_thumb_tip_lm
+      weight: 1.0
+    - name: wrist_index
+      origin_human: 0
+      target_human: 8
+      origin_robot: aero_wrist_lm
+      target_robot: aero_index_tip_lm
+      weight: 1.0
+    - name: wrist_middle
+      origin_human: 0
+      target_human: 12
+      origin_robot: aero_wrist_lm
+      target_robot: aero_middle_tip_lm
+      weight: 1.0
+    - name: wrist_ring
+      origin_human: 0
+      target_human: 16
+      origin_robot: aero_wrist_lm
+      target_robot: aero_ring_tip_lm
+      weight: 0.8
+    - name: wrist_little
+      origin_human: 0
+      target_human: 20
+      origin_robot: aero_wrist_lm
+      target_robot: aero_little_tip_lm
+      weight: 0.8
+    - name: thumb_index
+      origin_human: 4
+      target_human: 8
+      origin_robot: aero_thumb_tip_lm
+      target_robot: aero_index_tip_lm
+      weight: 2.0
+      pinch_weight: 8.0
+    - name: thumb_middle
+      origin_human: 4
+      target_human: 12
+      origin_robot: aero_thumb_tip_lm
+      target_robot: aero_middle_tip_lm
+      weight: 1.2
+      pinch_weight: 2.5
+    - name: thumb_ring
+      origin_human: 4
+      target_human: 16
+      origin_robot: aero_thumb_tip_lm
+      target_robot: aero_ring_tip_lm
+      weight: 0.8
+    - name: thumb_little
+      origin_human: 4
+      target_human: 20
+      origin_robot: aero_thumb_tip_lm
+      target_robot: aero_little_tip_lm
+      weight: 0.8
+
+  pinch:
+    enter_distance_normalized: 0.30
+    exit_distance_normalized: 0.40

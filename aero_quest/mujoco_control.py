@@ -38,17 +38,19 @@ def require_mujoco() -> None:
         raise RuntimeError("mujoco is required. Install it with: pip install mujoco")
 
 
-def normalized_aero_action_to_ctrl(model, action: np.ndarray) -> np.ndarray:
-    """Convert semantic normalized 7D Aero action to MuJoCo ctrl by actuator name."""
+def write_normalized_aero_action_to_ctrl(
+    model,
+    action: np.ndarray,
+    ctrl: np.ndarray,
+) -> np.ndarray:
+    """Write only Aero Hand actuator targets into an existing ctrl array."""
     require_mujoco()
     action = np.asarray(action, dtype=np.float64)
     if action.shape != (7,):
         raise ValueError(f"Expected semantic Aero action shape (7,), got {action.shape}")
-
-    ctrl = np.zeros(model.nu, dtype=np.float64)
-    for actuator_id in range(model.nu):
-        lo, hi = model.actuator_ctrlrange[actuator_id]
-        ctrl[actuator_id] = 0.5 * (lo + hi)
+    ctrl = np.asarray(ctrl)
+    if ctrl.shape != (model.nu,):
+        raise ValueError(f"Expected ctrl shape ({model.nu},), got {ctrl.shape}")
 
     for value, (action_name, actuator_name, inverted) in zip(action, AERO_HAND_ACTION_MAP):
         actuator_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_ACTUATOR, actuator_name)
@@ -59,7 +61,16 @@ def normalized_aero_action_to_ctrl(model, action: np.ndarray) -> np.ndarray:
         if inverted:
             value = 1.0 - value
         ctrl[actuator_id] = lo + value * (hi - lo)
+    return ctrl
 
+
+def normalized_aero_action_to_ctrl(model, action: np.ndarray) -> np.ndarray:
+    """Convert semantic normalized 7D Aero action to a fresh MuJoCo ctrl."""
+    ctrl = np.zeros(model.nu, dtype=np.float64)
+    for actuator_id in range(model.nu):
+        lo, hi = model.actuator_ctrlrange[actuator_id]
+        ctrl[actuator_id] = 0.5 * (lo + hi)
+    write_normalized_aero_action_to_ctrl(model, action, ctrl)
     return ctrl.astype(np.float32)
 
 
@@ -84,4 +95,3 @@ def print_actuator_info(model) -> None:
             continue
         direction = "inverted" if inverted else "direct"
         print(f"  {action_name:16s} -> ctrl[{actuator_id}] {actuator_name} ({direction})")
-

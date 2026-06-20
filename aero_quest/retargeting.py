@@ -1,18 +1,16 @@
 from __future__ import annotations
 
 import numpy as np
+from aero_quest.pinch_state import PinchHysteresis
 from aero_quest.mujoco_control import (
     AERO_ACTION_NAMES,
-    AERO_HAND_ACTION_MAP,
     normalized_aero_action_to_ctrl,
     print_actuator_info,
-    require_mujoco,
 )
 
 
 ACTION_NAMES = AERO_ACTION_NAMES
 
-THUMB_IDS = (1, 2, 3, 4)
 INDEX_IDS = (5, 6, 7, 8)
 MIDDLE_IDS = (9, 10, 11, 12)
 RING_IDS = (13, 14, 15, 16)
@@ -55,14 +53,6 @@ def safe_normalize(v: np.ndarray, eps: float = 1e-8) -> np.ndarray:
     return v / norm
 
 
-def normalize(v, eps=1e-8):
-    """Return a unit vector or raise if the vector is degenerate."""
-    v_norm = safe_normalize(v, eps)
-    if float(np.linalg.norm(v_norm)) < eps:
-        raise ValueError("Cannot normalize near-zero vector")
-    return v_norm
-
-
 def palm_localize(points: np.ndarray, eps: float = 1e-8) -> np.ndarray:
     """Convert 21 landmarks to the palm-local frame with deterministic fallbacks."""
     points = as_points_array(points)
@@ -91,11 +81,6 @@ def palm_localize(points: np.ndarray, eps: float = 1e-8) -> np.ndarray:
     local = ((points - origin) @ R) / scale
     local = np.nan_to_num(local, nan=0.0, posinf=0.0, neginf=0.0)
     return local.astype(np.float32)
-
-
-def points_to_palm_local(points):
-    """Compatibility wrapper for the formula retargeter palm-local transform."""
-    return palm_localize(points)
 
 
 def angle_between(v1, v2):
@@ -148,7 +133,7 @@ def thumb_abduction_from_local(points_local):
 
 def quest_points_to_action_7d(points):
     """Convert Quest 21 landmarks to semantic normalized Aero 7D action."""
-    local = points_to_palm_local(points)
+    local = palm_localize(points)
 
     thumb_base = joint_bend(local, 0, 1, 2)
     thumb_mid = joint_bend(local, 1, 2, 3)
@@ -180,7 +165,7 @@ def quest_points_to_hand_features(points):
     features make logging/debugging easier for later shared-autonomy datasets.
     """
     points = as_points_array(points)
-    local = points_to_palm_local(points)
+    local = palm_localize(points)
     action = quest_points_to_action_7d(points)
     thumb_tip = local[4]
     index_tip = local[8]
@@ -206,10 +191,50 @@ def quest_points_to_hand_features(points):
     }
 
 
+def apply_hand_grasp_profile(
+    action_7d: np.ndarray,
+    *,
+    profile: str = "none",
+    pinch_active: bool = False,
+    pinch_strength: float = 0.0,
+    blend: float = 1.0,
+) -> np.ndarray:
+    """Apply an optional task-oriented grasp bias to a formula 7D action.
+
+    The ``pipette`` profile keeps thumb/index closure strong while adding a
+    modest middle-finger support curl. Hysteretic ``pinch_active`` should come
+    from :class:`PinchHysteresis`; ``pinch_strength`` provides proportional
+    approach motion before the pinch state latches.
+    """
+    action = np.asarray(action_7d, dtype=np.float32).reshape(7)
+    if profile == "none":
+        return action.copy()
+    if profile != "pipette":
+        raise ValueError(f"Unknown hand grasp profile: {profile!r}")
+
+    strength = float(np.clip(pinch_strength, 0.0, 1.0))
+    if pinch_active:
+        strength = max(strength, 0.85)
+    # [thumb abd, thumb flex 1, thumb flex 2, index, middle, ring, little]
+    closure_floor = np.asarray(
+        [0.30, 0.68, 0.82, 0.90, 0.48, 0.18, 0.12],
+        dtype=np.float32,
+    )
+    target = np.maximum(action, closure_floor * strength)
+    blend = float(np.clip(blend, 0.0, 1.0))
+    return np.clip((1.0 - blend) * action + blend * target, 0.0, 1.0).astype(
+        np.float32
+    )
+
+
 class GeometricRetargeter:
     """Stateful formula retargeter with exponential action smoothing."""
 
-    def __init__(self, alpha=0.25, initial_action=None):
+    def __init__(
+        self,
+        alpha=0.25,
+        initial_action=None,
+    ):
         """Create a retargeter with smoothing coefficient ``alpha``."""
         self.alpha = float(np.clip(alpha, 0.0, 1.0))
         if initial_action is None:
@@ -271,18 +296,30 @@ def estimate_palm_pose(landmarks):
 class AeroHandRetargetingWrapper:
     """Wrapper for running existing formula retargeting alongside arm teleop."""
 
-    def __init__(self, smoothing_alpha=0.25, disabled=False, initial_action=None):
+    def __init__(
+        self,
+        smoothing_alpha=0.25,
+        disabled=False,
+        initial_action=None,
+        pinch_enter_distance=0.30,
+        pinch_exit_distance=0.40,
+    ):
         self.smoothing_alpha = float(np.clip(smoothing_alpha, 0.0, 1.0))
         self.disabled = bool(disabled)
         if initial_action is None:
             initial_action = np.array([1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float32)
         self.prev_action = np.asarray(initial_action, dtype=np.float32)
         self.last_features = {}
+        self.pinch_state = PinchHysteresis(
+            enter_distance=pinch_enter_distance,
+            exit_distance=pinch_exit_distance,
+        )
 
     def reset(self, action=None):
         if action is None:
             action = np.array([1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float32)
         self.prev_action = np.asarray(action, dtype=np.float32)
+        self.pinch_state.reset()
 
     def __call__(self, landmarks):
         if self.disabled:
@@ -291,6 +328,9 @@ class AeroHandRetargetingWrapper:
         else:
             raw_action = quest_points_to_action_7d(landmarks)
             self.last_features = quest_points_to_hand_features(landmarks)
+            self.last_features["pinch_active"] = bool(
+                self.pinch_state.update_landmarks(landmarks)
+            )
         alpha = self.smoothing_alpha
         filtered = alpha * self.prev_action + (1.0 - alpha) * raw_action
         self.prev_action = np.clip(filtered, 0.0, 1.0).astype(np.float32)

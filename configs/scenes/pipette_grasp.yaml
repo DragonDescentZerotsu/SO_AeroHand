@@ -5,7 +5,7 @@ output_model: models/so101_aero_hand/scenes/SO101_aerohand_pipette.xml
 objects:
   - id: pipette_0
     model_name: pipette_model
-    source: /data/tianang/projects/AutoBio/autobio/model/object/pipette.gen.xml
+    source: external/AutoBio/autobio/model/object/pipette.gen.xml
     body: pipette
     prefix: pipette_0/
     freejoint: true

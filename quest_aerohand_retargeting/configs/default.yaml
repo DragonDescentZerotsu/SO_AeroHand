@@ -1,0 +1,54 @@
+demo:
+  num_frames: 120
+  dt: 0.02
+  output_dir: quest_aerohand_retargeting/data/processed
+
+quest_io:
+  hand_side: right
+  source: mock
+
+preprocessing:
+  low_pass_alpha: 0.25
+  pinch_closed_m: 0.025
+  pinch_open_m: 0.085
+  scale_reference_m: 0.10
+
+retargeting:
+  action_dim: 7
+  lambda_pinch: 2.0
+  smooth_weight: 0.08
+  limit_weight: 0.01
+  baseline1b:
+    thumb_abduction_min: 0.20
+    thumb_flexion_1_min: 0.45
+    thumb_flexion_2_min: 0.55
+    index_curl_min: 0.75
+    blend: 1.0
+  baseline2:
+    num_candidates: 28
+    sample_radius: 0.22
+    local_radius: 0.10
+    seed: 7
+  baseline3:
+    num_candidates: 40
+    sample_radius: 0.24
+    local_radius: 0.10
+    seed: 11
+    lambda_pinch: 35.0
+    lambda_close: 15.0
+    pinch_strength_threshold: 0.55
+    contact_distance_m: 0.03
+
+sim:
+  model_path: models/piper_aero_hand/Piper_aerohand.xml
+  use_placeholder: false
+  thumb_tip_site: aero_thumb_tip_site
+  index_tip_site: aero_index_tip_site
+  middle_tip_site: aero_middle_tip_site
+  ring_tip_site: aero_ring_tip_site
+  little_tip_site: aero_little_tip_site
+  settle_steps: 20
+
+evaluation:
+  pinch_success_threshold_m: 0.03
+  contact_success_requires_contact: true

@@ -12,6 +12,7 @@ dependencies = [
     "gymnasium>=0.29",
     "mujoco>=3.2",
     "numpy>=1.24",
+    "osqp>=0.6.3",
     "PyYAML>=6.0",
     "scipy>=1.10",
 ]
@@ -19,6 +20,10 @@ dependencies = [
 [project.optional-dependencies]
 quest = [
     "hand-tracking-sdk",
+]
+visualization = [
+    "matplotlib>=3.7",
+    "Pillow>=9",
 ]
 dev = [
     "pytest>=8",

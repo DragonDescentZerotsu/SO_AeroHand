@@ -1,0 +1,8162 @@
+[
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.0,
+    "human_pinch_distance": 0.09545214042184237,
+    "robot_pinch_distance": 0.04579623252153396,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.2648889422416687,
+      0.2610406279563904,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.02,
+    "human_pinch_distance": 0.09543896000179618,
+    "robot_pinch_distance": 0.0458046955615282,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.26441317796707153,
+      0.2610327899456024,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.04,
+    "human_pinch_distance": 0.09538957062679308,
+    "robot_pinch_distance": 0.04581772677600383,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.26369142532348633,
+      0.26100990176200867,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.06,
+    "human_pinch_distance": 0.0952868130427586,
+    "robot_pinch_distance": 0.04584608919918536,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.2620130479335785,
+      0.26106756925582886,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.08,
+    "human_pinch_distance": 0.09511800538487591,
+    "robot_pinch_distance": 0.04588557817041873,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.2599022388458252,
+      0.2609218657016754,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.1,
+    "human_pinch_distance": 0.0948738990917593,
+    "robot_pinch_distance": 0.045934407934546465,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.25717416405677795,
+      0.2608596682548523,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.12,
+    "human_pinch_distance": 0.09454789523442607,
+    "robot_pinch_distance": 0.045994369462132444,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.2538186311721802,
+      0.26078882813453674,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.14,
+    "human_pinch_distance": 0.09413545585779666,
+    "robot_pinch_distance": 0.046062495708465566,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.2500017583370209,
+      0.26071277260780334,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.16,
+    "human_pinch_distance": 0.09363366135394742,
+    "robot_pinch_distance": 0.046148194223642344,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.24518099427223206,
+      0.26063647866249084,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.18,
+    "human_pinch_distance": 0.09304087716604117,
+    "robot_pinch_distance": 0.04624226763844489,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.2398754060268402,
+      0.26056644320487976,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.2,
+    "human_pinch_distance": 0.09235650231360164,
+    "robot_pinch_distance": 0.04634784962981939,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.23389776051044464,
+      0.2605108320713043,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.22,
+    "human_pinch_distance": 0.0915807791152924,
+    "robot_pinch_distance": 0.04646486666053533,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.22724051773548126,
+      0.2604813873767853,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.24,
+    "human_pinch_distance": 0.09071464864613016,
+    "robot_pinch_distance": 0.04659312237054109,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.21989993751049042,
+      0.26049306988716125,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.26,
+    "human_pinch_distance": 0.0897596403356966,
+    "robot_pinch_distance": 0.04673220917582511,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.21187910437583923,
+      0.2605660855770111,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.28,
+    "human_pinch_distance": 0.08871778701628136,
+    "robot_pinch_distance": 0.04688146263360977,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.20318877696990967,
+      0.2607276439666748,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.3,
+    "human_pinch_distance": 0.08759155890721868,
+    "robot_pinch_distance": 0.04703985661268233,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.19385048747062683,
+      0.261014848947525,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.32,
+    "human_pinch_distance": 0.08638381165531561,
+    "robot_pinch_distance": 0.047205921672284594,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.18389855325222015,
+      0.26147735118865967,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.34,
+    "human_pinch_distance": 0.08509774477706024,
+    "robot_pinch_distance": 0.047377562522888175,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.17338311672210693,
+      0.262184739112854,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.36,
+    "human_pinch_distance": 0.08373686776805533,
+    "robot_pinch_distance": 0.047551949806511395,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.16237108409404755,
+      0.2632317841053009,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.38,
+    "human_pinch_distance": 0.08230497183516888,
+    "robot_pinch_distance": 0.047725246027112,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.15094837546348572,
+      0.2647518515586853,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.4,
+    "human_pinch_distance": 0.08080610572443585,
+    "robot_pinch_distance": 0.04789231661707162,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.1392206996679306,
+      0.2669326364994049,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.42,
+    "human_pinch_distance": 0.07924455450566709,
+    "robot_pinch_distance": 0.04804634138941764,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.1273120641708374,
+      0.2700398564338684,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.44,
+    "human_pinch_distance": 0.07762482046513955,
+    "robot_pinch_distance": 0.048178172782063475,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.11536416411399841,
+      0.2744545340538025,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.46,
+    "human_pinch_distance": 0.07595160547469935,
+    "robot_pinch_distance": 0.04826946716755628,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.10378415882587433,
+      0.2808177173137665,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.48,
+    "human_pinch_distance": 0.07422979436706993,
+    "robot_pinch_distance": 0.048321659956127395,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.09199074655771255,
+      0.28962868452072144,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.5,
+    "human_pinch_distance": 0.07246443896651823,
+    "robot_pinch_distance": 0.048291660808026785,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.08090899884700775,
+      0.30242466926574707,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.52,
+    "human_pinch_distance": 0.07066074251123779,
+    "robot_pinch_distance": 0.04816222250461578,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.07046657800674438,
+      0.3202635645866394,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.54,
+    "human_pinch_distance": 0.06882404426620457,
+    "robot_pinch_distance": 0.04788214396685361,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.06101389229297638,
+      0.34572073817253113,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.56,
+    "human_pinch_distance": 0.06695980416822757,
+    "robot_pinch_distance": 0.047418521521612994,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.05218375846743584,
+      0.38104358315467834,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.58,
+    "human_pinch_distance": 0.06507358737233387,
+    "robot_pinch_distance": 0.04671687555499374,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.044649410992860794,
+      0.4286719858646393,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.6,
+    "human_pinch_distance": 0.06317104858326396,
+    "robot_pinch_distance": 0.04574669150635599,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.038345567882061005,
+      0.49041491746902466,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.62,
+    "human_pinch_distance": 0.061257916059630185,
+    "robot_pinch_distance": 0.044531036596745247,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.03334026783704758,
+      0.564886212348938,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.64,
+    "human_pinch_distance": 0.05933997517254829,
+    "robot_pinch_distance": 0.0431588334403932,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.02964719384908676,
+      0.6469908952713013,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.66,
+    "human_pinch_distance": 0.057423051386237864,
+    "robot_pinch_distance": 0.041771291578188534,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.02739638462662697,
+      0.7285298109054565,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.68,
+    "human_pinch_distance": 0.05551299250600645,
+    "robot_pinch_distance": 0.04050004933495074,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.025953801348805428,
+      0.8026148080825806,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.7000000000000001,
+    "human_pinch_distance": 0.0536156500100663,
+    "robot_pinch_distance": 0.03940643226262181,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.02570248208940029,
+      0.8653585314750671,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.72,
+    "human_pinch_distance": 0.051736859247060646,
+    "robot_pinch_distance": 0.038504545721225435,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.026293335482478142,
+      0.9163040518760681,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.74,
+    "human_pinch_distance": 0.049882418243039156,
+    "robot_pinch_distance": 0.03777136574499308,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.02754826471209526,
+      0.9569451212882996,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.76,
+    "human_pinch_distance": 0.04805806482319998,
+    "robot_pinch_distance": 0.037173905409872525,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.029549971222877502,
+      0.989084005355835,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.78,
+    "human_pinch_distance": 0.046269451720100614,
+    "robot_pinch_distance": 0.03695048333145677,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.031400952488183975,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.8,
+    "human_pinch_distance": 0.0445221193187916,
+    "robot_pinch_distance": 0.0369097770191729,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.03372702747583389,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.8200000000000001,
+    "human_pinch_distance": 0.042821465691123606,
+    "robot_pinch_distance": 0.03686687860637902,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.03617836534976959,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.84,
+    "human_pinch_distance": 0.04117271361063491,
+    "robot_pinch_distance": 0.036823167176917186,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.03867616131901741,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.86,
+    "human_pinch_distance": 0.039580874333983745,
+    "robot_pinch_distance": 0.03677968978881835,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.04116058349609375,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.88,
+    "human_pinch_distance": 0.03805070810590448,
+    "robot_pinch_distance": 0.036734148794785135,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.0437629260122776,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.9,
+    "human_pinch_distance": 0.036586681614144814,
+    "robot_pinch_distance": 0.036693312944844354,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.046096403151750565,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.92,
+    "human_pinch_distance": 0.03519292300774978,
+    "robot_pinch_distance": 0.036657609641551965,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.04813659191131592,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.9400000000000001,
+    "human_pinch_distance": 0.03387317560595229,
+    "robot_pinch_distance": 0.036621151668950906,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.050219904631376266,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.96,
+    "human_pinch_distance": 0.03263075205722976,
+    "robot_pinch_distance": 0.03658724468201398,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.0521574467420578,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 0.98,
+    "human_pinch_distance": 0.031468491421959253,
+    "robot_pinch_distance": 0.03655602708458899,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.053941309452056885,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.0,
+    "human_pinch_distance": 0.03038872237333362,
+    "robot_pinch_distance": 0.03652758864685892,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.05556636303663254,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.02,
+    "human_pinch_distance": 0.0293932363239809,
+    "robot_pinch_distance": 0.03650198321789502,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.05702953040599823,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.04,
+    "human_pinch_distance": 0.028483274638349067,
+    "robot_pinch_distance": 0.036479236027225845,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.058329369872808456,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.06,
+    "human_pinch_distance": 0.02765953401573458,
+    "robot_pinch_distance": 0.036459359591826786,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.05946516618132591,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.08,
+    "human_pinch_distance": 0.02692219347763577,
+    "robot_pinch_distance": 0.036437976621091356,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.060687050223350525,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.1,
+    "human_pinch_distance": 0.026270965083077868,
+    "robot_pinch_distance": 0.03642820216715335,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.06124559044837952,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.12,
+    "human_pinch_distance": 0.025705168553834867,
+    "robot_pinch_distance": 0.0364169029239565,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.061891261488199234,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.1400000000000001,
+    "human_pinch_distance": 0.02522382758174913,
+    "robot_pinch_distance": 0.03640843936242162,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.062374893575906754,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.16,
+    "human_pinch_distance": 0.024825783006240745,
+    "robot_pinch_distance": 0.03640280378982424,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.0626969262957573,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.18,
+    "human_pinch_distance": 0.024509815669793416,
+    "robot_pinch_distance": 0.03639998707920312,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.06285788118839264,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.2,
+    "human_pinch_distance": 0.024274769970457237,
+    "robot_pinch_distance": 0.03639998707920312,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.06285788118839264,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.22,
+    "human_pinch_distance": 0.02411966824799961,
+    "robot_pinch_distance": 0.03640280378982424,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.0626969262957573,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.24,
+    "human_pinch_distance": 0.024043806341856815,
+    "robot_pinch_distance": 0.03640843936242162,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.062374893575906754,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.26,
+    "human_pinch_distance": 0.024046821956810606,
+    "robot_pinch_distance": 0.0364169029239565,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.061891261488199234,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.28,
+    "human_pinch_distance": 0.0241287297235246,
+    "robot_pinch_distance": 0.03642820216715335,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.06124559044837952,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.3,
+    "human_pinch_distance": 0.02428991978392666,
+    "robot_pinch_distance": 0.036437976621091356,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.060687050223350525,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.32,
+    "human_pinch_distance": 0.024531120029755698,
+    "robot_pinch_distance": 0.036459359591826786,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.05946516618132591,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.34,
+    "human_pinch_distance": 0.024853325406583946,
+    "robot_pinch_distance": 0.036479236027225845,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.058329369872808456,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.36,
+    "human_pinch_distance": 0.02525770059675443,
+    "robot_pinch_distance": 0.03650198321789502,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.05702953040599823,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.3800000000000001,
+    "human_pinch_distance": 0.025745464580938786,
+    "robot_pinch_distance": 0.03652758864685892,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.05556636303663254,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.4000000000000001,
+    "human_pinch_distance": 0.02631776679516249,
+    "robot_pinch_distance": 0.03655602708458899,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.053941309452056885,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.42,
+    "human_pinch_distance": 0.026975564716165905,
+    "robot_pinch_distance": 0.03658724468201398,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.0521574467420578,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.44,
+    "human_pinch_distance": 0.027719511747916325,
+    "robot_pinch_distance": 0.036621151668950906,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.050219904631376266,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.46,
+    "human_pinch_distance": 0.02854986243555586,
+    "robot_pinch_distance": 0.036657609641551965,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.04813659191131592,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.48,
+    "human_pinch_distance": 0.029466399623066495,
+    "robot_pinch_distance": 0.036693312944844354,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.046096403151750565,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.5,
+    "human_pinch_distance": 0.030468385587465424,
+    "robot_pinch_distance": 0.036734148794785135,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.0437629260122776,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.52,
+    "human_pinch_distance": 0.031554536799509945,
+    "robot_pinch_distance": 0.03677968978881835,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.04116058349609375,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.54,
+    "human_pinch_distance": 0.03272302006349402,
+    "robot_pinch_distance": 0.036823167176917186,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.03867616131901741,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.56,
+    "human_pinch_distance": 0.03397146652973959,
+    "robot_pinch_distance": 0.03686687860637902,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.03617836534976959,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.58,
+    "human_pinch_distance": 0.03529699947028424,
+    "robot_pinch_distance": 0.0369097770191729,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.03372702747583389,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.6,
+    "human_pinch_distance": 0.0366962716715249,
+    "robot_pinch_distance": 0.03695048333145677,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.031400952488183975,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.62,
+    "human_pinch_distance": 0.03816550867595191,
+    "robot_pinch_distance": 0.037173905409872525,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.029549971222877502,
+      0.989084005355835,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.6400000000000001,
+    "human_pinch_distance": 0.039700554731100866,
+    "robot_pinch_distance": 0.03777136574499308,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.02754826471209526,
+      0.9569451212882996,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.6600000000000001,
+    "human_pinch_distance": 0.04129691902799064,
+    "robot_pinch_distance": 0.038504545721225435,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.026293335482478142,
+      0.9163040518760681,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.68,
+    "human_pinch_distance": 0.04294982052092525,
+    "robot_pinch_distance": 0.03940643226262181,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.02570248208940029,
+      0.8653585314750671,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.7,
+    "human_pinch_distance": 0.04465423024448975,
+    "robot_pinch_distance": 0.04050004933495074,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.025953801348805428,
+      0.8026148080825806,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.72,
+    "human_pinch_distance": 0.04640491054753645,
+    "robot_pinch_distance": 0.041771291578188534,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.02739638462662697,
+      0.7285298109054565,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.74,
+    "human_pinch_distance": 0.04819645104107762,
+    "robot_pinch_distance": 0.0431588334403932,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.02964719384908676,
+      0.6469908952713013,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.76,
+    "human_pinch_distance": 0.0500233013178052,
+    "robot_pinch_distance": 0.044531036596745247,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.03334026783704758,
+      0.564886212348938,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.78,
+    "human_pinch_distance": 0.0518798006648061,
+    "robot_pinch_distance": 0.04574669150635599,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.038345567882061005,
+      0.49041491746902466,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.8,
+    "human_pinch_distance": 0.05376020507993823,
+    "robot_pinch_distance": 0.04671687555499374,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.044649410992860794,
+      0.4286719858646393,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.82,
+    "human_pinch_distance": 0.055658711937091966,
+    "robot_pinch_distance": 0.047418521521612994,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.05218375846743584,
+      0.38104358315467834,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.84,
+    "human_pinch_distance": 0.057569482643878886,
+    "robot_pinch_distance": 0.04788214396685361,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.06101389229297638,
+      0.34572073817253113,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.86,
+    "human_pinch_distance": 0.05948666361107924,
+    "robot_pinch_distance": 0.04816222250461578,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.07046657800674438,
+      0.3202635645866394,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.8800000000000001,
+    "human_pinch_distance": 0.06140440581672572,
+    "robot_pinch_distance": 0.048291660808026785,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.08090899884700775,
+      0.30242466926574707,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.9000000000000001,
+    "human_pinch_distance": 0.0633168832061592,
+    "robot_pinch_distance": 0.048321659956127395,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.09199074655771255,
+      0.28962868452072144,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.92,
+    "human_pinch_distance": 0.0652183101274475,
+    "robot_pinch_distance": 0.04826946716755628,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.10378415882587433,
+      0.2808177173137665,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.94,
+    "human_pinch_distance": 0.06710295796204346,
+    "robot_pinch_distance": 0.048178172782063475,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.11536416411399841,
+      0.2744545340538025,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.96,
+    "human_pinch_distance": 0.06896517107500029,
+    "robot_pinch_distance": 0.04804634138941764,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.1273120641708374,
+      0.2700398564338684,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 1.98,
+    "human_pinch_distance": 0.07079938217810283,
+    "robot_pinch_distance": 0.04789231661707162,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.1392206996679306,
+      0.2669326364994049,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 2.0,
+    "human_pinch_distance": 0.0726001271729991,
+    "robot_pinch_distance": 0.047725246027112,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.15094837546348572,
+      0.2647518515586853,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 2.02,
+    "human_pinch_distance": 0.07436205951957774,
+    "robot_pinch_distance": 0.047551949806511395,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.16237108409404755,
+      0.2632317841053009,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 2.04,
+    "human_pinch_distance": 0.07607996415701655,
+    "robot_pinch_distance": 0.047377562522888175,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.17338311672210693,
+      0.262184739112854,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 2.06,
+    "human_pinch_distance": 0.07774877099062931,
+    "robot_pinch_distance": 0.047205921672284594,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.18389855325222015,
+      0.26147735118865967,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 2.08,
+    "human_pinch_distance": 0.07936356794636529,
+    "robot_pinch_distance": 0.04703985661268233,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.19385048747062683,
+      0.261014848947525,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 2.1,
+    "human_pinch_distance": 0.08091961358609415,
+    "robot_pinch_distance": 0.04688146263360977,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.20318877696990967,
+      0.2607276439666748,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 2.12,
+    "human_pinch_distance": 0.08241234927021199,
+    "robot_pinch_distance": 0.04673220917582511,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.21187910437583923,
+      0.2605660855770111,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 2.14,
+    "human_pinch_distance": 0.08383741084926326,
+    "robot_pinch_distance": 0.04659312237054109,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.21989993751049042,
+      0.26049306988716125,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 2.16,
+    "human_pinch_distance": 0.08519063986286764,
+    "robot_pinch_distance": 0.04646486666053533,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.22724051773548126,
+      0.2604813873767853,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 2.18,
+    "human_pinch_distance": 0.08646809422200606,
+    "robot_pinch_distance": 0.04634784962981939,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.23389776051044464,
+      0.2605108320713043,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 2.2,
+    "human_pinch_distance": 0.08766605834943456,
+    "robot_pinch_distance": 0.04624226763844489,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.2398754060268402,
+      0.26056644320487976,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 2.22,
+    "human_pinch_distance": 0.08878105275247614,
+    "robot_pinch_distance": 0.046148194223642344,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.24518099427223206,
+      0.26063647866249084,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 2.24,
+    "human_pinch_distance": 0.08980984300254273,
+    "robot_pinch_distance": 0.046062495708465566,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.2500017583370209,
+      0.26071277260780334,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 2.2600000000000002,
+    "human_pinch_distance": 0.0907494480963395,
+    "robot_pinch_distance": 0.045994369462132444,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.2538186311721802,
+      0.26078882813453674,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 2.2800000000000002,
+    "human_pinch_distance": 0.09159714817470721,
+    "robot_pinch_distance": 0.045934407934546465,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.25717416405677795,
+      0.2608596682548523,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 2.3000000000000003,
+    "human_pinch_distance": 0.09235049157638461,
+    "robot_pinch_distance": 0.04588557817041873,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.2599022388458252,
+      0.2609218657016754,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 2.32,
+    "human_pinch_distance": 0.09300730120556076,
+    "robot_pinch_distance": 0.04584608919918536,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.2620130479335785,
+      0.26106756925582886,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 2.34,
+    "human_pinch_distance": 0.09356568019388357,
+    "robot_pinch_distance": 0.04581772677600383,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.26369142532348633,
+      0.26100990176200867,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 2.36,
+    "human_pinch_distance": 0.09402401683955605,
+    "robot_pinch_distance": 0.0458046955615282,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.26441317796707153,
+      0.2610327899456024,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline1_direct",
+    "timestamp": 2.38,
+    "human_pinch_distance": 0.09438098880825094,
+    "robot_pinch_distance": 0.04579623252153396,
+    "contact": false,
+    "action": [
+      1.0,
+      1.0,
+      0.2648889422416687,
+      0.2610406279563904,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.0,
+    "human_pinch_distance": 0.09545214042184237,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.05,
+      0.05,
+      0.05
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.02,
+    "human_pinch_distance": 0.09543896000179618,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.08750000000000001,
+      0.08750000000000001,
+      0.08750000000000001
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.04,
+    "human_pinch_distance": 0.09538957062679308,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.115625,
+      0.115625,
+      0.115625
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.06,
+    "human_pinch_distance": 0.0952868130427586,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.13671875,
+      0.13671875,
+      0.13671875
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.08,
+    "human_pinch_distance": 0.09511800538487591,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1525390625,
+      0.1525390625,
+      0.1525390625
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.1,
+    "human_pinch_distance": 0.0948738990917593,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.164404296875,
+      0.164404296875,
+      0.164404296875
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.12,
+    "human_pinch_distance": 0.09454789523442607,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.17330322265624998,
+      0.17330322265624998,
+      0.17330322265624998
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.14,
+    "human_pinch_distance": 0.09413545585779666,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1799774169921875,
+      0.1799774169921875,
+      0.1799774169921875
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.16,
+    "human_pinch_distance": 0.09363366135394742,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.18498306274414061,
+      0.18498306274414061,
+      0.18498306274414061
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.18,
+    "human_pinch_distance": 0.09304087716604117,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.18873729705810544,
+      0.18873729705810544,
+      0.18873729705810544
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.2,
+    "human_pinch_distance": 0.09235650231360164,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.19155297279357908,
+      0.19155297279357908,
+      0.19155297279357908
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.22,
+    "human_pinch_distance": 0.0915807791152924,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.19366472959518433,
+      0.19366472959518433,
+      0.19366472959518433
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.24,
+    "human_pinch_distance": 0.09071464864613016,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.19524854719638823,
+      0.19524854719638823,
+      0.19524854719638823
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.26,
+    "human_pinch_distance": 0.0897596403356966,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.19643641039729115,
+      0.19643641039729115,
+      0.19643641039729115
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.28,
+    "human_pinch_distance": 0.08871778701628136,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.19732730779796837,
+      0.19732730779796837,
+      0.19732730779796837
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.3,
+    "human_pinch_distance": 0.08759155890721868,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1979954808484763,
+      0.1979954808484763,
+      0.1979954808484763
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.32,
+    "human_pinch_distance": 0.08638381165531561,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1984966106363572,
+      0.1984966106363572,
+      0.1984966106363572
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.34,
+    "human_pinch_distance": 0.08509774477706024,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.19887245797726788,
+      0.19887245797726788,
+      0.19887245797726788
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.36,
+    "human_pinch_distance": 0.08373686776805533,
+    "robot_pinch_distance": 0.08974211050264462,
+    "contact": false,
+    "action": [
+      0.0026315254832180663,
+      0.0031578305798616794,
+      0.0036841356765052926,
+      0.0052630509664361325,
+      0.1991543434829509,
+      0.1991543434829509,
+      0.1991543434829509
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.38,
+    "human_pinch_distance": 0.08230497183516888,
+    "robot_pinch_distance": 0.08925634795999711,
+    "contact": false,
+    "action": [
+      0.007588286122478389,
+      0.009105943346974066,
+      0.010623600571469743,
+      0.015176572244956778,
+      0.1993657576122132,
+      0.1993657576122132,
+      0.1993657576122132
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.4,
+    "human_pinch_distance": 0.08080610572443585,
+    "robot_pinch_distance": 0.08858600755540348,
+    "contact": false,
+    "action": [
+      0.014428494332617454,
+      0.017314193199140945,
+      0.020199892065664436,
+      0.02885698866523491,
+      0.1995243182091599,
+      0.1995243182091599,
+      0.1995243182091599
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.42,
+    "human_pinch_distance": 0.07924455450566709,
+    "robot_pinch_distance": 0.08776443554479298,
+    "contact": false,
+    "action": [
+      0.022811882195990008,
+      0.027374258635188005,
+      0.03193663507438601,
+      0.045623764391980015,
+      0.1996432386568699,
+      0.1996432386568699,
+      0.1996432386568699
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.44,
+    "human_pinch_distance": 0.07762482046513955,
+    "robot_pinch_distance": 0.08681756083689406,
+    "contact": false,
+    "action": [
+      0.03247386901128512,
+      0.03896864281354215,
+      0.04546341661579917,
+      0.06494773802257024,
+      0.19973242899265242,
+      0.19973242899265242,
+      0.19973242899265242
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.46,
+    "human_pinch_distance": 0.07595160547469935,
+    "robot_pinch_distance": 0.08576579007875498,
+    "contact": false,
+    "action": [
+      0.04320622368617353,
+      0.05184746842340824,
+      0.06048871316064294,
+      0.08641244737234706,
+      0.19979932174448933,
+      0.19979932174448933,
+      0.19979932174448933
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.48,
+    "human_pinch_distance": 0.07422979436706993,
+    "robot_pinch_distance": 0.08462542557567634,
+    "contact": false,
+    "action": [
+      0.0548425961665678,
+      0.06581111539988137,
+      0.07677963463319493,
+      0.1096851923331356,
+      0.199849491308367,
+      0.199849491308367,
+      0.199849491308367
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.5,
+    "human_pinch_distance": 0.07246443896651823,
+    "robot_pinch_distance": 0.08340972547075473,
+    "contact": false,
+    "action": [
+      0.06724769927801287,
+      0.08069723913361546,
+      0.09414677898921803,
+      0.13449539855602574,
+      0.19988711848127522,
+      0.19988711848127522,
+      0.19988711848127522
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.52,
+    "human_pinch_distance": 0.07066074251123779,
+    "robot_pinch_distance": 0.08212969569911042,
+    "contact": false,
+    "action": [
+      0.0803092275600976,
+      0.09637107307211713,
+      0.11243291858413665,
+      0.1606184551201952,
+      0.19991533886095642,
+      0.19991533886095642,
+      0.19991533886095642
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.54,
+    "human_pinch_distance": 0.06882404426620457,
+    "robot_pinch_distance": 0.08079468081201625,
+    "contact": false,
+    "action": [
+      0.09393182844881368,
+      0.11271819413857642,
+      0.13150455982833917,
+      0.18786365689762735,
+      0.1999365041457173,
+      0.1999365041457173,
+      0.1999365041457173
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.56,
+    "human_pinch_distance": 0.06695980416822757,
+    "robot_pinch_distance": 0.07941280396002531,
+    "contact": false,
+    "action": [
+      0.10803261265280284,
+      0.1296391351833634,
+      0.15124565771392398,
+      0.21606522530560568,
+      0.19995237810928795,
+      0.19995237810928795,
+      0.19995237810928795
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.58,
+    "human_pinch_distance": 0.06507358737233387,
+    "robot_pinch_distance": 0.07799129372520382,
+    "contact": false,
+    "action": [
+      0.12253781913057324,
+      0.14704538295668787,
+      0.17155294678280253,
+      0.24507563826114648,
+      0.19996428358196594,
+      0.19996428358196594,
+      0.19996428358196594
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.6,
+    "human_pinch_distance": 0.06317104858326396,
+    "robot_pinch_distance": 0.07653672604631925,
+    "contact": false,
+    "action": [
+      0.13738034646613,
+      0.164856415759356,
+      0.19233248505258202,
+      0.27476069293226,
+      0.19997321268647444,
+      0.19997321268647444,
+      0.19997321268647444
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.62,
+    "human_pinch_distance": 0.061257916059630185,
+    "robot_pinch_distance": 0.07505520239691393,
+    "contact": false,
+    "action": [
+      0.15249793472536796,
+      0.18299752167044153,
+      0.21349710861551513,
+      0.3049958694507359,
+      0.19997990951485584,
+      0.19997990951485584,
+      0.19997990951485584
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.64,
+    "human_pinch_distance": 0.05933997517254829,
+    "robot_pinch_distance": 0.07355248006208073,
+    "contact": false,
+    "action": [
+      0.16783183610121705,
+      0.2013982033214604,
+      0.23496457054170383,
+      0.3356636722024341,
+      0.19998493213614188,
+      0.19998493213614188,
+      0.19998493213614188
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.66,
+    "human_pinch_distance": 0.057423051386237864,
+    "robot_pinch_distance": 0.07203406637125077,
+    "contact": false,
+    "action": [
+      0.18332585335458393,
+      0.21999102402550064,
+      0.25665619469641743,
+      0.36665170670916786,
+      0.19998869910210643,
+      0.19998869910210643,
+      0.19998869910210643
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.68,
+    "human_pinch_distance": 0.05551299250600645,
+    "robot_pinch_distance": 0.07050528574841439,
+    "contact": false,
+    "action": [
+      0.1989256556284245,
+      0.23871078675410937,
+      0.2784959178797943,
+      0.397851311256849,
+      0.1999915243265798,
+      0.1999915243265798,
+      0.1999915243265798
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.7000000000000001,
+    "human_pinch_distance": 0.0536156500100663,
+    "robot_pinch_distance": 0.06897132618836599,
+    "contact": false,
+    "action": [
+      0.21457830420034696,
+      0.2574939650404163,
+      0.30040962588048564,
+      0.4291566084006939,
+      0.19999364324493485,
+      0.19999364324493485,
+      0.19999364324493485
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.72,
+    "human_pinch_distance": 0.051736859247060646,
+    "robot_pinch_distance": 0.06743727007088271,
+    "contact": false,
+    "action": [
+      0.2302319380522172,
+      0.27627832566266064,
+      0.322324713273104,
+      0.4604638761044344,
+      0.19999523243370115,
+      0.19999523243370115,
+      0.19999523243370115
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.74,
+    "human_pinch_distance": 0.049882418243039156,
+    "robot_pinch_distance": 0.06590811294444919,
+    "contact": false,
+    "action": [
+      0.245835582199498,
+      0.2950026986393976,
+      0.34416981507929717,
+      0.491671164398996,
+      0.19999642432527587,
+      0.19999642432527587,
+      0.19999642432527587
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.76,
+    "human_pinch_distance": 0.04805806482319998,
+    "robot_pinch_distance": 0.06438877294307355,
+    "contact": false,
+    "action": [
+      0.26133905160129023,
+      0.31360686192154824,
+      0.3658746722418063,
+      0.5226781032025805,
+      0.1999973182439569,
+      0.1999973182439569,
+      0.1999973182439569
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.78,
+    "human_pinch_distance": 0.046269451720100614,
+    "robot_pinch_distance": 0.0628840927668257,
+    "contact": false,
+    "action": [
+      0.2766929309507581,
+      0.33203151714090967,
+      0.38737010333106126,
+      0.5533858619015162,
+      0.19999798868296764,
+      0.19999798868296764,
+      0.19999798868296764
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.8,
+    "human_pinch_distance": 0.0445221193187916,
+    "robot_pinch_distance": 0.0613988356027059,
+    "contact": false,
+    "action": [
+      0.2918486162989194,
+      0.35021833955870324,
+      0.4085880628184871,
+      0.5836972325978388,
+      0.1999984915122257,
+      0.1999984915122257,
+      0.1999984915122257
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.8200000000000001,
+    "human_pinch_distance": 0.042821465691123606,
+    "robot_pinch_distance": 0.05993767594730049,
+    "contact": false,
+    "action": [
+      0.3067584087010154,
+      0.3681100904412184,
+      0.42946177218142145,
+      0.6135168174020308,
+      0.19999886863416927,
+      0.19999886863416927,
+      0.19999886863416927
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.84,
+    "human_pinch_distance": 0.04117271361063491,
+    "robot_pinch_distance": 0.05850518598931333,
+    "contact": false,
+    "action": [
+      0.32137565317027217,
+      0.3856507838043265,
+      0.4499259144383809,
+      0.6427513063405443,
+      0.19999915147562697,
+      0.19999915147562697,
+      0.19999915147562697
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.86,
+    "human_pinch_distance": 0.039580874333983745,
+    "robot_pinch_distance": 0.05710581800184,
+    "contact": false,
+    "action": [
+      0.3356549183485713,
+      0.40278590201828557,
+      0.4699168856879998,
+      0.6713098366971426,
+      0.19999936360672022,
+      0.19999936360672022,
+      0.19999936360672022
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.88,
+    "human_pinch_distance": 0.03805070810590448,
+    "robot_pinch_distance": 0.05574388307300217,
+    "contact": false,
+    "action": [
+      0.34955221354079413,
+      0.41946265624895296,
+      0.48937309895711173,
+      0.6991044270815883,
+      0.19999952270504018,
+      0.19999952270504018,
+      0.19999952270504018
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.9,
+    "human_pinch_distance": 0.036586681614144814,
+    "robot_pinch_distance": 0.054423526467639524,
+    "contact": false,
+    "action": [
+      0.36302524012612725,
+      0.4356302881513527,
+      0.5082353361765781,
+      0.7260504802522545,
+      0.19999964202878012,
+      0.19999964202878012,
+      0.19999964202878012
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.92,
+    "human_pinch_distance": 0.03519292300774978,
+    "robot_pinch_distance": 0.053148699964811884,
+    "contact": false,
+    "action": [
+      0.37603367382845004,
+      0.45124040859414005,
+      0.5264471433598301,
+      0.7520673476569001,
+      0.19999973152158507,
+      0.19999973152158507,
+      0.19999973152158507
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.9400000000000001,
+    "human_pinch_distance": 0.03387317560595229,
+    "robot_pinch_distance": 0.05192313165982418,
+    "contact": false,
+    "action": [
+      0.388539472858937,
+      0.4662473674307243,
+      0.5439552620025118,
+      0.777078945717874,
+      0.19999979864118878,
+      0.19999979864118878,
+      0.19999979864118878
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.96,
+    "human_pinch_distance": 0.03263075205722976,
+    "robot_pinch_distance": 0.050750293956552534,
+    "contact": false,
+    "action": [
+      0.400507204524974,
+      0.48060864542996884,
+      0.5607100863349637,
+      0.801014409049948,
+      0.19999984898089157,
+      0.19999984898089157,
+      0.19999984898089157
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 0.98,
+    "human_pinch_distance": 0.031468491421959253,
+    "robot_pinch_distance": 0.049633370799397745,
+    "contact": false,
+    "action": [
+      0.4119043795979821,
+      0.4942852555175785,
+      0.5766661314371749,
+      0.8238087591959642,
+      0.19999988673566865,
+      0.19999988673566865,
+      0.19999988673566865
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.0,
+    "human_pinch_distance": 0.03038872237333362,
+    "robot_pinch_distance": 0.048575225584103925,
+    "contact": false,
+    "action": [
+      0.4227017797540415,
+      0.5072421357048498,
+      0.5917824916556582,
+      0.845403559508083,
+      0.19999991505175146,
+      0.19999991505175146,
+      0.19999991505175146
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.02,
+    "human_pinch_distance": 0.0293932363239809,
+    "robot_pinch_distance": 0.04757837160422404,
+    "contact": false,
+    "action": [
+      0.4328737591405709,
+      0.519448510968685,
+      0.6060232627967994,
+      0.8657475182811418,
+      0.19999993628881357,
+      0.19999993628881357,
+      0.19999993628881357
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.04,
+    "human_pinch_distance": 0.028483274638349067,
+    "robot_pinch_distance": 0.0466449472751643,
+    "contact": false,
+    "action": [
+      0.4423984971922009,
+      0.5308781966306411,
+      0.6193578960690814,
+      0.8847969943844018,
+      0.19999995221661016,
+      0.19999995221661016,
+      0.19999995221661016
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.06,
+    "human_pinch_distance": 0.02765953401573458,
+    "robot_pinch_distance": 0.045776698651252376,
+    "contact": false,
+    "action": [
+      0.45125817702803694,
+      0.5415098124336444,
+      0.6317614478392518,
+      0.9025163540560739,
+      0.19999996416245763,
+      0.19999996416245763,
+      0.19999996416245763
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.08,
+    "human_pinch_distance": 0.02692219347763577,
+    "robot_pinch_distance": 0.044974971823456576,
+    "contact": false,
+    "action": [
+      0.4594390630259532,
+      0.5513268756311438,
+      0.6432146882363345,
+      0.9188781260519064,
+      0.1999999731218432,
+      0.1999999731218432,
+      0.1999999731218432
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.1,
+    "human_pinch_distance": 0.026270965083077868,
+    "robot_pinch_distance": 0.04424071757205416,
+    "contact": false,
+    "action": [
+      0.46693145334638597,
+      0.5603177440156631,
+      0.6537040346849404,
+      0.9338629066927719,
+      0.1999999798413824,
+      0.1999999798413824,
+      0.1999999798413824
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.12,
+    "human_pinch_distance": 0.025705168553834867,
+    "robot_pinch_distance": 0.04357451009211524,
+    "contact": false,
+    "action": [
+      0.47372948885596683,
+      0.5684753866271601,
+      0.6632212843983536,
+      0.9474589777119337,
+      0.19999998488103682,
+      0.19999998488103682,
+      0.19999998488103682
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.1400000000000001,
+    "human_pinch_distance": 0.02522382758174913,
+    "robot_pinch_distance": 0.042976580700360215,
+    "contact": false,
+    "action": [
+      0.47983080917999776,
+      0.5757969710159972,
+      0.6717631328519968,
+      0.9596616183599955,
+      0.19999998866077762,
+      0.19999998866077762,
+      0.19999998866077762
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.16,
+    "human_pinch_distance": 0.024825783006240745,
+    "robot_pinch_distance": 0.04248243552527016,
+    "contact": false,
+    "action": [
+      0.4848731068849983,
+      0.5818477282619979,
+      0.6788223496389976,
+      0.9697462137699966,
+      0.19999999149558323,
+      0.19999999149558323,
+      0.19999999149558323
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.18,
+    "human_pinch_distance": 0.024509815669793416,
+    "robot_pinch_distance": 0.04211182664395262,
+    "contact": false,
+    "action": [
+      0.4886548301637487,
+      0.5863857961964984,
+      0.6841167622292481,
+      0.9773096603274974,
+      0.1999999936216874,
+      0.1999999936216874,
+      0.1999999936216874
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.2,
+    "human_pinch_distance": 0.024274769970457237,
+    "robot_pinch_distance": 0.04183386998296446,
+    "contact": false,
+    "action": [
+      0.4914911226228115,
+      0.5897893471473739,
+      0.6880875716719361,
+      0.982982245245623,
+      0.19999999521626555,
+      0.19999999521626555,
+      0.19999999521626555
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.22,
+    "human_pinch_distance": 0.02411966824799961,
+    "robot_pinch_distance": 0.04162540248722334,
+    "contact": false,
+    "action": [
+      0.49361834196710863,
+      0.5923420103605304,
+      0.6910656787539522,
+      0.9872366839342173,
+      0.19999999641219918,
+      0.19999999641219918,
+      0.19999999641219918
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.24,
+    "human_pinch_distance": 0.024043806341856815,
+    "robot_pinch_distance": 0.04146905186541751,
+    "contact": false,
+    "action": [
+      0.4952137564753315,
+      0.5942565077703977,
+      0.6932992590654641,
+      0.990427512950663,
+      0.19999999730914936,
+      0.19999999730914936,
+      0.19999999730914936
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.26,
+    "human_pinch_distance": 0.024046821956810606,
+    "robot_pinch_distance": 0.04135178889906312,
+    "contact": false,
+    "action": [
+      0.49641031735649865,
+      0.5956923808277983,
+      0.6949744442990982,
+      0.9928206347129973,
+      0.19999999798186202,
+      0.19999999798186202,
+      0.19999999798186202
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.28,
+    "human_pinch_distance": 0.0241287297235246,
+    "robot_pinch_distance": 0.04126384167429734,
+    "contact": false,
+    "action": [
+      0.497307738017374,
+      0.5967692856208487,
+      0.6962308332243237,
+      0.994615476034748,
+      0.1999999984863965,
+      0.1999999984863965,
+      0.1999999984863965
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.3,
+    "human_pinch_distance": 0.02428991978392666,
+    "robot_pinch_distance": 0.041197881255723004,
+    "contact": false,
+    "action": [
+      0.4979808035130305,
+      0.5975769642156366,
+      0.6971731249182427,
+      0.995961607026061,
+      0.19999999886479736,
+      0.19999999886479736,
+      0.19999999886479736
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.32,
+    "human_pinch_distance": 0.024531120029755698,
+    "robot_pinch_distance": 0.04114841094179226,
+    "contact": false,
+    "action": [
+      0.4984856026347729,
+      0.5981827231617274,
+      0.697879843688682,
+      0.9969712052695457,
+      0.199999999148598,
+      0.199999999148598,
+      0.199999999148598
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.34,
+    "human_pinch_distance": 0.024853325406583946,
+    "robot_pinch_distance": 0.041111308206344184,
+    "contact": false,
+    "action": [
+      0.49886420197607967,
+      0.5986370423712956,
+      0.6984098827665115,
+      0.9977284039521593,
+      0.19999999936144852,
+      0.19999999936144852,
+      0.19999999936144852
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.36,
+    "human_pinch_distance": 0.02525770059675443,
+    "robot_pinch_distance": 0.0411360950265955,
+    "contact": false,
+    "action": [
+      0.49861127523882137,
+      0.5983335302865856,
+      0.6980557853343499,
+      0.9972225504776427,
+      0.19999999952108638,
+      0.19999999952108638,
+      0.19999999952108638
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.3800000000000001,
+    "human_pinch_distance": 0.025745464580938786,
+    "robot_pinch_distance": 0.04125427028855496,
+    "contact": false,
+    "action": [
+      0.49740540521882687,
+      0.5968864862625923,
+      0.6963675673063576,
+      0.9948108104376537,
+      0.19999999964081477,
+      0.19999999964081477,
+      0.19999999964081477
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.4000000000000001,
+    "human_pinch_distance": 0.02631776679516249,
+    "robot_pinch_distance": 0.04145974677042856,
+    "contact": false,
+    "action": [
+      0.49530870642419833,
+      0.594370447709038,
+      0.6934321889938776,
+      0.9906174128483967,
+      0.19999999973061106,
+      0.19999999973061106,
+      0.19999999973061106
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.42,
+    "human_pinch_distance": 0.026975564716165905,
+    "robot_pinch_distance": 0.04174815454070528,
+    "contact": false,
+    "action": [
+      0.4923657699928031,
+      0.5908389239913638,
+      0.6893120779899243,
+      0.9847315399856063,
+      0.1999999997979583,
+      0.1999999997979583,
+      0.1999999997979583
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.44,
+    "human_pinch_distance": 0.027719511747916325,
+    "robot_pinch_distance": 0.04211634955406188,
+    "contact": false,
+    "action": [
+      0.48860867801977664,
+      0.5863304136237321,
+      0.6840521492276872,
+      0.9772173560395533,
+      0.19999999984846872,
+      0.19999999984846872,
+      0.19999999984846872
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.46,
+    "human_pinch_distance": 0.02854986243555586,
+    "robot_pinch_distance": 0.042562025746139064,
+    "contact": false,
+    "action": [
+      0.4840609617740911,
+      0.5808731541289094,
+      0.6776853464837274,
+      0.9681219235481822,
+      0.19999999988635153,
+      0.19999999988635153,
+      0.19999999988635153
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.48,
+    "human_pinch_distance": 0.029466399623066495,
+    "robot_pinch_distance": 0.043083409232647044,
+    "contact": false,
+    "action": [
+      0.4787407221158465,
+      0.5744888665390158,
+      0.6702370109621849,
+      0.957481444231693,
+      0.19999999991476364,
+      0.19999999991476364,
+      0.19999999991476364
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.5,
+    "human_pinch_distance": 0.030468385587465424,
+    "robot_pinch_distance": 0.04367901898192614,
+    "contact": false,
+    "action": [
+      0.4726630716129986,
+      0.5671956859355982,
+      0.6617283002581978,
+      0.9453261432259972,
+      0.1999999999360727,
+      0.1999999999360727,
+      0.1999999999360727
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.52,
+    "human_pinch_distance": 0.031554536799509945,
+    "robot_pinch_distance": 0.04434748216634454,
+    "contact": false,
+    "action": [
+      0.4658420187107699,
+      0.5590104224529238,
+      0.6521788261950776,
+      0.9316840374215398,
+      0.19999999995205453,
+      0.19999999995205453,
+      0.19999999995205453
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.54,
+    "human_pinch_distance": 0.03272302006349402,
+    "robot_pinch_distance": 0.045087394887721774,
+    "contact": false,
+    "action": [
+      0.4582918889007982,
+      0.5499502666809577,
+      0.6416086444611173,
+      0.9165837778015964,
+      0.1999999999640409,
+      0.1999999999640409,
+      0.1999999999640409
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.56,
+    "human_pinch_distance": 0.03397146652973959,
+    "robot_pinch_distance": 0.04589722058227983,
+    "contact": false,
+    "action": [
+      0.4500283614053078,
+      0.5400340336863693,
+      0.6300397059674309,
+      0.9000567228106156,
+      0.19999999997303064,
+      0.19999999997303064,
+      0.19999999997303064
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.58,
+    "human_pinch_distance": 0.03529699947028424,
+    "robot_pinch_distance": 0.046775219495226235,
+    "contact": false,
+    "action": [
+      0.441069188824222,
+      0.5292830265890663,
+      0.6174968643539108,
+      0.882138377648444,
+      0.19999999997977297,
+      0.19999999997977297,
+      0.19999999997977297
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.6,
+    "human_pinch_distance": 0.0366962716715249,
+    "robot_pinch_distance": 0.047719403421022676,
+    "contact": false,
+    "action": [
+      0.43143465896915634,
+      0.5177215907629875,
+      0.6040085225568188,
+      0.8628693179383127,
+      0.1999999999848297,
+      0.1999999999848297,
+      0.1999999999848297
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.62,
+    "human_pinch_distance": 0.03816550867595191,
+    "robot_pinch_distance": 0.048727510587107184,
+    "contact": false,
+    "action": [
+      0.4211478511519674,
+      0.5053774213823609,
+      0.5896069916127544,
+      0.8422957023039348,
+      0.19999999998862228,
+      0.19999999998862228,
+      0.19999999998862228
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.6400000000000001,
+    "human_pinch_distance": 0.039700554731100866,
+    "robot_pinch_distance": 0.04979699619793015,
+    "contact": false,
+    "action": [
+      0.4102347326741821,
+      0.4922816792090185,
+      0.5743286257438549,
+      0.8204694653483642,
+      0.19999999999146673,
+      0.19999999999146673,
+      0.19999999999146673
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.6600000000000001,
+    "human_pinch_distance": 0.04129691902799064,
+    "robot_pinch_distance": 0.050925034783329035,
+    "contact": false,
+    "action": [
+      0.3987241348639894,
+      0.4784689618367873,
+      0.5582137888095852,
+      0.7974482697279788,
+      0.19999999999360002,
+      0.19999999999360002,
+      0.19999999999360002
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.68,
+    "human_pinch_distance": 0.04294982052092525,
+    "robot_pinch_distance": 0.052108531110519,
+    "contact": false,
+    "action": [
+      0.3866476417293978,
+      0.46397717007527733,
+      0.541306698421157,
+      0.7732952834587956,
+      0.19999999999520002,
+      0.19999999999520002,
+      0.19999999999520002
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.7,
+    "human_pinch_distance": 0.04465423024448975,
+    "robot_pinch_distance": 0.053344137007805915,
+    "contact": false,
+    "action": [
+      0.3740394182876947,
+      0.44884730194523365,
+      0.5236551856027726,
+      0.7480788365753894,
+      0.1999999999964,
+      0.1999999999964,
+      0.1999999999964
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.72,
+    "human_pinch_distance": 0.04640491054753645,
+    "robot_pinch_distance": 0.054628271992643126,
+    "contact": false,
+    "action": [
+      0.3609360000750701,
+      0.4331232000900841,
+      0.5053104001050982,
+      0.7218720001501402,
+      0.1999999999973,
+      0.1999999999973,
+      0.1999999999973
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.74,
+    "human_pinch_distance": 0.04819645104107762,
+    "robot_pinch_distance": 0.05595714608203569,
+    "contact": false,
+    "action": [
+      0.3473760603873909,
+      0.41685127246486897,
+      0.4863264845423473,
+      0.6947521207747818,
+      0.19999999999797502,
+      0.19999999999797502,
+      0.19999999999797502
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.76,
+    "human_pinch_distance": 0.0500233013178052,
+    "robot_pinch_distance": 0.057326783580578654,
+    "contact": false,
+    "action": [
+      0.3334001675451157,
+      0.4000802010541387,
+      0.466760234563162,
+      0.6668003350902314,
+      0.19999999999848128,
+      0.19999999999848128,
+      0.19999999999848128
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.78,
+    "human_pinch_distance": 0.0518798006648061,
+    "robot_pinch_distance": 0.058733046987831904,
+    "contact": false,
+    "action": [
+      0.31905054094049073,
+      0.3828606491285888,
+      0.44667075731668704,
+      0.6381010818809815,
+      0.19999999999886098,
+      0.19999999999886098,
+      0.19999999999886098
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.8,
+    "human_pinch_distance": 0.05376020507993823,
+    "robot_pinch_distance": 0.060171660444694644,
+    "contact": false,
+    "action": [
+      0.3043708117888301,
+      0.365244974146596,
+      0.4261191365043621,
+      0.6087416235776602,
+      0.19999999999914575,
+      0.19999999999914575,
+      0.19999999999914575
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.82,
+    "human_pinch_distance": 0.055658711937091966,
+    "robot_pinch_distance": 0.061638232354010586,
+    "contact": false,
+    "action": [
+      0.2894057923060143,
+      0.3472869507672171,
+      0.40516810922842,
+      0.5788115846120286,
+      0.1999999999993593,
+      0.1999999999993593,
+      0.1999999999993593
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.84,
+    "human_pinch_distance": 0.057569482643878886,
+    "robot_pinch_distance": 0.06312827697196655,
+    "contact": false,
+    "action": [
+      0.2742012553880964,
+      0.3290415064657156,
+      0.3838817575433349,
+      0.5484025107761928,
+      0.19999999999951945,
+      0.19999999999951945,
+      0.19999999999951945
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.86,
+    "human_pinch_distance": 0.05948666361107924,
+    "robot_pinch_distance": 0.06463723488290359,
+    "contact": false,
+    "action": [
+      0.25880372568465726,
+      0.3105644708215886,
+      0.3623252159585201,
+      0.5176074513693145,
+      0.19999999999963958,
+      0.19999999999963958,
+      0.19999999999963958
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.8800000000000001,
+    "human_pinch_distance": 0.06140440581672572,
+    "robot_pinch_distance": 0.0661604923497592,
+    "contact": false,
+    "action": [
+      0.24326028214531437,
+      0.29191233857437715,
+      0.34056439500344005,
+      0.48652056429062873,
+      0.19999999999972967,
+      0.19999999999972967,
+      0.19999999999972967
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.9000000000000001,
+    "human_pinch_distance": 0.0633168832061592,
+    "robot_pinch_distance": 0.0676933995835769,
+    "contact": false,
+    "action": [
+      0.2276183715961541,
+      0.2731420459153849,
+      0.3186657202346157,
+      0.4552367431923082,
+      0.19999999999979723,
+      0.19999999999979723,
+      0.19999999999979723
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.92,
+    "human_pinch_distance": 0.0652183101274475,
+    "robot_pinch_distance": 0.06923128800536986,
+    "contact": false,
+    "action": [
+      0.21192563259826663,
+      0.25431075911791995,
+      0.29669588563757326,
+      0.42385126519653327,
+      0.1999999999998479,
+      0.1999999999998479,
+      0.1999999999998479
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.94,
+    "human_pinch_distance": 0.06710295796204346,
+    "robot_pinch_distance": 0.0707694865879446,
+    "contact": false,
+    "action": [
+      0.19622972869444277,
+      0.23547567443333134,
+      0.27472162017221985,
+      0.39245945738888555,
+      0.19999999999988594,
+      0.19999999999988594,
+      0.19999999999988594
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.96,
+    "human_pinch_distance": 0.06896517107500029,
+    "robot_pinch_distance": 0.07230333736877101,
+    "contact": false,
+    "action": [
+      0.18057819011458148,
+      0.21669382813749782,
+      0.25280946616041405,
+      0.36115638022916297,
+      0.19999999999991447,
+      0.19999999999991447,
+      0.19999999999991447
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 1.98,
+    "human_pinch_distance": 0.07079938217810283,
+    "robot_pinch_distance": 0.07382821022127425,
+    "contact": false,
+    "action": [
+      0.16501826304822187,
+      0.1980219156578663,
+      0.2310255682675106,
+      0.33003652609644374,
+      0.19999999999993584,
+      0.19999999999993584,
+      0.19999999999993584
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 2.0,
+    "human_pinch_distance": 0.0726001271729991,
+    "robot_pinch_distance": 0.07533951696377633,
+    "contact": false,
+    "action": [
+      0.14959676567575161,
+      0.179516118810902,
+      0.20943547194605225,
+      0.29919353135150323,
+      0.19999999999995188,
+      0.19999999999995188,
+      0.19999999999995188
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 2.02,
+    "human_pinch_distance": 0.07436205951957774,
+    "robot_pinch_distance": 0.07683272487474604,
+    "contact": false,
+    "action": [
+      0.13435995025769343,
+      0.16123194030923216,
+      0.1881039303607708,
+      0.26871990051538686,
+      0.19999999999996393,
+      0.19999999999996393,
+      0.19999999999996393
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 2.04,
+    "human_pinch_distance": 0.07607996415701655,
+    "robot_pinch_distance": 0.0783033696714504,
+    "contact": false,
+    "action": [
+      0.1193533706994856,
+      0.14322404483938275,
+      0.16709471897927985,
+      0.2387067413989712,
+      0.19999999999997292,
+      0.19999999999997292,
+      0.19999999999997292
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 2.06,
+    "human_pinch_distance": 0.07774877099062931,
+    "robot_pinch_distance": 0.07974706799750796,
+    "contact": false,
+    "action": [
+      0.10462175512746981,
+      0.1255461061529638,
+      0.14647045717845775,
+      0.20924351025493962,
+      0.1999999999999797,
+      0.1999999999999797,
+      0.1999999999999797
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 2.08,
+    "human_pinch_distance": 0.07936356794636529,
+    "robot_pinch_distance": 0.08115952945384722,
+    "contact": false,
+    "action": [
+      0.09020888312400802,
+      0.10825065974880964,
+      0.12629243637361123,
+      0.18041776624801603,
+      0.19999999999998475,
+      0.19999999999998475,
+      0.19999999999998475
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 2.1,
+    "human_pinch_distance": 0.08091961358609415,
+    "robot_pinch_distance": 0.08253656819754629,
+    "contact": false,
+    "action": [
+      0.07615746737197655,
+      0.09138896084637187,
+      0.1066204543207672,
+      0.1523149347439531,
+      0.19999999999998858,
+      0.19999999999998858,
+      0.19999999999998858
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 2.12,
+    "human_pinch_distance": 0.08241234927021199,
+    "robot_pinch_distance": 0.08387411412416133,
+    "contact": false,
+    "action": [
+      0.06250903954937412,
+      0.07501084745924894,
+      0.08751265536912378,
+      0.12501807909874824,
+      0.1999999999999914,
+      0.1999999999999914,
+      0.1999999999999914
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 2.14,
+    "human_pinch_distance": 0.08383741084926326,
+    "robot_pinch_distance": 0.08516822364151225,
+    "contact": false,
+    "action": [
+      0.04930384039273215,
+      0.05916460847127857,
+      0.06902537654982502,
+      0.0986076807854643,
+      0.19999999999999357,
+      0.19999999999999357,
+      0.19999999999999357
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 2.16,
+    "human_pinch_distance": 0.08519063986286764,
+    "robot_pinch_distance": 0.08637616773113418,
+    "contact": false,
+    "action": [
+      0.03697788029454911,
+      0.04437345635345893,
+      0.051769032412368764,
+      0.07395576058909822,
+      0.19999999999999518,
+      0.19999999999999518,
+      0.19999999999999518
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 2.18,
+    "human_pinch_distance": 0.08646809422200606,
+    "robot_pinch_distance": 0.08728212579835064,
+    "contact": false,
+    "action": [
+      0.027733410220911834,
+      0.033280092265094194,
+      0.03882677430927657,
+      0.05546682044182367,
+      0.1999999999999964,
+      0.1999999999999964,
+      0.1999999999999964
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 2.2,
+    "human_pinch_distance": 0.08766605834943456,
+    "robot_pinch_distance": 0.08796159434876298,
+    "contact": false,
+    "action": [
+      0.020800057665683876,
+      0.024960069198820645,
+      0.02912008073195743,
+      0.04160011533136775,
+      0.1999999999999973,
+      0.1999999999999973,
+      0.1999999999999973
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 2.22,
+    "human_pinch_distance": 0.08878105275247614,
+    "robot_pinch_distance": 0.08847119576157224,
+    "contact": false,
+    "action": [
+      0.015600043249262906,
+      0.018720051899115485,
+      0.02184006054896807,
+      0.031200086498525813,
+      0.19999999999999796,
+      0.19999999999999796,
+      0.19999999999999796
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 2.24,
+    "human_pinch_distance": 0.08980984300254273,
+    "robot_pinch_distance": 0.08885339682117917,
+    "contact": false,
+    "action": [
+      0.011700032436947179,
+      0.014040038924336614,
+      0.016380045411726052,
+      0.023400064873894358,
+      0.19999999999999846,
+      0.19999999999999846,
+      0.19999999999999846
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 2.2600000000000002,
+    "human_pinch_distance": 0.0907494480963395,
+    "robot_pinch_distance": 0.08914004761588439,
+    "contact": false,
+    "action": [
+      0.008775024327710384,
+      0.01053002919325246,
+      0.012285034058794539,
+      0.01755004865542077,
+      0.19999999999999885,
+      0.19999999999999885,
+      0.19999999999999885
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 2.2800000000000002,
+    "human_pinch_distance": 0.09159714817470721,
+    "robot_pinch_distance": 0.08935503571191328,
+    "contact": false,
+    "action": [
+      0.006581268245782788,
+      0.007897521894939346,
+      0.009213775544095904,
+      0.013162536491565575,
+      0.19999999999999912,
+      0.19999999999999912,
+      0.19999999999999912
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 2.3000000000000003,
+    "human_pinch_distance": 0.09235049157638461,
+    "robot_pinch_distance": 0.08951627678393496,
+    "contact": false,
+    "action": [
+      0.004935951184337091,
+      0.0059231414212045095,
+      0.006910331658071928,
+      0.009871902368674182,
+      0.19999999999999934,
+      0.19999999999999934,
+      0.19999999999999934
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 2.32,
+    "human_pinch_distance": 0.09300730120556076,
+    "robot_pinch_distance": 0.08963720758795123,
+    "contact": false,
+    "action": [
+      0.003701963388252818,
+      0.004442356065903382,
+      0.005182748743553946,
+      0.007403926776505636,
+      0.1999999999999995,
+      0.1999999999999995,
+      0.1999999999999995
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 2.34,
+    "human_pinch_distance": 0.09356568019388357,
+    "robot_pinch_distance": 0.08972790569096341,
+    "contact": false,
+    "action": [
+      0.0027764725411896134,
+      0.003331767049427537,
+      0.0038870615576654596,
+      0.005552945082379227,
+      0.19999999999999962,
+      0.19999999999999962,
+      0.19999999999999962
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 2.36,
+    "human_pinch_distance": 0.09402401683955605,
+    "robot_pinch_distance": 0.08979592926822257,
+    "contact": false,
+    "action": [
+      0.0020823544058922103,
+      0.0024988252870706525,
+      0.0029152961682490947,
+      0.0041647088117844205,
+      0.19999999999999973,
+      0.19999999999999973,
+      0.19999999999999973
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline2_optimized_placeholder",
+    "timestamp": 2.38,
+    "human_pinch_distance": 0.09438098880825094,
+    "robot_pinch_distance": 0.08984694695116692,
+    "contact": false,
+    "action": [
+      0.0015617658044191577,
+      0.0018741189653029894,
+      0.002186472126186821,
+      0.0031235316088383154,
+      0.1999999999999998,
+      0.1999999999999998,
+      0.1999999999999998
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.0,
+    "human_pinch_distance": 0.09545214042184237,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.05,
+      0.05,
+      0.05
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.02,
+    "human_pinch_distance": 0.09543896000179618,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.08750000000000001,
+      0.08750000000000001,
+      0.08750000000000001
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.04,
+    "human_pinch_distance": 0.09538957062679308,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.115625,
+      0.115625,
+      0.115625
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.06,
+    "human_pinch_distance": 0.0952868130427586,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.13671875,
+      0.13671875,
+      0.13671875
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.08,
+    "human_pinch_distance": 0.09511800538487591,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1525390625,
+      0.1525390625,
+      0.1525390625
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.1,
+    "human_pinch_distance": 0.0948738990917593,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.164404296875,
+      0.164404296875,
+      0.164404296875
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.12,
+    "human_pinch_distance": 0.09454789523442607,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.17330322265624998,
+      0.17330322265624998,
+      0.17330322265624998
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.14,
+    "human_pinch_distance": 0.09413545585779666,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1799774169921875,
+      0.1799774169921875,
+      0.1799774169921875
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.16,
+    "human_pinch_distance": 0.09363366135394742,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.18498306274414061,
+      0.18498306274414061,
+      0.18498306274414061
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.18,
+    "human_pinch_distance": 0.09304087716604117,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.18873729705810544,
+      0.18873729705810544,
+      0.18873729705810544
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.2,
+    "human_pinch_distance": 0.09235650231360164,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.19155297279357908,
+      0.19155297279357908,
+      0.19155297279357908
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.22,
+    "human_pinch_distance": 0.0915807791152924,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.19366472959518433,
+      0.19366472959518433,
+      0.19366472959518433
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.24,
+    "human_pinch_distance": 0.09071464864613016,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.19524854719638823,
+      0.19524854719638823,
+      0.19524854719638823
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.26,
+    "human_pinch_distance": 0.0897596403356966,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.19643641039729115,
+      0.19643641039729115,
+      0.19643641039729115
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.28,
+    "human_pinch_distance": 0.08871778701628136,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.19732730779796837,
+      0.19732730779796837,
+      0.19732730779796837
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.3,
+    "human_pinch_distance": 0.08759155890721868,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1979954808484763,
+      0.1979954808484763,
+      0.1979954808484763
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.32,
+    "human_pinch_distance": 0.08638381165531561,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1984966106363572,
+      0.1984966106363572,
+      0.1984966106363572
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.34,
+    "human_pinch_distance": 0.08509774477706024,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.19887245797726788,
+      0.19887245797726788,
+      0.19887245797726788
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.36,
+    "human_pinch_distance": 0.08373686776805533,
+    "robot_pinch_distance": 0.08942895897014168,
+    "contact": false,
+    "action": [
+      0.0078945764496542,
+      0.006315661159723359,
+      0.0078945764496542,
+      0.010526101932872265,
+      0.1991543434829509,
+      0.1991543434829509,
+      0.1991543434829509
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.38,
+    "human_pinch_distance": 0.08230497183516888,
+    "robot_pinch_distance": 0.0885882055607994,
+    "contact": false,
+    "action": [
+      0.018817570142608066,
+      0.015843513759051873,
+      0.019607027787573485,
+      0.026405856265086458,
+      0.1993657576122132,
+      0.1993657576122132,
+      0.1993657576122132
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.4,
+    "human_pinch_distance": 0.08080610572443585,
+    "robot_pinch_distance": 0.08754627126625321,
+    "contact": false,
+    "action": [
+      0.03190305381413478,
+      0.02779892888805134,
+      0.0341795396508783,
+      0.046331548146752236,
+      0.1995243182091599,
+      0.1995243182091599,
+      0.1995243182091599
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.42,
+    "human_pinch_distance": 0.07924455450566709,
+    "robot_pinch_distance": 0.08633756468265627,
+    "contact": false,
+    "action": [
+      0.04679290508904384,
+      0.041762872371020304,
+      0.05112145338882908,
+      0.06960478728503385,
+      0.1996432386568699,
+      0.1996432386568699,
+      0.1996432386568699
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.44,
+    "human_pinch_distance": 0.07762482046513955,
+    "robot_pinch_distance": 0.08498913091054323,
+    "contact": false,
+    "action": [
+      0.06320378373987036,
+      0.057406591650693284,
+      0.07004734839866736,
+      0.09567765275115547,
+      0.19973242899265242,
+      0.19973242899265242,
+      0.19973242899265242
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.46,
+    "human_pinch_distance": 0.07595160547469935,
+    "robot_pinch_distance": 0.08352254226935754,
+    "contact": false,
+    "action": [
+      0.0809078675415929,
+      0.07446845473665986,
+      0.09065002824497845,
+      0.12411409122776644,
+      0.19979932174448933,
+      0.19979932174448933,
+      0.19979932174448933
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.48,
+    "human_pinch_distance": 0.07422979436706993,
+    "robot_pinch_distance": 0.08195531209584578,
+    "contact": false,
+    "action": [
+      0.0997184529704431,
+      0.09273662948220655,
+      0.11268032007629517,
+      0.1545610491370109,
+      0.199849491308367,
+      0.199849491308367,
+      0.199849491308367
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.5,
+    "human_pinch_distance": 0.07246443896651823,
+    "robot_pinch_distance": 0.08030195096453738,
+    "contact": false,
+    "action": [
+      0.11947920358418693,
+      0.11203614171731988,
+      0.13593198243415727,
+      0.18672690286219978,
+      0.19988711848127522,
+      0.19988711848127522,
+      0.19988711848127522
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.52,
+    "human_pinch_distance": 0.07066074251123779,
+    "robot_pinch_distance": 0.07857475478002146,
+    "contact": false,
+    "action": [
+      0.14005613376327353,
+      0.13221921679402268,
+      0.16023044354667737,
+      0.22036536132337112,
+      0.19991533886095642,
+      0.19991533886095642,
+      0.19991533886095642
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.54,
+    "human_pinch_distance": 0.06882404426620457,
+    "robot_pinch_distance": 0.07678439178634613,
+    "contact": false,
+    "action": [
+      0.16133164400629463,
+      0.153158083473065,
+      0.18542441227432394,
+      0.25526347245510833,
+      0.1999365041457173,
+      0.1999365041457173,
+      0.1999365041457173
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.56,
+    "human_pinch_distance": 0.06695980416822757,
+    "robot_pinch_distance": 0.0749403387433984,
+    "contact": false,
+    "action": [
+      0.183200095285188,
+      0.17473962476279448,
+      0.2113796438198321,
+      0.29123270793799083,
+      0.19995237810928795,
+      0.19995237810928795,
+      0.19995237810928795
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.58,
+    "human_pinch_distance": 0.06507358737233387,
+    "robot_pinch_distance": 0.07305120392792826,
+    "contact": false,
+    "action": [
+      0.20556453841251543,
+      0.1968614145258532,
+      0.2379743222083563,
+      0.3281023575430887,
+      0.19996428358196594,
+      0.19996428358196594,
+      0.19996428358196594
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.6,
+    "human_pinch_distance": 0.06317104858326396,
+    "robot_pinch_distance": 0.07112496517425344,
+    "contact": false,
+    "action": [
+      0.22833431070253019,
+      0.2194287943011961,
+      0.2650956564417022,
+      0.3657146571686602,
+      0.19997321268647444,
+      0.19997321268647444,
+      0.19997321268647444
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.62,
+    "human_pinch_distance": 0.061257916059630185,
+    "robot_pinch_distance": 0.06916914408669725,
+    "contact": false,
+    "action": [
+      0.25142328447690887,
+      0.24235273152136608,
+      0.29263738841674786,
+      0.40392121920227686,
+      0.19997990951485584,
+      0.19997990951485584,
+      0.19997990951485584
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.64,
+    "human_pinch_distance": 0.05933997517254829,
+    "robot_pinch_distance": 0.06719093224027499,
+    "contact": false,
+    "action": [
+      0.27474860621559916,
+      0.2655482653900897,
+      0.32049798663320955,
+      0.44258044231681626,
+      0.19998493213614188,
+      0.19998493213614188,
+      0.19998493213614188
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.66,
+    "human_pinch_distance": 0.057423051386237864,
+    "robot_pinch_distance": 0.06519728119408891,
+    "contact": false,
+    "action": [
+      0.29822980591192616,
+      0.288933395559906,
+      0.34857935674229124,
+      0.4815556592665101,
+      0.19998869910210643,
+      0.19998869910210643,
+      0.19998869910210643
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.68,
+    "human_pinch_distance": 0.05551299250600645,
+    "robot_pinch_distance": 0.0631949651405285,
+    "contact": false,
+    "action": [
+      0.32178818685339766,
+      0.3124283054890933,
+      0.3767859428597728,
+      0.5207138424818222,
+      0.1999915243265798,
+      0.1999915243265798,
+      0.1999915243265798
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.7000000000000001,
+    "human_pinch_distance": 0.0536156500100663,
+    "robot_pinch_distance": 0.061190622753361595,
+    "contact": false,
+    "action": [
+      0.3453464291584041,
+      0.33595484001525056,
+      0.4050241258469313,
+      0.559924733358751,
+      0.19999364324493485,
+      0.19999364324493485,
+      0.19999364324493485
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.72,
+    "human_pinch_distance": 0.051736859247060646,
+    "robot_pinch_distance": 0.059190783092549826,
+    "contact": false,
+    "action": [
+      0.3688283578561312,
+      0.359436177545009,
+      0.4332018491162352,
+      0.5990602959083484,
+      0.19999523243370115,
+      0.19999523243370115,
+      0.19999523243370115
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.74,
+    "human_pinch_distance": 0.049882418243039156,
+    "robot_pinch_distance": 0.057201879133869316,
+    "contact": false,
+    "action": [
+      0.39215883952016817,
+      0.3827966530317997,
+      0.4612284209358333,
+      0.6379944217196662,
+      0.19999642432527587,
+      0.19999642432527587,
+      0.19999642432527587
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.76,
+    "human_pinch_distance": 0.04805806482319998,
+    "robot_pinch_distance": 0.05523025151382521,
+    "contact": false,
+    "action": [
+      0.4152637815046237,
+      0.4059616998635483,
+      0.4890144561644731,
+      0.676602833105914,
+      0.1999973182439569,
+      0.1999973182439569,
+      0.1999973182439569
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.78,
+    "human_pinch_distance": 0.046269451720100614,
+    "robot_pinch_distance": 0.05328214433910065,
+    "contact": false,
+    "action": [
+      0.43807021545033886,
+      0.42885788784065815,
+      0.5164719309307259,
+      0.714763146401097,
+      0.19999798868296764,
+      0.19999798868296764,
+      0.19999798868296764
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.8,
+    "human_pinch_distance": 0.0445221193187916,
+    "robot_pinch_distance": 0.051363694350489646,
+    "contact": false,
+    "action": [
+      0.46050645247062105,
+      0.4514130412617242,
+      0.5435143317558484,
+      0.7523550687695404,
+      0.1999984915122257,
+      0.1999984915122257,
+      0.1999984915122257
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.8200000000000001,
+    "human_pinch_distance": 0.042821465691123606,
+    "robot_pinch_distance": 0.04948091431655822,
+    "contact": false,
+    "action": [
+      0.482502301654667,
+      0.4735564262134094,
+      0.5700568865443427,
+      0.7892607103556825,
+      0.19999886863416927,
+      0.19999886863416927,
+      0.19999886863416927
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.84,
+    "human_pinch_distance": 0.04117271361063491,
+    "robot_pinch_distance": 0.047639671238616565,
+    "contact": false,
+    "action": [
+      0.5039893464592934,
+      0.4952189997777392,
+      0.5960168690695979,
+      0.8253649996295656,
+      0.19999915147562697,
+      0.19999915147562697,
+      0.19999915147562697
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.86,
+    "human_pinch_distance": 0.039580874333983745,
+    "robot_pinch_distance": 0.045845659763806806,
+    "contact": false,
+    "action": [
+      0.5249012752903057,
+      0.5163337161833262,
+      0.6213139712413873,
+      0.860556193638877,
+      0.19999936360672022,
+      0.19999936360672022,
+      0.19999936360672022
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.88,
+    "human_pinch_distance": 0.03805070810590448,
+    "robot_pinch_distance": 0.04410437112425765,
+    "contact": false,
+    "action": [
+      0.5451742630995254,
+      0.5368358859841917,
+      0.6458707386040968,
+      0.8947264766403196,
+      0.19999952270504018,
+      0.19999952270504018,
+      0.19999952270504018
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.9,
+    "human_pinch_distance": 0.036586681614144814,
+    "robot_pinch_distance": 0.04242105795114625,
+    "contact": false,
+    "action": [
+      0.5647474000671906,
+      0.5566635841159906,
+      0.6696130641294288,
+      0.9277726401933177,
+      0.19999964202878012,
+      0.19999964202878012,
+      0.19999964202878012
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.92,
+    "human_pinch_distance": 0.03519292300774978,
+    "robot_pinch_distance": 0.040800695460483184,
+    "contact": false,
+    "action": [
+      0.5835631612961593,
+      0.5757581010747655,
+      0.6924707333339976,
+      0.9595968351246094,
+      0.19999973152158507,
+      0.19999973152158507,
+      0.19999973152158507
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.9400000000000001,
+    "human_pinch_distance": 0.03387317560595229,
+    "robot_pinch_distance": 0.03924793977879984,
+    "contact": false,
+    "action": [
+      0.6015679078341358,
+      0.5940644284158436,
+      0.7143780099826709,
+      0.9901073806930728,
+      0.19999979864118878,
+      0.19999979864118878,
+      0.19999979864118878
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.96,
+    "human_pinch_distance": 0.03263075205722976,
+    "robot_pinch_distance": 0.03810342772494183,
+    "contact": false,
+    "action": [
+      0.6187124042865166,
+      0.6115317652868945,
+      0.7352742461441978,
+      1.0,
+      0.19999984898089157,
+      0.19999984898089157,
+      0.19999984898089157
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 0.98,
+    "human_pinch_distance": 0.031468491421959253,
+    "robot_pinch_distance": 0.037182010084169985,
+    "contact": false,
+    "action": [
+      0.6349523320064852,
+      0.6281140269626804,
+      0.7551044933639774,
+      1.0,
+      0.19999988673566865,
+      0.19999988673566865,
+      0.19999988673566865
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.0,
+    "human_pinch_distance": 0.03038872237333362,
+    "robot_pinch_distance": 0.036312814290828756,
+    "contact": false,
+    "action": [
+      0.6502487698651515,
+      0.6437703297715157,
+      0.7738200837445461,
+      1.0,
+      0.19999991505175146,
+      0.19999991505175146,
+      0.19999991505175146
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.02,
+    "human_pinch_distance": 0.0293932363239809,
+    "robot_pinch_distance": 0.03549776953084068,
+    "contact": false,
+    "action": [
+      0.6645686077906505,
+      0.6584654201587328,
+      0.7913791417168631,
+      1.0,
+      0.19999993628881357,
+      0.19999993628881357,
+      0.19999993628881357
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.04,
+    "human_pinch_distance": 0.028483274638349067,
+    "robot_pinch_distance": 0.034738467738602424,
+    "contact": false,
+    "action": [
+      0.6778848528657464,
+      0.6721700100347684,
+      0.8077469806079178,
+      1.0,
+      0.19999995221661016,
+      0.19999995221661016,
+      0.19999995221661016
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.06,
+    "human_pinch_distance": 0.02765953401573458,
+    "robot_pinch_distance": 0.03403615329998721,
+    "contact": false,
+    "action": [
+      0.6901767852958095,
+      0.684860977394308,
+      0.8228963344534699,
+      1.0,
+      0.19999996416245763,
+      0.19999996416245763,
+      0.19999996416245763
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.08,
+    "human_pinch_distance": 0.02692219347763577,
+    "robot_pinch_distance": 0.033391722887951204,
+    "contact": false,
+    "action": [
+      0.7014299235358041,
+      0.6965213919370543,
+      0.8368073766442153,
+      1.0,
+      0.1999999731218432,
+      0.1999999731218432,
+      0.1999999731218432
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.1,
+    "human_pinch_distance": 0.026270965083077868,
+    "robot_pinch_distance": 0.032805737328716306,
+    "contact": false,
+    "action": [
+      0.7116357655002281,
+      0.7071403313079685,
+      0.8494674844080142,
+      1.0,
+      0.1999999798413824,
+      0.1999999798413824,
+      0.1999999798413824
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.12,
+    "human_pinch_distance": 0.025705168553834867,
+    "robot_pinch_distance": 0.032278446698995183,
+    "contact": false,
+    "action": [
+      0.7207912865483216,
+      0.7167124652425729,
+      0.8608707225522374,
+      1.0,
+      0.19999998488103682,
+      0.19999998488103682,
+      0.19999998488103682
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.1400000000000001,
+    "human_pinch_distance": 0.02522382758174913,
+    "robot_pinch_distance": 0.03180982884846623,
+    "contact": false,
+    "action": [
+      0.7288981942560431,
+      0.7252374020616245,
+      0.871017040912833,
+      1.0,
+      0.19999998866077762,
+      0.19999998866077762,
+      0.19999998866077762
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.16,
+    "human_pinch_distance": 0.024825783006240745,
+    "robot_pinch_distance": 0.0314529942662451,
+    "contact": false,
+    "action": [
+      0.7348731068849983,
+      0.731847728261998,
+      0.8788223496389975,
+      1.0,
+      0.19999999149558323,
+      0.19999999149558323,
+      0.19999999149558323
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.18,
+    "human_pinch_distance": 0.024509815669793416,
+    "robot_pinch_distance": 0.03121474569968382,
+    "contact": false,
+    "action": [
+      0.7386548301637488,
+      0.7363857961964985,
+      0.8841167622292481,
+      1.0,
+      0.1999999936216874,
+      0.1999999936216874,
+      0.1999999936216874
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.2,
+    "human_pinch_distance": 0.024274769970457237,
+    "robot_pinch_distance": 0.031036059274762863,
+    "contact": false,
+    "action": [
+      0.7414911226228116,
+      0.7397893471473739,
+      0.8880875716719361,
+      1.0,
+      0.19999999521626555,
+      0.19999999521626555,
+      0.19999999521626555
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.22,
+    "human_pinch_distance": 0.02411966824799961,
+    "robot_pinch_distance": 0.030902044456072142,
+    "contact": false,
+    "action": [
+      0.7436183419671086,
+      0.7423420103605304,
+      0.8910656787539522,
+      1.0,
+      0.19999999641219918,
+      0.19999999641219918,
+      0.19999999641219918
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.24,
+    "human_pinch_distance": 0.024043806341856815,
+    "robot_pinch_distance": 0.030801533342054113,
+    "contact": false,
+    "action": [
+      0.7452137564753315,
+      0.7442565077703978,
+      0.893299259065464,
+      1.0,
+      0.19999999730914936,
+      0.19999999730914936,
+      0.19999999730914936
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.26,
+    "human_pinch_distance": 0.024046821956810606,
+    "robot_pinch_distance": 0.030726150006540574,
+    "contact": false,
+    "action": [
+      0.7464103173564987,
+      0.7456923808277983,
+      0.8949744442990981,
+      1.0,
+      0.19999999798186202,
+      0.19999999798186202,
+      0.19999999798186202
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.28,
+    "human_pinch_distance": 0.0241287297235246,
+    "robot_pinch_distance": 0.030669612504905436,
+    "contact": false,
+    "action": [
+      0.747307738017374,
+      0.7467692856208488,
+      0.8962308332243236,
+      1.0,
+      0.1999999984863965,
+      0.1999999984863965,
+      0.1999999984863965
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.3,
+    "human_pinch_distance": 0.02428991978392666,
+    "robot_pinch_distance": 0.030627209378679077,
+    "contact": false,
+    "action": [
+      0.7479808035130304,
+      0.7475769642156366,
+      0.8971731249182426,
+      1.0,
+      0.19999999886479736,
+      0.19999999886479736,
+      0.19999999886479736
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.32,
+    "human_pinch_distance": 0.024531120029755698,
+    "robot_pinch_distance": 0.030595407034009307,
+    "contact": false,
+    "action": [
+      0.7484856026347728,
+      0.7481827231617274,
+      0.8978798436886819,
+      1.0,
+      0.199999999148598,
+      0.199999999148598,
+      0.199999999148598
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.34,
+    "human_pinch_distance": 0.024853325406583946,
+    "robot_pinch_distance": 0.03057155527550698,
+    "contact": false,
+    "action": [
+      0.7488642019760796,
+      0.7486370423712956,
+      0.8984098827665115,
+      1.0,
+      0.19999999936144852,
+      0.19999999936144852,
+      0.19999999936144852
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.36,
+    "human_pinch_distance": 0.02525770059675443,
+    "robot_pinch_distance": 0.030632587264386266,
+    "contact": false,
+    "action": [
+      0.7475375227523446,
+      0.7476892787946996,
+      0.8971967833451684,
+      1.0,
+      0.19999999952108638,
+      0.19999999952108638,
+      0.19999999952108638
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.3800000000000001,
+    "human_pinch_distance": 0.025745464580938786,
+    "robot_pinch_distance": 0.030793915772878183,
+    "contact": false,
+    "action": [
+      0.7442993027982486,
+      0.7450228248102454,
+      0.893882685369895,
+      1.0,
+      0.19999999964081477,
+      0.19999999964081477,
+      0.19999999964081477
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.4000000000000001,
+    "human_pinch_distance": 0.02631776679516249,
+    "robot_pinch_distance": 0.031026160684428934,
+    "contact": false,
+    "action": [
+      0.7398180114443547,
+      0.7410760307211318,
+      0.8890396330100027,
+      1.0,
+      0.19999999973061106,
+      0.19999999973061106,
+      0.19999999973061106
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.42,
+    "human_pinch_distance": 0.026975564716165905,
+    "robot_pinch_distance": 0.031326680315782424,
+    "contact": false,
+    "action": [
+      0.7341342503421119,
+      0.7359000122009491,
+      0.8827268622693714,
+      1.0,
+      0.1999999997979583,
+      0.1999999997979583,
+      0.1999999997979583
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.44,
+    "human_pinch_distance": 0.027719511747916325,
+    "robot_pinch_distance": 0.03169356784063942,
+    "contact": false,
+    "action": [
+      0.7272773790701252,
+      0.7295316342539413,
+      0.8749871100679661,
+      1.0,
+      0.19999999984846872,
+      0.19999999984846872,
+      0.19999999984846872
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.46,
+    "human_pinch_distance": 0.02854986243555586,
+    "robot_pinch_distance": 0.03212538533445453,
+    "contact": false,
+    "action": [
+      0.7192698682926083,
+      0.7219984980400197,
+      0.8658524716985412,
+      1.0,
+      0.19999999988635153,
+      0.19999999988635153,
+      0.19999999988635153
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.48,
+    "human_pinch_distance": 0.029466399623066495,
+    "robot_pinch_distance": 0.0326209544407383,
+    "contact": false,
+    "action": [
+      0.7101307236864027,
+      0.7133228674813495,
+      0.8553490122186299,
+      1.0,
+      0.19999999991476364,
+      0.19999999991476364,
+      0.19999999991476364
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.5,
+    "human_pinch_distance": 0.030468385587465424,
+    "robot_pinch_distance": 0.033179193966187535,
+    "contact": false,
+    "action": [
+      0.699878131665226,
+      0.7035247219669347,
+      0.8435003482999798,
+      1.0,
+      0.1999999999360727,
+      0.1999999999360727,
+      0.1999999999360727
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.52,
+    "human_pinch_distance": 0.031554536799509945,
+    "robot_pinch_distance": 0.033798996761135736,
+    "contact": false,
+    "action": [
+      0.6885314487128118,
+      0.6926240804541489,
+      0.8303303701967111,
+      1.0,
+      0.19999999995205453,
+      0.19999999995205453,
+      0.19999999995205453
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.54,
+    "human_pinch_distance": 0.03272302006349402,
+    "robot_pinch_distance": 0.03447913951036117,
+    "contact": false,
+    "action": [
+      0.6761126386362397,
+      0.6806427165222226,
+      0.8158652442494706,
+      1.0,
+      0.1999999999640409,
+      0.1999999999640409,
+      0.1999999999640409
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.56,
+    "human_pinch_distance": 0.03397146652973959,
+    "robot_pinch_distance": 0.03521821987417004,
+    "contact": false,
+    "action": [
+      0.6626472508647261,
+      0.6676053673620203,
+      0.8001348175349656,
+      1.0,
+      0.19999999997303064,
+      0.19999999997303064,
+      0.19999999997303064
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.58,
+    "human_pinch_distance": 0.03529699947028424,
+    "robot_pinch_distance": 0.03601461601137375,
+    "contact": false,
+    "action": [
+      0.6481650243647044,
+      0.6535405279133557,
+      0.7831735327862968,
+      1.0,
+      0.19999999997977297,
+      0.19999999997977297,
+      0.19999999997977297
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.6,
+    "human_pinch_distance": 0.0366962716715249,
+    "robot_pinch_distance": 0.03686646402746,
+    "contact": false,
+    "action": [
+      0.632700193671136,
+      0.6384809115841753,
+      0.7650209503184024,
+      1.0,
+      0.1999999999848297,
+      0.1999999999848297,
+      0.1999999999848297
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.62,
+    "human_pinch_distance": 0.03816550867595191,
+    "robot_pinch_distance": 0.03777164939571762,
+    "contact": false,
+    "action": [
+      0.6162915650021678,
+      0.6224636496924811,
+      0.7457219626929148,
+      1.0,
+      0.19999999998862228,
+      0.19999999998862228,
+      0.19999999998862228
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.6400000000000001,
+    "human_pinch_distance": 0.039700554731100866,
+    "robot_pinch_distance": 0.03872780891946918,
+    "contact": false,
+    "action": [
+      0.5989824212945951,
+      0.6055302923812663,
+      0.7253267766401854,
+      1.0,
+      0.19999999999146673,
+      0.19999999999146673,
+      0.19999999999146673
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.6600000000000001,
+    "human_pinch_distance": 0.04129691902799064,
+    "robot_pinch_distance": 0.04009031262568504,
+    "contact": false,
+    "action": [
+      0.5808203055806951,
+      0.5877266642668106,
+      0.7038907253829497,
+      0.9795444404446845,
+      0.19999999999360002,
+      0.19999999999360002,
+      0.19999999999360002
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.68,
+    "human_pinch_distance": 0.04294982052092525,
+    "robot_pinch_distance": 0.04168359078133172,
+    "contact": false,
+    "action": [
+      0.5618567228922093,
+      0.5691026187729642,
+      0.6814739633514062,
+      0.9485043646216071,
+      0.19999999999520002,
+      0.19999999999520002,
+      0.19999999999520002
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.7,
+    "human_pinch_distance": 0.04465423024448975,
+    "robot_pinch_distance": 0.043341748255918994,
+    "contact": false,
+    "action": [
+      0.5421467922689874,
+      0.5497117263340092,
+      0.6581410847878068,
+      0.9161862105566821,
+      0.1999999999964,
+      0.1999999999964,
+      0.1999999999964
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.72,
+    "human_pinch_distance": 0.04640491054753645,
+    "robot_pinch_distance": 0.045059906065886536,
+    "contact": false,
+    "action": [
+      0.5217488727936682,
+      0.529610923721243,
+      0.6339606982799767,
+      0.8826848728687383,
+      0.1999999999973,
+      0.1999999999973,
+      0.1999999999973
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.74,
+    "human_pinch_distance": 0.04819645104107762,
+    "robot_pinch_distance": 0.04683293290263618,
+    "contact": false,
+    "action": [
+      0.5007241810495675,
+      0.5088601448621749,
+      0.6090049810720886,
+      0.8481002414369584,
+      0.19999999999797502,
+      0.19999999999797502,
+      0.19999999999797502
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.76,
+    "human_pinch_distance": 0.0500233013178052,
+    "robot_pinch_distance": 0.04865547703228453,
+    "contact": false,
+    "action": [
+      0.4791364120542607,
+      0.4875219477596257,
+      0.583349230170478,
+      0.8125365795993764,
+      0.19999999999848128,
+      0.19999999999848128,
+      0.19999999999848128
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.78,
+    "human_pinch_distance": 0.0518798006648061,
+    "robot_pinch_distance": 0.05052199756931508,
+    "contact": false,
+    "action": [
+      0.45705137150379865,
+      0.46566114746657356,
+      0.5570714217673334,
+      0.7761019124442894,
+      0.19999999999886098,
+      0.19999999999886098,
+      0.19999999999886098
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.8,
+    "human_pinch_distance": 0.05376020507993823,
+    "robot_pinch_distance": 0.05242679462076267,
+    "contact": false,
+    "action": [
+      0.43453662395575415,
+      0.44334446144675044,
+      0.5302517862379014,
+      0.7389074357445842,
+      0.19999999999914575,
+      0.19999999999914575,
+      0.19999999999914575
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.82,
+    "human_pinch_distance": 0.055658711937091966,
+    "robot_pinch_distance": 0.054364038021747975,
+    "contact": false,
+    "action": [
+      0.4116611592347978,
+      0.4206401709244872,
+      0.5029724027714468,
+      0.7010669515408121,
+      0.1999999999993593,
+      0.1999999999993593,
+      0.1999999999993593
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.84,
+    "human_pinch_distance": 0.057569482643878886,
+    "robot_pinch_distance": 0.05632779454409485,
+    "contact": false,
+    "action": [
+      0.38849507770526776,
+      0.3976177998560184,
+      0.475316815397072,
+      0.6626963330933642,
+      0.19999999999951945,
+      0.19999999999951945,
+      0.19999999999951945
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.86,
+    "human_pinch_distance": 0.05948666361107924,
+    "robot_pinch_distance": 0.05831205356981698,
+    "contact": false,
+    "action": [
+      0.3651092939718271,
+      0.37434781179389054,
+      0.44736967058825594,
+      0.6239130196564844,
+      0.19999999999963958,
+      0.19999999999963958,
+      0.19999999999963958
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.8800000000000001,
+    "human_pinch_distance": 0.06140440581672572,
+    "robot_pinch_distance": 0.06031075129182244,
+    "contact": false,
+    "action": [
+      0.34157525790895726,
+      0.35090132403256286,
+      0.4192163756143543,
+      0.5848355400542716,
+      0.19999999999972967,
+      0.19999999999972967,
+      0.19999999999972967
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.9000000000000001,
+    "human_pinch_distance": 0.0633168832061592,
+    "robot_pinch_distance": 0.06231779354510386,
+    "contact": false,
+    "action": [
+      0.3179646915704908,
+      0.3273498378999869,
+      0.390942776214085,
+      0.5455830631666448,
+      0.19999999999979723,
+      0.19999999999979723,
+      0.19999999999979723
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.92,
+    "human_pinch_distance": 0.0652183101274475,
+    "robot_pinch_distance": 0.06432707739113289,
+    "contact": false,
+    "action": [
+      0.29434934040056876,
+      0.3037649837993012,
+      0.36263485187941497,
+      0.5062749729988354,
+      0.1999999999998479,
+      0.1999999999998479,
+      0.1999999999998479
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.94,
+    "human_pinch_distance": 0.06710295796204346,
+    "robot_pinch_distance": 0.0663325115827012,
+    "contact": false,
+    "action": [
+      0.27080073718592834,
+      0.2802182795282227,
+      0.3343784269654083,
+      0.4670304658803711,
+      0.19999999999988594,
+      0.19999999999988594,
+      0.19999999999988594
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.96,
+    "human_pinch_distance": 0.06896517107500029,
+    "robot_pinch_distance": 0.06832803603111483,
+    "contact": false,
+    "action": [
+      0.2473899773020803,
+      0.25678090044999713,
+      0.3062588959104131,
+      0.42796816741666177,
+      0.19999999999991447,
+      0.19999999999991447,
+      0.19999999999991447
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 1.98,
+    "human_pinch_distance": 0.07079938217810283,
+    "robot_pinch_distance": 0.07030764038626225,
+    "contact": false,
+    "action": [
+      0.2241875039727934,
+      0.23352346021260925,
+      0.27836096100716784,
+      0.3892057670210153,
+      0.19999999999993584,
+      0.19999999999993584,
+      0.19999999999993584
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 2.0,
+    "human_pinch_distance": 0.0726001271729991,
+    "robot_pinch_distance": 0.0722653818254157,
+    "contact": false,
+    "action": [
+      0.20126290245492204,
+      0.21051580087840424,
+      0.2507683813693886,
+      0.35085966813067365,
+      0.19999999999995188,
+      0.19999999999995188,
+      0.19999999999995188
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 2.02,
+    "human_pinch_distance": 0.07436205951957774,
+    "robot_pinch_distance": 0.07419540213064135,
+    "contact": false,
+    "action": [
+      0.17868470225945288,
+      0.18782679151028783,
+      0.22356373196217838,
+      0.3130446525171463,
+      0.19999999999996393,
+      0.19999999999996393,
+      0.19999999999996393
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 2.04,
+    "human_pinch_distance": 0.07607996415701655,
+    "robot_pinch_distance": 0.07609194411871076,
+    "contact": false,
+    "action": [
+      0.15652018671191664,
+      0.1655241344468414,
+      0.1968281717892247,
+      0.27587355741140224,
+      0.19999999999997292,
+      0.19999999999997292,
+      0.19999999999997292
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 2.06,
+    "human_pinch_distance": 0.07774877099062931,
+    "robot_pinch_distance": 0.07794936747226813,
+    "contact": false,
+    "action": [
+      0.13483520933318105,
+      0.14367417867639054,
+      0.17064122054302674,
+      0.23945696446065085,
+      0.1999999999999797,
+      0.1999999999999797,
+      0.1999999999999797
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 2.08,
+    "human_pinch_distance": 0.07936356794636529,
+    "robot_pinch_distance": 0.07976216400721693,
+    "contact": false,
+    "action": [
+      0.11369401668081934,
+      0.12234173988289643,
+      0.1450805432190603,
+      0.20390289980482734,
+      0.19999999999998475,
+      0.19999999999998475,
+      0.19999999999998475
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 2.1,
+    "human_pinch_distance": 0.08091961358609415,
+    "robot_pinch_distance": 0.0815249723990988,
+    "contact": false,
+    "action": [
+      0.09315907742991764,
+      0.10158992688113651,
+      0.12022174236712006,
+      0.16931654480189418,
+      0.19999999999998858,
+      0.19999999999998858,
+      0.19999999999998858
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 2.12,
+    "human_pinch_distance": 0.08241234927021199,
+    "robot_pinch_distance": 0.08323259238073472,
+    "contact": false,
+    "action": [
+      0.07329091759015753,
+      0.08147997428371898,
+      0.09613815780175052,
+      0.13579995713953164,
+      0.1999999999999914,
+      0.1999999999999914,
+      0.1999999999999914
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 2.14,
+    "human_pinch_distance": 0.08383741084926326,
+    "robot_pinch_distance": 0.08487999841455876,
+    "contact": false,
+    "action": [
+      0.054147961854135264,
+      0.06207108134812044,
+      0.07290067371894751,
+      0.10345180224686741,
+      0.19999999999999357,
+      0.19999999999999357,
+      0.19999999999999357
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 2.16,
+    "human_pinch_distance": 0.08519063986286764,
+    "robot_pinch_distance": 0.08637616773113418,
+    "contact": false,
+    "action": [
+      0.03697788029454911,
+      0.04437345635345893,
+      0.051769032412368764,
+      0.07395576058909822,
+      0.19999999999999518,
+      0.19999999999999518,
+      0.19999999999999518
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 2.18,
+    "human_pinch_distance": 0.08646809422200606,
+    "robot_pinch_distance": 0.08728212579835064,
+    "contact": false,
+    "action": [
+      0.027733410220911834,
+      0.033280092265094194,
+      0.03882677430927657,
+      0.05546682044182367,
+      0.1999999999999964,
+      0.1999999999999964,
+      0.1999999999999964
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 2.2,
+    "human_pinch_distance": 0.08766605834943456,
+    "robot_pinch_distance": 0.08796159434876298,
+    "contact": false,
+    "action": [
+      0.020800057665683876,
+      0.024960069198820645,
+      0.02912008073195743,
+      0.04160011533136775,
+      0.1999999999999973,
+      0.1999999999999973,
+      0.1999999999999973
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 2.22,
+    "human_pinch_distance": 0.08878105275247614,
+    "robot_pinch_distance": 0.08847119576157224,
+    "contact": false,
+    "action": [
+      0.015600043249262906,
+      0.018720051899115485,
+      0.02184006054896807,
+      0.031200086498525813,
+      0.19999999999999796,
+      0.19999999999999796,
+      0.19999999999999796
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 2.24,
+    "human_pinch_distance": 0.08980984300254273,
+    "robot_pinch_distance": 0.08885339682117917,
+    "contact": false,
+    "action": [
+      0.011700032436947179,
+      0.014040038924336614,
+      0.016380045411726052,
+      0.023400064873894358,
+      0.19999999999999846,
+      0.19999999999999846,
+      0.19999999999999846
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 2.2600000000000002,
+    "human_pinch_distance": 0.0907494480963395,
+    "robot_pinch_distance": 0.08914004761588439,
+    "contact": false,
+    "action": [
+      0.008775024327710384,
+      0.01053002919325246,
+      0.012285034058794539,
+      0.01755004865542077,
+      0.19999999999999885,
+      0.19999999999999885,
+      0.19999999999999885
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 2.2800000000000002,
+    "human_pinch_distance": 0.09159714817470721,
+    "robot_pinch_distance": 0.08935503571191328,
+    "contact": false,
+    "action": [
+      0.006581268245782788,
+      0.007897521894939346,
+      0.009213775544095904,
+      0.013162536491565575,
+      0.19999999999999912,
+      0.19999999999999912,
+      0.19999999999999912
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 2.3000000000000003,
+    "human_pinch_distance": 0.09235049157638461,
+    "robot_pinch_distance": 0.08951627678393496,
+    "contact": false,
+    "action": [
+      0.004935951184337091,
+      0.0059231414212045095,
+      0.006910331658071928,
+      0.009871902368674182,
+      0.19999999999999934,
+      0.19999999999999934,
+      0.19999999999999934
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 2.32,
+    "human_pinch_distance": 0.09300730120556076,
+    "robot_pinch_distance": 0.08963720758795123,
+    "contact": false,
+    "action": [
+      0.003701963388252818,
+      0.004442356065903382,
+      0.005182748743553946,
+      0.007403926776505636,
+      0.1999999999999995,
+      0.1999999999999995,
+      0.1999999999999995
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 2.34,
+    "human_pinch_distance": 0.09356568019388357,
+    "robot_pinch_distance": 0.08972790569096341,
+    "contact": false,
+    "action": [
+      0.0027764725411896134,
+      0.003331767049427537,
+      0.0038870615576654596,
+      0.005552945082379227,
+      0.19999999999999962,
+      0.19999999999999962,
+      0.19999999999999962
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 2.36,
+    "human_pinch_distance": 0.09402401683955605,
+    "robot_pinch_distance": 0.08979592926822257,
+    "contact": false,
+    "action": [
+      0.0020823544058922103,
+      0.0024988252870706525,
+      0.0029152961682490947,
+      0.0041647088117844205,
+      0.19999999999999973,
+      0.19999999999999973,
+      0.19999999999999973
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "baseline3_contact_aware_placeholder",
+    "timestamp": 2.38,
+    "human_pinch_distance": 0.09438098880825094,
+    "robot_pinch_distance": 0.08984694695116692,
+    "contact": false,
+    "action": [
+      0.0015617658044191577,
+      0.0018741189653029894,
+      0.002186472126186821,
+      0.0031235316088383154,
+      0.1999999999999998,
+      0.1999999999999998,
+      0.1999999999999998
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.0,
+    "human_pinch_distance": 0.09545214042184237,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.05,
+      0.05,
+      0.05
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.02,
+    "human_pinch_distance": 0.09543896000179618,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.08750000000000001,
+      0.08750000000000001,
+      0.08750000000000001
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.04,
+    "human_pinch_distance": 0.09538957062679308,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.115625,
+      0.115625,
+      0.115625
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.06,
+    "human_pinch_distance": 0.0952868130427586,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.13671875,
+      0.13671875,
+      0.13671875
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.08,
+    "human_pinch_distance": 0.09511800538487591,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1525390625,
+      0.1525390625,
+      0.1525390625
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.1,
+    "human_pinch_distance": 0.0948738990917593,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.164404296875,
+      0.164404296875,
+      0.164404296875
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.12,
+    "human_pinch_distance": 0.09454789523442607,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.17330322265624998,
+      0.17330322265624998,
+      0.17330322265624998
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.14,
+    "human_pinch_distance": 0.09413545585779666,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1799774169921875,
+      0.1799774169921875,
+      0.1799774169921875
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.16,
+    "human_pinch_distance": 0.09363366135394742,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.18498306274414061,
+      0.18498306274414061,
+      0.18498306274414061
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.18,
+    "human_pinch_distance": 0.09304087716604117,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.18873729705810544,
+      0.18873729705810544,
+      0.18873729705810544
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.2,
+    "human_pinch_distance": 0.09235650231360164,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.19155297279357908,
+      0.19155297279357908,
+      0.19155297279357908
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.22,
+    "human_pinch_distance": 0.0915807791152924,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.19366472959518433,
+      0.19366472959518433,
+      0.19366472959518433
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.24,
+    "human_pinch_distance": 0.09071464864613016,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.19524854719638823,
+      0.19524854719638823,
+      0.19524854719638823
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.26,
+    "human_pinch_distance": 0.0897596403356966,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.19643641039729115,
+      0.19643641039729115,
+      0.19643641039729115
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.28,
+    "human_pinch_distance": 0.08871778701628136,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.19732730779796837,
+      0.19732730779796837,
+      0.19732730779796837
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.3,
+    "human_pinch_distance": 0.08759155890721868,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1979954808484763,
+      0.1979954808484763,
+      0.1979954808484763
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.32,
+    "human_pinch_distance": 0.08638381165531561,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1984966106363572,
+      0.1984966106363572,
+      0.1984966106363572
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.34,
+    "human_pinch_distance": 0.08509774477706024,
+    "robot_pinch_distance": 0.09,
+    "contact": false,
+    "action": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.19887245797726788,
+      0.19887245797726788,
+      0.19887245797726788
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.36,
+    "human_pinch_distance": 0.08373686776805533,
+    "robot_pinch_distance": 0.08942895897014168,
+    "contact": false,
+    "action": [
+      0.0078945764496542,
+      0.006315661159723359,
+      0.0078945764496542,
+      0.010526101932872265,
+      0.1991543434829509,
+      0.1991543434829509,
+      0.1991543434829509
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.38,
+    "human_pinch_distance": 0.08230497183516888,
+    "robot_pinch_distance": 0.0885882055607994,
+    "contact": false,
+    "action": [
+      0.018817570142608066,
+      0.015843513759051873,
+      0.019607027787573485,
+      0.026405856265086458,
+      0.1993657576122132,
+      0.1993657576122132,
+      0.1993657576122132
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.4,
+    "human_pinch_distance": 0.08080610572443585,
+    "robot_pinch_distance": 0.08754627126625321,
+    "contact": false,
+    "action": [
+      0.03190305381413478,
+      0.02779892888805134,
+      0.0341795396508783,
+      0.046331548146752236,
+      0.1995243182091599,
+      0.1995243182091599,
+      0.1995243182091599
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.42,
+    "human_pinch_distance": 0.07924455450566709,
+    "robot_pinch_distance": 0.08633756468265627,
+    "contact": false,
+    "action": [
+      0.04679290508904384,
+      0.041762872371020304,
+      0.05112145338882908,
+      0.06960478728503385,
+      0.1996432386568699,
+      0.1996432386568699,
+      0.1996432386568699
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.44,
+    "human_pinch_distance": 0.07762482046513955,
+    "robot_pinch_distance": 0.08498913091054323,
+    "contact": false,
+    "action": [
+      0.06320378373987036,
+      0.057406591650693284,
+      0.07004734839866736,
+      0.09567765275115547,
+      0.19973242899265242,
+      0.19973242899265242,
+      0.19973242899265242
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.46,
+    "human_pinch_distance": 0.07595160547469935,
+    "robot_pinch_distance": 0.08352254226935754,
+    "contact": false,
+    "action": [
+      0.0809078675415929,
+      0.07446845473665986,
+      0.09065002824497845,
+      0.12411409122776644,
+      0.19979932174448933,
+      0.19979932174448933,
+      0.19979932174448933
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.48,
+    "human_pinch_distance": 0.07422979436706993,
+    "robot_pinch_distance": 0.08195531209584578,
+    "contact": false,
+    "action": [
+      0.0997184529704431,
+      0.09273662948220655,
+      0.11268032007629517,
+      0.1545610491370109,
+      0.199849491308367,
+      0.199849491308367,
+      0.199849491308367
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.5,
+    "human_pinch_distance": 0.07246443896651823,
+    "robot_pinch_distance": 0.08030195096453738,
+    "contact": false,
+    "action": [
+      0.11947920358418693,
+      0.11203614171731988,
+      0.13593198243415727,
+      0.18672690286219978,
+      0.19988711848127522,
+      0.19988711848127522,
+      0.19988711848127522
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.52,
+    "human_pinch_distance": 0.07066074251123779,
+    "robot_pinch_distance": 0.07857475478002146,
+    "contact": false,
+    "action": [
+      0.14005613376327353,
+      0.13221921679402268,
+      0.16023044354667737,
+      0.22036536132337112,
+      0.19991533886095642,
+      0.19991533886095642,
+      0.19991533886095642
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.54,
+    "human_pinch_distance": 0.06882404426620457,
+    "robot_pinch_distance": 0.07678439178634613,
+    "contact": false,
+    "action": [
+      0.16133164400629463,
+      0.153158083473065,
+      0.18542441227432394,
+      0.25526347245510833,
+      0.1999365041457173,
+      0.1999365041457173,
+      0.1999365041457173
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.56,
+    "human_pinch_distance": 0.06695980416822757,
+    "robot_pinch_distance": 0.0749403387433984,
+    "contact": false,
+    "action": [
+      0.183200095285188,
+      0.17473962476279448,
+      0.2113796438198321,
+      0.29123270793799083,
+      0.19995237810928795,
+      0.19995237810928795,
+      0.19995237810928795
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.58,
+    "human_pinch_distance": 0.06507358737233387,
+    "robot_pinch_distance": 0.07305120392792826,
+    "contact": false,
+    "action": [
+      0.20556453841251543,
+      0.1968614145258532,
+      0.2379743222083563,
+      0.3281023575430887,
+      0.19996428358196594,
+      0.19996428358196594,
+      0.19996428358196594
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.6,
+    "human_pinch_distance": 0.06317104858326396,
+    "robot_pinch_distance": 0.07112496517425344,
+    "contact": false,
+    "action": [
+      0.22833431070253019,
+      0.2194287943011961,
+      0.2650956564417022,
+      0.3657146571686602,
+      0.19997321268647444,
+      0.19997321268647444,
+      0.19997321268647444
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.62,
+    "human_pinch_distance": 0.061257916059630185,
+    "robot_pinch_distance": 0.06916914408669725,
+    "contact": false,
+    "action": [
+      0.25142328447690887,
+      0.24235273152136608,
+      0.29263738841674786,
+      0.40392121920227686,
+      0.19997990951485584,
+      0.19997990951485584,
+      0.19997990951485584
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.64,
+    "human_pinch_distance": 0.05933997517254829,
+    "robot_pinch_distance": 0.06719093224027499,
+    "contact": false,
+    "action": [
+      0.27474860621559916,
+      0.2655482653900897,
+      0.32049798663320955,
+      0.44258044231681626,
+      0.19998493213614188,
+      0.19998493213614188,
+      0.19998493213614188
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.66,
+    "human_pinch_distance": 0.057423051386237864,
+    "robot_pinch_distance": 0.06519728119408891,
+    "contact": false,
+    "action": [
+      0.29822980591192616,
+      0.288933395559906,
+      0.34857935674229124,
+      0.4815556592665101,
+      0.19998869910210643,
+      0.19998869910210643,
+      0.19998869910210643
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.68,
+    "human_pinch_distance": 0.05551299250600645,
+    "robot_pinch_distance": 0.0631949651405285,
+    "contact": false,
+    "action": [
+      0.32178818685339766,
+      0.3124283054890933,
+      0.3767859428597728,
+      0.5207138424818222,
+      0.1999915243265798,
+      0.1999915243265798,
+      0.1999915243265798
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.7000000000000001,
+    "human_pinch_distance": 0.0536156500100663,
+    "robot_pinch_distance": 0.061190622753361595,
+    "contact": false,
+    "action": [
+      0.3453464291584041,
+      0.33595484001525056,
+      0.4050241258469313,
+      0.559924733358751,
+      0.19999364324493485,
+      0.19999364324493485,
+      0.19999364324493485
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.72,
+    "human_pinch_distance": 0.051736859247060646,
+    "robot_pinch_distance": 0.059190783092549826,
+    "contact": false,
+    "action": [
+      0.3688283578561312,
+      0.359436177545009,
+      0.4332018491162352,
+      0.5990602959083484,
+      0.19999523243370115,
+      0.19999523243370115,
+      0.19999523243370115
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.74,
+    "human_pinch_distance": 0.049882418243039156,
+    "robot_pinch_distance": 0.057201879133869316,
+    "contact": false,
+    "action": [
+      0.39215883952016817,
+      0.3827966530317997,
+      0.4612284209358333,
+      0.6379944217196662,
+      0.19999642432527587,
+      0.19999642432527587,
+      0.19999642432527587
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.76,
+    "human_pinch_distance": 0.04805806482319998,
+    "robot_pinch_distance": 0.05523025151382521,
+    "contact": false,
+    "action": [
+      0.4152637815046237,
+      0.4059616998635483,
+      0.4890144561644731,
+      0.676602833105914,
+      0.1999973182439569,
+      0.1999973182439569,
+      0.1999973182439569
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.78,
+    "human_pinch_distance": 0.046269451720100614,
+    "robot_pinch_distance": 0.05328214433910065,
+    "contact": false,
+    "action": [
+      0.43807021545033886,
+      0.42885788784065815,
+      0.5164719309307259,
+      0.714763146401097,
+      0.19999798868296764,
+      0.19999798868296764,
+      0.19999798868296764
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.8,
+    "human_pinch_distance": 0.0445221193187916,
+    "robot_pinch_distance": 0.051363694350489646,
+    "contact": false,
+    "action": [
+      0.46050645247062105,
+      0.4514130412617242,
+      0.5435143317558484,
+      0.7523550687695404,
+      0.1999984915122257,
+      0.1999984915122257,
+      0.1999984915122257
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.8200000000000001,
+    "human_pinch_distance": 0.042821465691123606,
+    "robot_pinch_distance": 0.04948091431655822,
+    "contact": false,
+    "action": [
+      0.482502301654667,
+      0.4735564262134094,
+      0.5700568865443427,
+      0.7892607103556825,
+      0.19999886863416927,
+      0.19999886863416927,
+      0.19999886863416927
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.84,
+    "human_pinch_distance": 0.04117271361063491,
+    "robot_pinch_distance": 0.047639671238616565,
+    "contact": false,
+    "action": [
+      0.5039893464592934,
+      0.4952189997777392,
+      0.5960168690695979,
+      0.8253649996295656,
+      0.19999915147562697,
+      0.19999915147562697,
+      0.19999915147562697
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.86,
+    "human_pinch_distance": 0.039580874333983745,
+    "robot_pinch_distance": 0.045845659763806806,
+    "contact": false,
+    "action": [
+      0.5249012752903057,
+      0.5163337161833262,
+      0.6213139712413873,
+      0.860556193638877,
+      0.19999936360672022,
+      0.19999936360672022,
+      0.19999936360672022
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.88,
+    "human_pinch_distance": 0.03805070810590448,
+    "robot_pinch_distance": 0.04410437112425765,
+    "contact": false,
+    "action": [
+      0.5451742630995254,
+      0.5368358859841917,
+      0.6458707386040968,
+      0.8947264766403196,
+      0.19999952270504018,
+      0.19999952270504018,
+      0.19999952270504018
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.9,
+    "human_pinch_distance": 0.036586681614144814,
+    "robot_pinch_distance": 0.04242105795114625,
+    "contact": false,
+    "action": [
+      0.5647474000671906,
+      0.5566635841159906,
+      0.6696130641294288,
+      0.9277726401933177,
+      0.19999964202878012,
+      0.19999964202878012,
+      0.19999964202878012
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.92,
+    "human_pinch_distance": 0.03519292300774978,
+    "robot_pinch_distance": 0.040800695460483184,
+    "contact": false,
+    "action": [
+      0.5835631612961593,
+      0.5757581010747655,
+      0.6924707333339976,
+      0.9595968351246094,
+      0.19999973152158507,
+      0.19999973152158507,
+      0.19999973152158507
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.9400000000000001,
+    "human_pinch_distance": 0.03387317560595229,
+    "robot_pinch_distance": 0.03924793977879984,
+    "contact": false,
+    "action": [
+      0.6015679078341358,
+      0.5940644284158436,
+      0.7143780099826709,
+      0.9901073806930728,
+      0.19999979864118878,
+      0.19999979864118878,
+      0.19999979864118878
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.96,
+    "human_pinch_distance": 0.03263075205722976,
+    "robot_pinch_distance": 0.03810342772494183,
+    "contact": false,
+    "action": [
+      0.6187124042865166,
+      0.6115317652868945,
+      0.7352742461441978,
+      1.0,
+      0.19999984898089157,
+      0.19999984898089157,
+      0.19999984898089157
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 0.98,
+    "human_pinch_distance": 0.031468491421959253,
+    "robot_pinch_distance": 0.037182010084169985,
+    "contact": false,
+    "action": [
+      0.6349523320064852,
+      0.6281140269626804,
+      0.7551044933639774,
+      1.0,
+      0.19999988673566865,
+      0.19999988673566865,
+      0.19999988673566865
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.0,
+    "human_pinch_distance": 0.03038872237333362,
+    "robot_pinch_distance": 0.036312814290828756,
+    "contact": false,
+    "action": [
+      0.6502487698651515,
+      0.6437703297715157,
+      0.7738200837445461,
+      1.0,
+      0.19999991505175146,
+      0.19999991505175146,
+      0.19999991505175146
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.02,
+    "human_pinch_distance": 0.0293932363239809,
+    "robot_pinch_distance": 0.03549776953084068,
+    "contact": false,
+    "action": [
+      0.6645686077906505,
+      0.6584654201587328,
+      0.7913791417168631,
+      1.0,
+      0.19999993628881357,
+      0.19999993628881357,
+      0.19999993628881357
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.04,
+    "human_pinch_distance": 0.028483274638349067,
+    "robot_pinch_distance": 0.034738467738602424,
+    "contact": false,
+    "action": [
+      0.6778848528657464,
+      0.6721700100347684,
+      0.8077469806079178,
+      1.0,
+      0.19999995221661016,
+      0.19999995221661016,
+      0.19999995221661016
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.06,
+    "human_pinch_distance": 0.02765953401573458,
+    "robot_pinch_distance": 0.03403615329998721,
+    "contact": false,
+    "action": [
+      0.6901767852958095,
+      0.684860977394308,
+      0.8228963344534699,
+      1.0,
+      0.19999996416245763,
+      0.19999996416245763,
+      0.19999996416245763
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.08,
+    "human_pinch_distance": 0.02692219347763577,
+    "robot_pinch_distance": 0.033391722887951204,
+    "contact": false,
+    "action": [
+      0.7014299235358041,
+      0.6965213919370543,
+      0.8368073766442153,
+      1.0,
+      0.1999999731218432,
+      0.1999999731218432,
+      0.1999999731218432
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.1,
+    "human_pinch_distance": 0.026270965083077868,
+    "robot_pinch_distance": 0.032805737328716306,
+    "contact": false,
+    "action": [
+      0.7116357655002281,
+      0.7071403313079685,
+      0.8494674844080142,
+      1.0,
+      0.1999999798413824,
+      0.1999999798413824,
+      0.1999999798413824
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.12,
+    "human_pinch_distance": 0.025705168553834867,
+    "robot_pinch_distance": 0.032278446698995183,
+    "contact": false,
+    "action": [
+      0.7207912865483216,
+      0.7167124652425729,
+      0.8608707225522374,
+      1.0,
+      0.19999998488103682,
+      0.19999998488103682,
+      0.19999998488103682
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.1400000000000001,
+    "human_pinch_distance": 0.02522382758174913,
+    "robot_pinch_distance": 0.03180982884846623,
+    "contact": false,
+    "action": [
+      0.7288981942560431,
+      0.7252374020616245,
+      0.871017040912833,
+      1.0,
+      0.19999998866077762,
+      0.19999998866077762,
+      0.19999998866077762
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.16,
+    "human_pinch_distance": 0.024825783006240745,
+    "robot_pinch_distance": 0.0314529942662451,
+    "contact": false,
+    "action": [
+      0.7348731068849983,
+      0.731847728261998,
+      0.8788223496389975,
+      1.0,
+      0.19999999149558323,
+      0.19999999149558323,
+      0.19999999149558323
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.18,
+    "human_pinch_distance": 0.024509815669793416,
+    "robot_pinch_distance": 0.03121474569968382,
+    "contact": false,
+    "action": [
+      0.7386548301637488,
+      0.7363857961964985,
+      0.8841167622292481,
+      1.0,
+      0.1999999936216874,
+      0.1999999936216874,
+      0.1999999936216874
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.2,
+    "human_pinch_distance": 0.024274769970457237,
+    "robot_pinch_distance": 0.031036059274762863,
+    "contact": false,
+    "action": [
+      0.7414911226228116,
+      0.7397893471473739,
+      0.8880875716719361,
+      1.0,
+      0.19999999521626555,
+      0.19999999521626555,
+      0.19999999521626555
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.22,
+    "human_pinch_distance": 0.02411966824799961,
+    "robot_pinch_distance": 0.030902044456072142,
+    "contact": false,
+    "action": [
+      0.7436183419671086,
+      0.7423420103605304,
+      0.8910656787539522,
+      1.0,
+      0.19999999641219918,
+      0.19999999641219918,
+      0.19999999641219918
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.24,
+    "human_pinch_distance": 0.024043806341856815,
+    "robot_pinch_distance": 0.030801533342054113,
+    "contact": false,
+    "action": [
+      0.7452137564753315,
+      0.7442565077703978,
+      0.893299259065464,
+      1.0,
+      0.19999999730914936,
+      0.19999999730914936,
+      0.19999999730914936
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.26,
+    "human_pinch_distance": 0.024046821956810606,
+    "robot_pinch_distance": 0.030726150006540574,
+    "contact": false,
+    "action": [
+      0.7464103173564987,
+      0.7456923808277983,
+      0.8949744442990981,
+      1.0,
+      0.19999999798186202,
+      0.19999999798186202,
+      0.19999999798186202
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.28,
+    "human_pinch_distance": 0.0241287297235246,
+    "robot_pinch_distance": 0.030669612504905436,
+    "contact": false,
+    "action": [
+      0.747307738017374,
+      0.7467692856208488,
+      0.8962308332243236,
+      1.0,
+      0.1999999984863965,
+      0.1999999984863965,
+      0.1999999984863965
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.3,
+    "human_pinch_distance": 0.02428991978392666,
+    "robot_pinch_distance": 0.030627209378679077,
+    "contact": false,
+    "action": [
+      0.7479808035130304,
+      0.7475769642156366,
+      0.8971731249182426,
+      1.0,
+      0.19999999886479736,
+      0.19999999886479736,
+      0.19999999886479736
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.32,
+    "human_pinch_distance": 0.024531120029755698,
+    "robot_pinch_distance": 0.030595407034009307,
+    "contact": false,
+    "action": [
+      0.7484856026347728,
+      0.7481827231617274,
+      0.8978798436886819,
+      1.0,
+      0.199999999148598,
+      0.199999999148598,
+      0.199999999148598
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.34,
+    "human_pinch_distance": 0.024853325406583946,
+    "robot_pinch_distance": 0.03057155527550698,
+    "contact": false,
+    "action": [
+      0.7488642019760796,
+      0.7486370423712956,
+      0.8984098827665115,
+      1.0,
+      0.19999999936144852,
+      0.19999999936144852,
+      0.19999999936144852
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.36,
+    "human_pinch_distance": 0.02525770059675443,
+    "robot_pinch_distance": 0.030632587264386266,
+    "contact": false,
+    "action": [
+      0.7475375227523446,
+      0.7476892787946996,
+      0.8971967833451684,
+      1.0,
+      0.19999999952108638,
+      0.19999999952108638,
+      0.19999999952108638
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.3800000000000001,
+    "human_pinch_distance": 0.025745464580938786,
+    "robot_pinch_distance": 0.030793915772878183,
+    "contact": false,
+    "action": [
+      0.7442993027982486,
+      0.7450228248102454,
+      0.893882685369895,
+      1.0,
+      0.19999999964081477,
+      0.19999999964081477,
+      0.19999999964081477
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.4000000000000001,
+    "human_pinch_distance": 0.02631776679516249,
+    "robot_pinch_distance": 0.031026160684428934,
+    "contact": false,
+    "action": [
+      0.7398180114443547,
+      0.7410760307211318,
+      0.8890396330100027,
+      1.0,
+      0.19999999973061106,
+      0.19999999973061106,
+      0.19999999973061106
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.42,
+    "human_pinch_distance": 0.026975564716165905,
+    "robot_pinch_distance": 0.031326680315782424,
+    "contact": false,
+    "action": [
+      0.7341342503421119,
+      0.7359000122009491,
+      0.8827268622693714,
+      1.0,
+      0.1999999997979583,
+      0.1999999997979583,
+      0.1999999997979583
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.44,
+    "human_pinch_distance": 0.027719511747916325,
+    "robot_pinch_distance": 0.03169356784063942,
+    "contact": false,
+    "action": [
+      0.7272773790701252,
+      0.7295316342539413,
+      0.8749871100679661,
+      1.0,
+      0.19999999984846872,
+      0.19999999984846872,
+      0.19999999984846872
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.46,
+    "human_pinch_distance": 0.02854986243555586,
+    "robot_pinch_distance": 0.03212538533445453,
+    "contact": false,
+    "action": [
+      0.7192698682926083,
+      0.7219984980400197,
+      0.8658524716985412,
+      1.0,
+      0.19999999988635153,
+      0.19999999988635153,
+      0.19999999988635153
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.48,
+    "human_pinch_distance": 0.029466399623066495,
+    "robot_pinch_distance": 0.0326209544407383,
+    "contact": false,
+    "action": [
+      0.7101307236864027,
+      0.7133228674813495,
+      0.8553490122186299,
+      1.0,
+      0.19999999991476364,
+      0.19999999991476364,
+      0.19999999991476364
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.5,
+    "human_pinch_distance": 0.030468385587465424,
+    "robot_pinch_distance": 0.033179193966187535,
+    "contact": false,
+    "action": [
+      0.699878131665226,
+      0.7035247219669347,
+      0.8435003482999798,
+      1.0,
+      0.1999999999360727,
+      0.1999999999360727,
+      0.1999999999360727
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.52,
+    "human_pinch_distance": 0.031554536799509945,
+    "robot_pinch_distance": 0.033798996761135736,
+    "contact": false,
+    "action": [
+      0.6885314487128118,
+      0.6926240804541489,
+      0.8303303701967111,
+      1.0,
+      0.19999999995205453,
+      0.19999999995205453,
+      0.19999999995205453
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.54,
+    "human_pinch_distance": 0.03272302006349402,
+    "robot_pinch_distance": 0.03447913951036117,
+    "contact": false,
+    "action": [
+      0.6761126386362397,
+      0.6806427165222226,
+      0.8158652442494706,
+      1.0,
+      0.1999999999640409,
+      0.1999999999640409,
+      0.1999999999640409
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.56,
+    "human_pinch_distance": 0.03397146652973959,
+    "robot_pinch_distance": 0.03521821987417004,
+    "contact": false,
+    "action": [
+      0.6626472508647261,
+      0.6676053673620203,
+      0.8001348175349656,
+      1.0,
+      0.19999999997303064,
+      0.19999999997303064,
+      0.19999999997303064
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.58,
+    "human_pinch_distance": 0.03529699947028424,
+    "robot_pinch_distance": 0.03601461601137375,
+    "contact": false,
+    "action": [
+      0.6481650243647044,
+      0.6535405279133557,
+      0.7831735327862968,
+      1.0,
+      0.19999999997977297,
+      0.19999999997977297,
+      0.19999999997977297
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.6,
+    "human_pinch_distance": 0.0366962716715249,
+    "robot_pinch_distance": 0.03686646402746,
+    "contact": false,
+    "action": [
+      0.632700193671136,
+      0.6384809115841753,
+      0.7650209503184024,
+      1.0,
+      0.1999999999848297,
+      0.1999999999848297,
+      0.1999999999848297
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.62,
+    "human_pinch_distance": 0.03816550867595191,
+    "robot_pinch_distance": 0.03777164939571762,
+    "contact": false,
+    "action": [
+      0.6162915650021678,
+      0.6224636496924811,
+      0.7457219626929148,
+      1.0,
+      0.19999999998862228,
+      0.19999999998862228,
+      0.19999999998862228
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.6400000000000001,
+    "human_pinch_distance": 0.039700554731100866,
+    "robot_pinch_distance": 0.03872780891946918,
+    "contact": false,
+    "action": [
+      0.5989824212945951,
+      0.6055302923812663,
+      0.7253267766401854,
+      1.0,
+      0.19999999999146673,
+      0.19999999999146673,
+      0.19999999999146673
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.6600000000000001,
+    "human_pinch_distance": 0.04129691902799064,
+    "robot_pinch_distance": 0.04009031262568504,
+    "contact": false,
+    "action": [
+      0.5808203055806951,
+      0.5877266642668106,
+      0.7038907253829497,
+      0.9795444404446845,
+      0.19999999999360002,
+      0.19999999999360002,
+      0.19999999999360002
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.68,
+    "human_pinch_distance": 0.04294982052092525,
+    "robot_pinch_distance": 0.04168359078133172,
+    "contact": false,
+    "action": [
+      0.5618567228922093,
+      0.5691026187729642,
+      0.6814739633514062,
+      0.9485043646216071,
+      0.19999999999520002,
+      0.19999999999520002,
+      0.19999999999520002
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.7,
+    "human_pinch_distance": 0.04465423024448975,
+    "robot_pinch_distance": 0.043341748255918994,
+    "contact": false,
+    "action": [
+      0.5421467922689874,
+      0.5497117263340092,
+      0.6581410847878068,
+      0.9161862105566821,
+      0.1999999999964,
+      0.1999999999964,
+      0.1999999999964
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.72,
+    "human_pinch_distance": 0.04640491054753645,
+    "robot_pinch_distance": 0.045059906065886536,
+    "contact": false,
+    "action": [
+      0.5217488727936682,
+      0.529610923721243,
+      0.6339606982799767,
+      0.8826848728687383,
+      0.1999999999973,
+      0.1999999999973,
+      0.1999999999973
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.74,
+    "human_pinch_distance": 0.04819645104107762,
+    "robot_pinch_distance": 0.04683293290263618,
+    "contact": false,
+    "action": [
+      0.5007241810495675,
+      0.5088601448621749,
+      0.6090049810720886,
+      0.8481002414369584,
+      0.19999999999797502,
+      0.19999999999797502,
+      0.19999999999797502
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.76,
+    "human_pinch_distance": 0.0500233013178052,
+    "robot_pinch_distance": 0.04865547703228453,
+    "contact": false,
+    "action": [
+      0.4791364120542607,
+      0.4875219477596257,
+      0.583349230170478,
+      0.8125365795993764,
+      0.19999999999848128,
+      0.19999999999848128,
+      0.19999999999848128
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.78,
+    "human_pinch_distance": 0.0518798006648061,
+    "robot_pinch_distance": 0.05052199756931508,
+    "contact": false,
+    "action": [
+      0.45705137150379865,
+      0.46566114746657356,
+      0.5570714217673334,
+      0.7761019124442894,
+      0.19999999999886098,
+      0.19999999999886098,
+      0.19999999999886098
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.8,
+    "human_pinch_distance": 0.05376020507993823,
+    "robot_pinch_distance": 0.05242679462076267,
+    "contact": false,
+    "action": [
+      0.43453662395575415,
+      0.44334446144675044,
+      0.5302517862379014,
+      0.7389074357445842,
+      0.19999999999914575,
+      0.19999999999914575,
+      0.19999999999914575
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.82,
+    "human_pinch_distance": 0.055658711937091966,
+    "robot_pinch_distance": 0.054364038021747975,
+    "contact": false,
+    "action": [
+      0.4116611592347978,
+      0.4206401709244872,
+      0.5029724027714468,
+      0.7010669515408121,
+      0.1999999999993593,
+      0.1999999999993593,
+      0.1999999999993593
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.84,
+    "human_pinch_distance": 0.057569482643878886,
+    "robot_pinch_distance": 0.05632779454409485,
+    "contact": false,
+    "action": [
+      0.38849507770526776,
+      0.3976177998560184,
+      0.475316815397072,
+      0.6626963330933642,
+      0.19999999999951945,
+      0.19999999999951945,
+      0.19999999999951945
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.86,
+    "human_pinch_distance": 0.05948666361107924,
+    "robot_pinch_distance": 0.05831205356981698,
+    "contact": false,
+    "action": [
+      0.3651092939718271,
+      0.37434781179389054,
+      0.44736967058825594,
+      0.6239130196564844,
+      0.19999999999963958,
+      0.19999999999963958,
+      0.19999999999963958
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.8800000000000001,
+    "human_pinch_distance": 0.06140440581672572,
+    "robot_pinch_distance": 0.06031075129182244,
+    "contact": false,
+    "action": [
+      0.34157525790895726,
+      0.35090132403256286,
+      0.4192163756143543,
+      0.5848355400542716,
+      0.19999999999972967,
+      0.19999999999972967,
+      0.19999999999972967
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.9000000000000001,
+    "human_pinch_distance": 0.0633168832061592,
+    "robot_pinch_distance": 0.06231779354510386,
+    "contact": false,
+    "action": [
+      0.3179646915704908,
+      0.3273498378999869,
+      0.390942776214085,
+      0.5455830631666448,
+      0.19999999999979723,
+      0.19999999999979723,
+      0.19999999999979723
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.92,
+    "human_pinch_distance": 0.0652183101274475,
+    "robot_pinch_distance": 0.06432707739113289,
+    "contact": false,
+    "action": [
+      0.29434934040056876,
+      0.3037649837993012,
+      0.36263485187941497,
+      0.5062749729988354,
+      0.1999999999998479,
+      0.1999999999998479,
+      0.1999999999998479
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.94,
+    "human_pinch_distance": 0.06710295796204346,
+    "robot_pinch_distance": 0.0663325115827012,
+    "contact": false,
+    "action": [
+      0.27080073718592834,
+      0.2802182795282227,
+      0.3343784269654083,
+      0.4670304658803711,
+      0.19999999999988594,
+      0.19999999999988594,
+      0.19999999999988594
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.96,
+    "human_pinch_distance": 0.06896517107500029,
+    "robot_pinch_distance": 0.06832803603111483,
+    "contact": false,
+    "action": [
+      0.2473899773020803,
+      0.25678090044999713,
+      0.3062588959104131,
+      0.42796816741666177,
+      0.19999999999991447,
+      0.19999999999991447,
+      0.19999999999991447
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 1.98,
+    "human_pinch_distance": 0.07079938217810283,
+    "robot_pinch_distance": 0.07030764038626225,
+    "contact": false,
+    "action": [
+      0.2241875039727934,
+      0.23352346021260925,
+      0.27836096100716784,
+      0.3892057670210153,
+      0.19999999999993584,
+      0.19999999999993584,
+      0.19999999999993584
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 2.0,
+    "human_pinch_distance": 0.0726001271729991,
+    "robot_pinch_distance": 0.0722653818254157,
+    "contact": false,
+    "action": [
+      0.20126290245492204,
+      0.21051580087840424,
+      0.2507683813693886,
+      0.35085966813067365,
+      0.19999999999995188,
+      0.19999999999995188,
+      0.19999999999995188
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 2.02,
+    "human_pinch_distance": 0.07436205951957774,
+    "robot_pinch_distance": 0.07419540213064135,
+    "contact": false,
+    "action": [
+      0.17868470225945288,
+      0.18782679151028783,
+      0.22356373196217838,
+      0.3130446525171463,
+      0.19999999999996393,
+      0.19999999999996393,
+      0.19999999999996393
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 2.04,
+    "human_pinch_distance": 0.07607996415701655,
+    "robot_pinch_distance": 0.07609194411871076,
+    "contact": false,
+    "action": [
+      0.15652018671191664,
+      0.1655241344468414,
+      0.1968281717892247,
+      0.27587355741140224,
+      0.19999999999997292,
+      0.19999999999997292,
+      0.19999999999997292
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 2.06,
+    "human_pinch_distance": 0.07774877099062931,
+    "robot_pinch_distance": 0.07794936747226813,
+    "contact": false,
+    "action": [
+      0.13483520933318105,
+      0.14367417867639054,
+      0.17064122054302674,
+      0.23945696446065085,
+      0.1999999999999797,
+      0.1999999999999797,
+      0.1999999999999797
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 2.08,
+    "human_pinch_distance": 0.07936356794636529,
+    "robot_pinch_distance": 0.07976216400721693,
+    "contact": false,
+    "action": [
+      0.11369401668081934,
+      0.12234173988289643,
+      0.1450805432190603,
+      0.20390289980482734,
+      0.19999999999998475,
+      0.19999999999998475,
+      0.19999999999998475
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 2.1,
+    "human_pinch_distance": 0.08091961358609415,
+    "robot_pinch_distance": 0.0815249723990988,
+    "contact": false,
+    "action": [
+      0.09315907742991764,
+      0.10158992688113651,
+      0.12022174236712006,
+      0.16931654480189418,
+      0.19999999999998858,
+      0.19999999999998858,
+      0.19999999999998858
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 2.12,
+    "human_pinch_distance": 0.08241234927021199,
+    "robot_pinch_distance": 0.08323259238073472,
+    "contact": false,
+    "action": [
+      0.07329091759015753,
+      0.08147997428371898,
+      0.09613815780175052,
+      0.13579995713953164,
+      0.1999999999999914,
+      0.1999999999999914,
+      0.1999999999999914
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 2.14,
+    "human_pinch_distance": 0.08383741084926326,
+    "robot_pinch_distance": 0.08487999841455876,
+    "contact": false,
+    "action": [
+      0.054147961854135264,
+      0.06207108134812044,
+      0.07290067371894751,
+      0.10345180224686741,
+      0.19999999999999357,
+      0.19999999999999357,
+      0.19999999999999357
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 2.16,
+    "human_pinch_distance": 0.08519063986286764,
+    "robot_pinch_distance": 0.08637616773113418,
+    "contact": false,
+    "action": [
+      0.03697788029454911,
+      0.04437345635345893,
+      0.051769032412368764,
+      0.07395576058909822,
+      0.19999999999999518,
+      0.19999999999999518,
+      0.19999999999999518
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 2.18,
+    "human_pinch_distance": 0.08646809422200606,
+    "robot_pinch_distance": 0.08728212579835064,
+    "contact": false,
+    "action": [
+      0.027733410220911834,
+      0.033280092265094194,
+      0.03882677430927657,
+      0.05546682044182367,
+      0.1999999999999964,
+      0.1999999999999964,
+      0.1999999999999964
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 2.2,
+    "human_pinch_distance": 0.08766605834943456,
+    "robot_pinch_distance": 0.08796159434876298,
+    "contact": false,
+    "action": [
+      0.020800057665683876,
+      0.024960069198820645,
+      0.02912008073195743,
+      0.04160011533136775,
+      0.1999999999999973,
+      0.1999999999999973,
+      0.1999999999999973
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 2.22,
+    "human_pinch_distance": 0.08878105275247614,
+    "robot_pinch_distance": 0.08847119576157224,
+    "contact": false,
+    "action": [
+      0.015600043249262906,
+      0.018720051899115485,
+      0.02184006054896807,
+      0.031200086498525813,
+      0.19999999999999796,
+      0.19999999999999796,
+      0.19999999999999796
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 2.24,
+    "human_pinch_distance": 0.08980984300254273,
+    "robot_pinch_distance": 0.08885339682117917,
+    "contact": false,
+    "action": [
+      0.011700032436947179,
+      0.014040038924336614,
+      0.016380045411726052,
+      0.023400064873894358,
+      0.19999999999999846,
+      0.19999999999999846,
+      0.19999999999999846
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 2.2600000000000002,
+    "human_pinch_distance": 0.0907494480963395,
+    "robot_pinch_distance": 0.08914004761588439,
+    "contact": false,
+    "action": [
+      0.008775024327710384,
+      0.01053002919325246,
+      0.012285034058794539,
+      0.01755004865542077,
+      0.19999999999999885,
+      0.19999999999999885,
+      0.19999999999999885
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 2.2800000000000002,
+    "human_pinch_distance": 0.09159714817470721,
+    "robot_pinch_distance": 0.08935503571191328,
+    "contact": false,
+    "action": [
+      0.006581268245782788,
+      0.007897521894939346,
+      0.009213775544095904,
+      0.013162536491565575,
+      0.19999999999999912,
+      0.19999999999999912,
+      0.19999999999999912
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 2.3000000000000003,
+    "human_pinch_distance": 0.09235049157638461,
+    "robot_pinch_distance": 0.08951627678393496,
+    "contact": false,
+    "action": [
+      0.004935951184337091,
+      0.0059231414212045095,
+      0.006910331658071928,
+      0.009871902368674182,
+      0.19999999999999934,
+      0.19999999999999934,
+      0.19999999999999934
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 2.32,
+    "human_pinch_distance": 0.09300730120556076,
+    "robot_pinch_distance": 0.08963720758795123,
+    "contact": false,
+    "action": [
+      0.003701963388252818,
+      0.004442356065903382,
+      0.005182748743553946,
+      0.007403926776505636,
+      0.1999999999999995,
+      0.1999999999999995,
+      0.1999999999999995
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 2.34,
+    "human_pinch_distance": 0.09356568019388357,
+    "robot_pinch_distance": 0.08972790569096341,
+    "contact": false,
+    "action": [
+      0.0027764725411896134,
+      0.003331767049427537,
+      0.0038870615576654596,
+      0.005552945082379227,
+      0.19999999999999962,
+      0.19999999999999962,
+      0.19999999999999962
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 2.36,
+    "human_pinch_distance": 0.09402401683955605,
+    "robot_pinch_distance": 0.08979592926822257,
+    "contact": false,
+    "action": [
+      0.0020823544058922103,
+      0.0024988252870706525,
+      0.0029152961682490947,
+      0.0041647088117844205,
+      0.19999999999999973,
+      0.19999999999999973,
+      0.19999999999999973
+    ],
+    "latency_s": 0.0
+  },
+  {
+    "method": "proposed_zero_residual",
+    "timestamp": 2.38,
+    "human_pinch_distance": 0.09438098880825094,
+    "robot_pinch_distance": 0.08984694695116692,
+    "contact": false,
+    "action": [
+      0.0015617658044191577,
+      0.0018741189653029894,
+      0.002186472126186821,
+      0.0031235316088383154,
+      0.1999999999999998,
+      0.1999999999999998,
+      0.1999999999999998
+    ],
+    "latency_s": 0.0
+  }
+]

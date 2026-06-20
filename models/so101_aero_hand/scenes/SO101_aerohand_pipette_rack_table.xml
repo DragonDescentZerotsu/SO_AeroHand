@@ -148,8 +148,8 @@
     <mesh name="right_thumb_distal_link" content_type="model/stl" file="../../../mujoco_menagerie/tetheria_aero_hand_open/assets/right_thumb_distal_link.STL" />
     <mesh name="right_thumb_tip_link" content_type="model/stl" file="../../../mujoco_menagerie/tetheria_aero_hand_open/assets/right_thumb_tip_link.STL" />
     <model name="table_model" file="../objects/vention_table_top.xml" content_type="text/xml" />
-    <model name="pipette_rack_model" file="../../../../AutoBio/autobio/model/object/pipette_rack.gen.xml" content_type="text/xml" />
-    <model name="pipette_model" file="../../../../AutoBio/autobio/model/object/pipette.gen.xml" content_type="text/xml" />
+    <model name="pipette_rack_model" file="../../../external/AutoBio/autobio/model/object/pipette_rack.gen.xml" content_type="text/xml" />
+    <model name="pipette_model" file="../../../external/AutoBio/autobio/model/object/pipette.gen.xml" content_type="text/xml" />
   </asset>
   <contact>
     <exclude body1="palm" body2="right_t_link" />

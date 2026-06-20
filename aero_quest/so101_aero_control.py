@@ -4,6 +4,12 @@ from __future__ import annotations
 
 import numpy as np
 
+from aero_quest.mujoco_control import (
+    AERO_ACTION_NAMES,
+    AERO_HAND_ACTION_MAP,
+    write_normalized_aero_action_to_ctrl,
+)
+
 try:
     import mujoco
 except ImportError:
@@ -18,25 +24,7 @@ SO101_ARM_ACTUATOR_NAMES = (
     "wrist_roll",
 )
 
-AERO_HAND_SEMANTIC_NAMES = (
-    "thumb_abduction",
-    "thumb_flexion_1",
-    "thumb_flexion_2",
-    "index_curl",
-    "middle_curl",
-    "ring_curl",
-    "little_curl",
-)
-
-AERO_HAND_ACTION_MAP = (
-    ("thumb_abduction", "right_thumb_A_cmc_abd", True),
-    ("thumb_flexion_1", "right_th1_A_tendon", True),
-    ("thumb_flexion_2", "right_th2_A_tendon", True),
-    ("index_curl", "right_index_A_tendon", True),
-    ("middle_curl", "right_middle_A_tendon", True),
-    ("ring_curl", "right_ring_A_tendon", True),
-    ("little_curl", "right_pinky_A_tendon", True),
-)
+AERO_HAND_SEMANTIC_NAMES = AERO_ACTION_NAMES
 
 
 def _require_mujoco() -> None:
@@ -78,20 +66,12 @@ def normalized_so101_arm_to_ctrl(model, arm_action: np.ndarray, ctrl: np.ndarray
 
 
 def normalized_aero_hand_to_ctrl(model, hand_action: np.ndarray, ctrl: np.ndarray | None = None) -> np.ndarray:
-    """Map semantic Aero Hand action ``[0, 1]^7`` to combined model ctrl."""
-    hand_action = np.asarray(hand_action, dtype=np.float64)
-    if hand_action.shape != (len(AERO_HAND_ACTION_MAP),):
-        raise ValueError(f"Expected Aero hand action shape ({len(AERO_HAND_ACTION_MAP)},), got {hand_action.shape}")
+    """Compatibility wrapper for the independent Aero Hand control module."""
     if ctrl is None:
         ctrl = ctrl_midpoints(model)
-    for value, (_semantic_name, actuator_name, inverted) in zip(hand_action, AERO_HAND_ACTION_MAP):
-        idx = actuator_id(model, actuator_name)
-        lo, hi = model.actuator_ctrlrange[idx]
-        value = float(np.clip(value, 0.0, 1.0))
-        if inverted:
-            value = 1.0 - value
-        ctrl[idx] = lo + value * (hi - lo)
-    return ctrl
+    return write_normalized_aero_action_to_ctrl(
+        model, hand_action, ctrl=ctrl
+    )
 
 
 def normalized_so101_aero_to_ctrl(model, arm_action: np.ndarray, hand_action: np.ndarray) -> np.ndarray:

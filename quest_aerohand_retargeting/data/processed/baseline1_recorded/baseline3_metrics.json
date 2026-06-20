@@ -1,0 +1,15 @@
+{
+  "human_pinch_distance_mean": 0.07561927784623422,
+  "robot_thumb_index_distance_mean": 0.07560202838747757,
+  "robot_thumb_index_distance_median": 0.08522272165232515,
+  "robot_thumb_index_distance_min": 0.006780903696747248,
+  "pinch_distance_mae": 0.00519057816040209,
+  "final_fingertip_error": 0.009060522369731275,
+  "pinch_success_rate": 0.1192868719611021,
+  "contact_success_rate": 0.06256077795786062,
+  "contact_given_pinch_success_rate": 0.49728260869565216,
+  "pinch_success_without_contact_rate": 0.059967585089141004,
+  "object_slip_rate": 0.0,
+  "control_smoothness": 0.015978427914556587,
+  "teleoperation_latency_mean_s": 0.0
+}

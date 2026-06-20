@@ -44,6 +44,8 @@ Quest HTS -> TCP localhost:8000 -> hand-tracking-sdk -> Python scripts
 - 接收：`scripts/04_receive_quest_tcp.py`，完整遥操作在 `scripts/teleop/`。
 - 解析和类型化坐标帧模型：`aero_quest/quest_hand_frame.py`。
 - 机械臂控制和 SO101 IK 辅助：`aero_quest/arm_teleop.py`。
+- 约束速度 IK：`aero_quest/osqp_ik.py`。
+- Aero Hand 实时控制通道：`aero_quest/aero_hand_teleop.py`。
 - Aero Hand 重定向：`aero_quest/retargeting.py`。
 - SO101 + Aero 动作应用：`aero_quest/so101_aero_control.py`。
 - MuJoCo landmark 辅助：`aero_quest/mujoco_landmarks.py`。
@@ -87,7 +89,13 @@ python -m mujoco.viewer --mjcf=models/so101_aero_hand/scenes/SO101_aerohand_pipe
 
 新增任务场景时，优先新增 `configs/scenes/<task>.yaml`，不要复制粘贴基础机器人 XML。需要训练 policy 时，MJCF 负责拓扑和碰撞，episode reset 时再由 Python 环境根据 YAML 中的 `randomize` 字段随机化 arm qpos、object freejoint pose 和 target object。可抓取物体必须放在带 `freejoint` 的 wrapper body 下，否则只是固定场景物体，无法被抓起来。
 
-当前 `pipette_grasp.yaml` 直接引用本机 `/data/tianang/projects/AutoBio/autobio/model/object/pipette.gen.xml`。如果场景需要脱离这台机器运行，应先把相关 AutoBio MJCF 和 mesh assets 复制或子模块化到本项目，再更新 recipe 的 `source` 路径。
+当前 pipette 场景 recipe 引用 `external/AutoBio/autobio/model/object/*.gen.xml`。`external/` 是本地忽略目录，所以新机器需要先运行：
+
+```bash
+git clone https://github.com/autobio-bench/AutoBio.git external/AutoBio
+```
+
+如果需要让场景随仓库自动获取，应把 AutoBio 改为 git submodule，或把所需 MJCF 与 mesh assets 复制到项目自有资源目录。
 
 ## 安全规则
 

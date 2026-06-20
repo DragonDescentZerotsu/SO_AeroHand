@@ -148,7 +148,7 @@
     <mesh name="right_thumb_distal_link" content_type="model/stl" file="../../../mujoco_menagerie/tetheria_aero_hand_open/assets/right_thumb_distal_link.STL" />
     <mesh name="right_thumb_tip_link" content_type="model/stl" file="../../../mujoco_menagerie/tetheria_aero_hand_open/assets/right_thumb_tip_link.STL" />
     <model name="table_model" file="../objects/vention_table_top.xml" content_type="text/xml" />
-    <model name="pipette_model" file="../../../../AutoBio/autobio/model/object/pipette.gen.xml" content_type="text/xml" />
+    <model name="pipette_model" file="../../../external/AutoBio/autobio/model/object/pipette.gen.xml" content_type="text/xml" />
   </asset>
   <contact>
     <exclude body1="palm" body2="right_t_link" />
@@ -181,7 +181,7 @@
     <light pos="0 0 3.5" dir="0 0 -1" directional="true" />
     <geom name="floor" size="0 0 0.05" pos="0 0 0" type="plane" material="groundplane" />
     <camera name="side" pos="-0.35 0.65 0.45" xyaxes="-0.88 -0.48 0 0.24 -0.44 0.86" />
-    <body name="base" pos="0 -0.25 0.836" quat="1 0 0 0" childclass="so101_new_calib">
+    <body name="base" pos="-0.30623 0.00047 0.836" quat="1 0 0 0" childclass="so101_new_calib">
       <inertial pos="0.0137179 -5.19711e-05 0.0334843" mass="0.147" fullinertia="0.000114686 0.000136117 0.000130364 -4.59787e-07 4.97151e-06 9.75275e-08" />
       <geom type="mesh" class="visual" pos="-0.00636471 -9.94414e-05 -0.0024" quat="0.5 0.5 0.5 0.5" mesh="base_motor_holder_so101_v1" material="base_motor_holder_so101_v1_material" />
       <geom type="mesh" class="visual" pos="-0.00636471 -8.97657e-09 -0.0024" quat="0.5 0.5 0.5 0.5" mesh="base_so101_v2" material="base_so101_v2_material" />
@@ -535,7 +535,7 @@
     <frame name="table_0" pos="0 0 0" quat="1 0 0 0">
       <attach model="table_model" body="vention_table_top" prefix="table_0/" />
     </frame>
-    <body name="pipette_0" pos="0.21985 0.05181 0.79854" quat="0.72864 -0.00355 -0.68487 -0.0041">
+    <body name="pipette_0" pos="-0.03342 0.00169 0.79854" quat="0.72864 -0.00355 -0.68487 -0.0041">
       <freejoint name="pipette_0_free" />
       <attach model="pipette_model" body="pipette" prefix="pipette_0/" />
     </body>

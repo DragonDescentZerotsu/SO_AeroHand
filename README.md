@@ -204,6 +204,28 @@ Inspect the combined model:
 python scripts/so101_aero_viewer.py
 ```
 
+## Table Scene Layout
+
+The default table pipette scene is:
+
+```bash
+python -m mujoco.viewer --mjcf=models/so101_aero_hand/scenes/SO101_aerohand_pipette_table.xml
+```
+
+Its layout is set in `configs/scenes/pipette_table_grasp.yaml`:
+
+```text
+table center:        B/world x=0.0, y=0.0
+base_pose.pos:       [-0.30623, 0.00047, 0.836]
+default palm xy:     approximately [0.0, 0.0]
+pipette wrapper pos: [-0.03342, 0.00169, 0.79854]
+visible pipette xy:  approximately [0.12, 0.0]
+```
+
+The pipette model has an internal body offset, so the wrapper position is not
+the visible pipette center. The visible pipette starts about 12 cm in front of
+the default palm along robot/world `+X`.
+
 ## Build And Check
 
 Refresh the combined SO101 + Aero Hand MJCF:

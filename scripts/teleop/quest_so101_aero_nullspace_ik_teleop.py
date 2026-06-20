@@ -24,6 +24,10 @@ from aero_quest.arm_teleop import (
     joint_qpos,
     joint_ranges,
 )
+from aero_quest.aero_hand_teleop import (
+    AeroHandTeleopChannel,
+    AeroHandTeleopConfig,
+)
 from aero_quest.quest_hand_frame import (
     QuestHandFrame,
     RelativeWristArmController,
@@ -31,8 +35,8 @@ from aero_quest.quest_hand_frame import (
     quat_xyzw_to_matrix,
     quest_hand_frame_from_sdk,
 )
-from aero_quest.retargeting import AeroHandRetargetingWrapper
-from aero_quest.so101_aero_control import normalized_aero_hand_to_ctrl, print_combined_actuator_info
+from aero_quest.osqp_ik import OSQPIKConfig, OSQPVelocityIK
+from aero_quest.so101_aero_control import print_combined_actuator_info
 
 
 DEFAULT_DESCRIPTION = "Quest wrist pose -> position-priority SO101 IK with nullspace orientation, landmarks -> Aero Hand."
@@ -46,11 +50,22 @@ DEFAULT_KP_POS = 10.0
 DEFAULT_KP_ROT = 1.2
 DEFAULT_MAX_LINEAR_SPEED = 0.45
 DEFAULT_MAX_ANGULAR_SPEED = 0.8
+DEFAULT_IK_DAMPING = 0.05
 DEFAULT_MAX_JOINT_SPEED = 3.0
+DEFAULT_IK_SOLVER = "dls"
 DEFAULT_IK_MODE = "position_nullspace"
+DEFAULT_ORIENTATION_SOURCE = "palm_landmarks"
+DEFAULT_ORIENTATION_WEIGHT = 1.0
 DEFAULT_ROBOT_GRAVITY_ROOT = "base"
-SAFE_OPEN_HAND = np.array([1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float32)
-
+DEFAULT_ARM_HOME_QPOS = None
+DEFAULT_JOINT_MOTION_WEIGHTS = None
+DEFAULT_ARM_ACTUATOR_KP = None
+DEFAULT_ARM_ACTUATOR_KV = None
+DEFAULT_QP_TASK_WEIGHTS = "1 1 1 1 1 1"
+DEFAULT_QP_ACCEL_WEIGHT = 0.02
+DEFAULT_QP_MAX_JOINT_ACCEL = 80.0
+DEFAULT_QP_SINGULAR_DAMPING_THRESHOLD = 0.08
+DEFAULT_QP_SINGULAR_DAMPING_GAIN = 0.08
 # Quest/Unity Q: +X right, +Y up, +Z forward.
 # SO101/MuJoCo debug B: +X forward, +Y left, +Z up.
 DEFAULT_R_BQ = np.asarray(
@@ -81,6 +96,22 @@ def parse_matrix(text):
     return np.asarray(values, dtype=np.float64).reshape(3, 3)
 
 
+def parse_optional_joint_values(text, name):
+    if text is None:
+        return None
+    text = str(text).strip()
+    if text.lower() in {"", "none", "null", "model"}:
+        return None
+    return np.asarray([float(v) for v in text.replace(",", " ").split()], dtype=np.float64)
+
+
+def parse_optional_vector(text, expected_len: int, name: str) -> np.ndarray | None:
+    values = parse_optional_joint_values(text, name)
+    if values is not None and values.shape != (expected_len,):
+        raise ValueError(f"{name} expected {expected_len} floats, got {values.shape}")
+    return values
+
+
 def resolve_model(path_text):
     path = Path(path_text).expanduser()
     if not path.is_absolute():
@@ -92,6 +123,47 @@ def resolve_model(path_text):
 
 def ctrl_midpoints(model):
     return 0.5 * (model.actuator_ctrlrange[:, 0] + model.actuator_ctrlrange[:, 1])
+
+
+def apply_arm_home_qpos(model, data, ik: DampedLeastSquaresIK, home_qpos: np.ndarray | None) -> np.ndarray:
+    """Set selected arm joints to an optional startup home pose."""
+    if home_qpos is None:
+        return joint_qpos(model, data, ik.joint_ids)
+    home_qpos = np.asarray(home_qpos, dtype=np.float64)
+    if home_qpos.shape != (len(ik.joint_ids),):
+        raise ValueError(f"--arm-home-qpos expected {len(ik.joint_ids)} values for {ik.joint_names}, got {home_qpos.shape}")
+    lo, hi = joint_ranges(model, ik.joint_ids)
+    home_qpos = np.clip(home_qpos, lo, hi)
+    for joint_id, value in zip(ik.joint_ids, home_qpos):
+        data.qpos[model.jnt_qposadr[joint_id]] = float(value)
+        data.qvel[model.jnt_dofadr[joint_id]] = 0.0
+    ik.apply_position_targets(data, home_qpos)
+    mujoco.mj_forward(model, data)
+    return home_qpos
+
+
+def set_arm_actuator_gains(
+    model,
+    joint_ids: list[int],
+    kp: np.ndarray | None,
+    kv: np.ndarray | None,
+) -> None:
+    """Optionally override MuJoCo position-actuator gains for selected joints."""
+    if kp is None and kv is None:
+        return
+    for index, joint_id in enumerate(joint_ids):
+        joint_name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_JOINT, joint_id)
+        actuator_id = mujoco.mj_name2id(
+            model, mujoco.mjtObj.mjOBJ_ACTUATOR, joint_name
+        )
+        if actuator_id < 0:
+            continue
+        if kp is not None:
+            value = float(kp[index])
+            model.actuator_gainprm[actuator_id, 0] = value
+            model.actuator_biasprm[actuator_id, 1] = -value
+        if kv is not None:
+            model.actuator_biasprm[actuator_id, 2] = -float(kv[index])
 
 
 def body_name(model, body_id: int) -> str:
@@ -139,9 +211,28 @@ def quest_orientation_frame_Q(frame, orientation_source: str) -> np.ndarray:
     raise ValueError(f"Unsupported orientation_source: {orientation_source!r}")
 
 
-def absolute_orientation_target_B(frame, R_BQ: np.ndarray, orientation_source: str) -> np.ndarray:
-    """Map current Quest wrist/palm orientation directly into robot base frame."""
-    return np.asarray(R_BQ, dtype=np.float64).reshape(3, 3) @ quest_orientation_frame_Q(frame, orientation_source)
+def absolute_orientation_target_B(
+    frame,
+    R_BQ: np.ndarray,
+    orientation_source: str,
+    R_ee_from_orientation: np.ndarray | None = None,
+) -> np.ndarray:
+    """Map Quest orientation into B while preserving the calibrated EE mount."""
+    orientation_R_B = np.asarray(R_BQ, dtype=np.float64).reshape(3, 3) @ quest_orientation_frame_Q(frame, orientation_source)
+    if R_ee_from_orientation is None:
+        return orientation_R_B
+    return orientation_R_B @ np.asarray(R_ee_from_orientation, dtype=np.float64).reshape(3, 3)
+
+
+def calibrate_absolute_orientation_offset(
+    frame,
+    R_BQ: np.ndarray,
+    orientation_source: str,
+    ee_R_B: np.ndarray,
+) -> np.ndarray:
+    """Return the fixed Quest-orientation-to-EE mounting rotation."""
+    orientation_R_B = np.asarray(R_BQ, dtype=np.float64).reshape(3, 3) @ quest_orientation_frame_Q(frame, orientation_source)
+    return orientation_R_B.T @ np.asarray(ee_R_B, dtype=np.float64).reshape(3, 3)
 
 
 def pose_xyz(pose) -> np.ndarray | None:
@@ -286,6 +377,24 @@ def _damped_right_pinv(J: np.ndarray, damping: float) -> np.ndarray:
     return J.T @ np.linalg.solve(JJt + (float(damping) ** 2) * np.eye(JJt.shape[0]), np.eye(JJt.shape[0]))
 
 
+def _weighted_damped_right_pinv(
+    J: np.ndarray,
+    damping: float,
+    joint_motion_weights: np.ndarray | None,
+) -> np.ndarray:
+    if joint_motion_weights is None:
+        return _damped_right_pinv(J, damping)
+    weights = np.asarray(joint_motion_weights, dtype=np.float64).reshape(J.shape[1])
+    if np.any(weights <= 0.0):
+        raise ValueError(f"Joint motion weights must be positive, got {weights}")
+    winv = np.diag(1.0 / (weights * weights))
+    JWJt = J @ winv @ J.T
+    return winv @ J.T @ np.linalg.solve(
+        JWJt + (float(damping) ** 2) * np.eye(JWJt.shape[0]),
+        np.eye(JWJt.shape[0]),
+    )
+
+
 def _scale_secondary_to_joint_speed_budget(primary: np.ndarray, secondary: np.ndarray, max_joint_speed: float) -> np.ndarray:
     primary = np.asarray(primary, dtype=np.float64)
     secondary = np.asarray(secondary, dtype=np.float64)
@@ -303,6 +412,37 @@ def _scale_secondary_to_joint_speed_budget(primary: np.ndarray, secondary: np.nd
             limit = (-max_joint_speed - qdot_primary) / qdot_secondary
         alpha = min(alpha, max(0.0, float(limit)))
     return float(np.clip(alpha, 0.0, 1.0)) * secondary
+
+
+def _joint_command_reference(ik: DampedLeastSquaresIK, data) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Return a bounded position-command integrator state and joint limits."""
+    q_current = joint_qpos(ik.model, data, ik.joint_ids)
+    lo, hi = joint_ranges(ik.model, ik.joint_ids)
+    if ik.prev_qtarget is None:
+        return q_current, lo, hi
+
+    # Do not let a blocked or heavily lagging actuator accumulate an
+    # arbitrarily distant position target.
+    max_lead = max(abs(float(ik.max_joint_speed)) * 0.1, 1e-3)
+    q_reference = np.clip(np.asarray(ik.prev_qtarget, dtype=np.float64), q_current - max_lead, q_current + max_lead)
+    return np.clip(q_reference, lo, hi), lo, hi
+
+
+def _integrate_joint_velocity_target(
+    ik: DampedLeastSquaresIK,
+    data,
+    qdot: np.ndarray,
+    dt: float,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Integrate velocity into the previous command, not measured qpos."""
+    q_reference, lo, hi = _joint_command_reference(ik, data)
+    qdot = np.asarray(qdot, dtype=np.float64)
+    alpha = ik.smoothing_alpha if ik.prev_qtarget is not None else 0.0
+    qdot_applied = (1.0 - alpha) * qdot
+    q_target = np.clip(q_reference + qdot_applied * float(dt), lo, hi)
+    qdot_applied = (q_target - q_reference) / max(float(dt), 1e-6)
+    ik.prev_qtarget = q_target.copy()
+    return q_target, qdot_applied
 
 
 def solve_nullspace_task_space_ik(
@@ -353,14 +493,11 @@ def solve_nullspace_task_space_ik(
         qdot_null = _scale_secondary_to_joint_speed_budget(qdot_pos, qdot_null, ik.max_joint_speed)
 
     qdot = qdot_pos + qdot_null
-
-    q_current = joint_qpos(ik.model, data, ik.joint_ids)
-    q_target = q_current + qdot * float(dt)
-    lo, hi = joint_ranges(ik.model, ik.joint_ids)
-    q_target = np.clip(q_target, lo, hi)
-    if ik.smoothing_alpha > 0.0 and ik.prev_qtarget is not None:
-        q_target = ik.smoothing_alpha * ik.prev_qtarget + (1.0 - ik.smoothing_alpha) * q_target
-    ik.prev_qtarget = q_target.copy()
+    q_target, qdot_applied = _integrate_joint_velocity_target(ik, data, qdot, dt)
+    scale = float(np.linalg.norm(qdot_applied) / np.linalg.norm(qdot)) if float(np.linalg.norm(qdot)) > 1e-12 else 1.0
+    qdot_pos = scale * qdot_pos
+    qdot_null = scale * qdot_null
+    qdot = qdot_applied
     return q_target, qdot, qdot_pos, qdot_null
 
 
@@ -370,6 +507,7 @@ def solve_full_task_space_ik(
     xdot_cmd: np.ndarray,
     dt: float,
     control_orientation: bool,
+    joint_motion_weights: np.ndarray | None = None,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """Solve resolved-rate IK with position and orientation in one task.
 
@@ -387,17 +525,108 @@ def solve_full_task_space_ik(
             raise ValueError(f"Expected 3D task velocity, got {xdot_cmd.shape}")
         J = ik.jacobian(data, control_orientation=False)
 
-    qdot = _damped_right_pinv(J, ik.damping) @ xdot_cmd
+    qdot = _weighted_damped_right_pinv(
+        J, ik.damping, joint_motion_weights
+    ) @ xdot_cmd
     qdot = np.clip(qdot, -ik.max_joint_speed, ik.max_joint_speed)
 
-    q_current = joint_qpos(ik.model, data, ik.joint_ids)
-    q_target = q_current + qdot * float(dt)
-    lo, hi = joint_ranges(ik.model, ik.joint_ids)
-    q_target = np.clip(q_target, lo, hi)
-    if ik.smoothing_alpha > 0.0 and ik.prev_qtarget is not None:
-        q_target = ik.smoothing_alpha * ik.prev_qtarget + (1.0 - ik.smoothing_alpha) * q_target
-    ik.prev_qtarget = q_target.copy()
+    q_target, qdot = _integrate_joint_velocity_target(ik, data, qdot, dt)
     return q_target, qdot, qdot.copy(), np.zeros_like(qdot)
+
+
+def solve_osqp_task_space_ik(
+    ik: DampedLeastSquaresIK,
+    data,
+    xdot_cmd: np.ndarray,
+    dt: float,
+    control_orientation: bool,
+    joint_motion_weights: np.ndarray | None = None,
+    task_weights: np.ndarray | None = None,
+    prev_qdot: np.ndarray | None = None,
+    accel_weight: float = 0.0,
+    max_joint_accel: float = 0.0,
+    singular_damping_threshold: float = 0.0,
+    singular_damping_gain: float = 0.0,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, dict[str, object]]:
+    """Solve resolved-rate IK as a constrained QP with OSQP.
+
+    Minimize ``||J qdot - xdot||^2 + damping^2 ||qdot||^2`` subject to
+    joint-velocity limits and one-step joint-position limits.
+    """
+    xdot_cmd = np.asarray(xdot_cmd, dtype=np.float64)
+    if control_orientation:
+        if xdot_cmd.shape != (6,):
+            raise ValueError(f"Expected 6D task velocity, got {xdot_cmd.shape}")
+        J = ik.jacobian(data, control_orientation=True)
+    else:
+        if xdot_cmd.shape != (3,):
+            raise ValueError(f"Expected 3D task velocity, got {xdot_cmd.shape}")
+        J = ik.jacobian(data, control_orientation=False)
+
+    n = len(ik.joint_ids)
+    task_weights = (
+        np.ones(J.shape[0], dtype=np.float64)
+        if task_weights is None
+        else np.asarray(task_weights, dtype=np.float64).reshape(J.shape[0])
+    )
+    joint_motion_weights = (
+        np.ones(n, dtype=np.float64)
+        if joint_motion_weights is None
+        else np.asarray(joint_motion_weights, dtype=np.float64).reshape(n)
+    )
+    if np.any(task_weights <= 0.0) or np.any(joint_motion_weights <= 0.0):
+        raise ValueError("OSQP task and joint motion weights must be positive")
+    prev_qdot = (
+        np.zeros(n, dtype=np.float64)
+        if prev_qdot is None
+        else np.asarray(prev_qdot, dtype=np.float64).reshape(n)
+    )
+    cache_key = (
+        n,
+        J.shape[0],
+        tuple(joint_motion_weights),
+        tuple(task_weights),
+        float(ik.damping),
+        float(accel_weight),
+        float(ik.max_joint_speed),
+        float(max_joint_accel),
+        float(singular_damping_threshold),
+        float(singular_damping_gain),
+    )
+    cache = getattr(ik, "_velocity_osqp_cache", None)
+    if cache is None or cache["key"] != cache_key:
+        solver = OSQPVelocityIK(
+            joint_count=n,
+            task_dimension=J.shape[0],
+            joint_motion_weights=joint_motion_weights,
+            task_weights=task_weights,
+            config=OSQPIKConfig(
+                base_damping=ik.damping,
+                accel_weight=accel_weight,
+                max_joint_speed=ik.max_joint_speed,
+                max_joint_accel=max_joint_accel,
+                singular_damping_threshold=singular_damping_threshold,
+                singular_damping_gain=singular_damping_gain,
+            ),
+        )
+        cache = {"key": cache_key, "solver": solver}
+        ik._velocity_osqp_cache = cache
+    solver = cache["solver"]
+    solver.prev_qdot = prev_qdot.copy()
+    q_current = joint_qpos(ik.model, data, ik.joint_ids)
+    lo, hi = joint_ranges(ik.model, ik.joint_ids)
+    result = solver.solve(J, xdot_cmd, q_current, lo, hi, dt)
+    qdot = result.qdot
+    q_target, qdot = _integrate_joint_velocity_target(ik, data, qdot, dt)
+    diagnostics = {
+        "status": result.status,
+        "iterations": result.iterations,
+        "min_singular": result.min_singular,
+        "effective_damping": result.effective_damping,
+        "solve_time_s": result.solve_time_s,
+        "wall_time_s": result.wall_time_s,
+    }
+    return q_target, qdot, qdot.copy(), np.zeros_like(qdot), diagnostics
 
 
 def make_key_callback(arm_channel, latest_frame_ref, latest_head_ref, ik, data, state, args, R_BQ):
@@ -428,12 +657,16 @@ def make_key_callback(arm_channel, latest_frame_ref, latest_head_ref, ik, data, 
                 landmarks_wrist=frame.landmarks_wrist,
             )
             state["target_pos_B"] = ee_pos_B.copy()
-            state["target_R_B"] = (
-                absolute_orientation_target_B(frame, R_BQ, args.orientation_source)
-                if args.control_orientation and args.orientation_tracking == "absolute"
-                else ee_R_B.copy()
-            )
+            if args.control_orientation and args.orientation_tracking == "absolute":
+                state["R_ee_from_orientation"] = calibrate_absolute_orientation_offset(
+                    frame,
+                    R_BQ,
+                    args.orientation_source,
+                    ee_R_B,
+                )
+            state["target_R_B"] = ee_R_B.copy()
             state["last_qtarget"] = joint_qpos(ik.model, data, ik.joint_ids)
+            ik.prev_qtarget = state["last_qtarget"].copy()
             state["raw_wrist_zero_Q"] = np.asarray(latest_frame_ref["frame"].wrist_pos_world, dtype=np.float64).copy()
             print(f"Re-zeroed IK in {args.reference_frame} frame: current Quest wrist maps to current robot end-effector pose.")
         elif key == "p":
@@ -453,6 +686,11 @@ def parse_args():
     parser.add_argument("--ee-body", default=None)
     parser.add_argument("--arm-joint-names", default=DEFAULT_ARM_JOINTS)
     parser.add_argument("--arm-joint-prefix", default=None)
+    parser.add_argument(
+        "--arm-home-qpos",
+        default=DEFAULT_ARM_HOME_QPOS,
+        help="Optional startup qpos for selected arm joints, e.g. '0 1.57 -1.3485 0 0 0'. Use 'none' for model default.",
+    )
     parser.add_argument("--scale", type=float, default=DEFAULT_SCALE)
     parser.add_argument("--R_BQ", type=parse_matrix, default=None)
     parser.add_argument("--workspace-min", nargs=3, default=DEFAULT_WORKSPACE_MIN)
@@ -463,23 +701,63 @@ def parse_args():
     parser.add_argument("--kp-rot", type=float, default=DEFAULT_KP_ROT)
     parser.add_argument("--max-linear-speed", type=float, default=DEFAULT_MAX_LINEAR_SPEED)
     parser.add_argument("--max-angular-speed", type=float, default=DEFAULT_MAX_ANGULAR_SPEED)
-    parser.add_argument("--ik-damping", type=float, default=0.05)
+    parser.add_argument("--ik-damping", type=float, default=DEFAULT_IK_DAMPING)
     parser.add_argument("--max-joint-speed", type=float, default=DEFAULT_MAX_JOINT_SPEED)
     parser.add_argument("--joint-target-smoothing-alpha", type=float, default=0.0)
+    parser.add_argument(
+        "--ik-solver",
+        choices=["dls", "osqp"],
+        default=DEFAULT_IK_SOLVER,
+        help="Arm IK solver. dls is damped least-squares; osqp is constrained QP with joint speed and position limits.",
+    )
     parser.add_argument(
         "--ik-mode",
         choices=["position_nullspace", "full_pose"],
         default=DEFAULT_IK_MODE,
         help="position_nullspace keeps position primary and uses remaining motion for orientation; full_pose solves the selected task rows together.",
     )
+    parser.add_argument("--joint-motion-weights", default=DEFAULT_JOINT_MOTION_WEIGHTS)
+    parser.add_argument("--arm-actuator-kp", default=DEFAULT_ARM_ACTUATOR_KP)
+    parser.add_argument("--arm-actuator-kv", default=DEFAULT_ARM_ACTUATOR_KV)
+    parser.add_argument("--qp-task-weights", default=DEFAULT_QP_TASK_WEIGHTS)
+    parser.add_argument("--qp-accel-weight", type=float, default=DEFAULT_QP_ACCEL_WEIGHT)
+    parser.add_argument("--qp-max-joint-accel", type=float, default=DEFAULT_QP_MAX_JOINT_ACCEL)
+    parser.add_argument(
+        "--qp-singular-damping-threshold",
+        type=float,
+        default=DEFAULT_QP_SINGULAR_DAMPING_THRESHOLD,
+    )
+    parser.add_argument(
+        "--qp-singular-damping-gain",
+        type=float,
+        default=DEFAULT_QP_SINGULAR_DAMPING_GAIN,
+    )
     parser.add_argument("--control-orientation", action=argparse.BooleanOptionalAction, default=True)
-    parser.add_argument("--orientation-source", choices=["palm_landmarks", "wrist_pose"], default="palm_landmarks")
+    parser.add_argument(
+        "--orientation-source",
+        choices=["palm_landmarks", "wrist_pose"],
+        default=DEFAULT_ORIENTATION_SOURCE,
+    )
     parser.add_argument("--orientation-tracking", choices=["absolute", "relative"], default="relative")
     parser.add_argument("--position-weight", type=float, default=1.0)
-    parser.add_argument("--orientation-weight", type=float, default=1.0)
+    parser.add_argument("--orientation-weight", type=float, default=DEFAULT_ORIENTATION_WEIGHT)
     parser.add_argument("--reference-frame", choices=["head", "quest"], default="head")
     parser.add_argument("--hand-smoothing-alpha", type=float, default=0.25)
     parser.add_argument("--disable-hand-retargeting", action="store_true")
+    parser.add_argument(
+        "--hand-pinch-boost",
+        action="store_true",
+        help="Apply a lightweight Baseline3-inspired thumb/index pinch boost for real-time teleop trials.",
+    )
+    parser.add_argument("--pinch-closed-m", type=float, default=0.025)
+    parser.add_argument("--pinch-open-m", type=float, default=0.085)
+    parser.add_argument("--pinch-boost-blend", type=float, default=1.0)
+    parser.add_argument(
+        "--hand-grasp-profile",
+        choices=["none", "pipette"],
+        default="none",
+        help="Optional task-specific formula-action bias. 'pipette' uses hysteretic thumb/index closure with middle-finger support.",
+    )
     parser.add_argument("--timeout", type=float, default=0.30)
     parser.add_argument("--debug-interval", type=float, default=0.25)
     parser.add_argument(
@@ -511,6 +789,7 @@ def main():
     workspace_max = parse_vec3(args.workspace_max, "--workspace-max")
     R_BQ = DEFAULT_R_BQ.copy() if args.R_BQ is None else np.asarray(args.R_BQ, dtype=np.float64).reshape(3, 3)
     model_path = resolve_model(args.model)
+    arm_home_qpos = parse_optional_joint_values(args.arm_home_qpos, "--arm-home-qpos")
 
     model = mujoco.MjModel.from_xml_path(str(model_path))
     if args.disable_gravity:
@@ -533,6 +812,25 @@ def main():
         max_joint_speed=args.max_joint_speed,
         smoothing_alpha=args.joint_target_smoothing_alpha,
     )
+    joint_motion_weights = parse_optional_vector(
+        args.joint_motion_weights, len(ik.joint_ids), "--joint-motion-weights"
+    )
+    arm_actuator_kp = parse_optional_vector(
+        args.arm_actuator_kp, len(ik.joint_ids), "--arm-actuator-kp"
+    )
+    arm_actuator_kv = parse_optional_vector(
+        args.arm_actuator_kv, len(ik.joint_ids), "--arm-actuator-kv"
+    )
+    set_arm_actuator_gains(
+        model, ik.joint_ids, arm_actuator_kp, arm_actuator_kv
+    )
+    task_dim = 6 if args.control_orientation else 3
+    qp_task_weights = parse_optional_vector(
+        args.qp_task_weights, 6, "--qp-task-weights"
+    )
+    if task_dim == 3 and qp_task_weights is not None:
+        qp_task_weights = qp_task_weights[:3]
+    arm_home_qpos = apply_arm_home_qpos(model, data, ik, arm_home_qpos)
     vel_controller = VelocityTeleopController(
         VelocityTeleopConfig(
             kp_pos=args.kp_pos,
@@ -550,21 +848,28 @@ def main():
         control_orientation=args.control_orientation,
         orientation_source=args.orientation_source,
     )
-    hand_retargeter = AeroHandRetargetingWrapper(
-        args.hand_smoothing_alpha,
-        disabled=args.disable_hand_retargeting,
-        initial_action=SAFE_OPEN_HAND,
+    hand_channel = AeroHandTeleopChannel(
+        AeroHandTeleopConfig(
+            smoothing_alpha=args.hand_smoothing_alpha,
+            disabled=args.disable_hand_retargeting,
+            pinch_boost=args.hand_pinch_boost,
+            pinch_closed_m=args.pinch_closed_m,
+            pinch_open_m=args.pinch_open_m,
+            pinch_boost_blend=args.pinch_boost_blend,
+            grasp_profile=args.hand_grasp_profile,
+        )
     )
 
     ee_pos_B, ee_R_B = ik.ee_pose(data)
     print("Before running:")
     print(f"  1. Confirm: adb reverse tcp:{args.port} tcp:{args.port}")
     print(f"  2. Quest HTS: TCP, localhost, port {args.port}")
-    print(f"  3. IK mode: {args.ik_mode}.")
+    print(f"  3. IK solver: {args.ik_solver}, IK mode: {args.ik_mode}.")
     print("  4. Hand Channel: wrist-relative landmarks -> Aero Hand retargeting.")
     print("  5. Press R to re-zero, P to pause/resume arm.")
     print(f"model={model_path}")
     print(f"ee_site={args.ee_site} arm_joints={ik.joint_names}")
+    print(f"arm_home_qpos={np.array2string(arm_home_qpos, precision=4, suppress_small=True)}")
     print(f"ee_start_B={np.array2string(ee_pos_B, precision=5)}")
     print(f"workspace_min={np.array2string(workspace_min, precision=3)} workspace_max={np.array2string(workspace_max, precision=3)}")
     if np.any(ee_pos_B < workspace_min) or np.any(ee_pos_B > workspace_max):
@@ -584,14 +889,29 @@ def main():
     print(
         f"control_orientation={args.control_orientation} orientation_source={args.orientation_source} "
         f"orientation_tracking={args.orientation_tracking} "
+        f"ik_solver={args.ik_solver} "
         f"position_weight={args.position_weight} orientation_weight={args.orientation_weight} "
         f"reference_frame={args.reference_frame}"
     )
-    print(f"disable_hand_retargeting={args.disable_hand_retargeting}")
+    print(
+        f"joint_motion_weights={joint_motion_weights} "
+        f"qp_task_weights={qp_task_weights} "
+        f"qp_accel_weight={args.qp_accel_weight:.3f} "
+        f"qp_max_joint_accel={args.qp_max_joint_accel:.1f}"
+    )
+    print(
+        f"disable_hand_retargeting={args.disable_hand_retargeting} "
+        f"hand_pinch_boost={args.hand_pinch_boost} "
+        f"hand_grasp_profile={args.hand_grasp_profile} "
+        f"pinch_closed_m={args.pinch_closed_m:.3f} pinch_open_m={args.pinch_open_m:.3f} "
+        f"pinch_boost_blend={args.pinch_boost_blend:.2f}"
+    )
     print_combined_actuator_info(model, arm_actuator_names=ik.joint_names)
 
     if args.dry_run:
-        _raw_hand, filtered_hand = hand_retargeter(np.zeros((21, 3), dtype=np.float32))
+        filtered_hand = hand_channel.process(
+            np.zeros((21, 3), dtype=np.float32)
+        ).action
         print(f"dry_run=true q_arm={np.array2string(joint_qpos(model, data, ik.joint_ids), precision=6)}")
         print(f"dry_run_hand={np.array2string(filtered_hand, precision=4, suppress_small=True)}")
         return
@@ -607,6 +927,7 @@ def main():
         "target_pos_B": ee_pos_B.copy(),
         "target_R_B": ee_R_B.copy(),
         "last_qtarget": joint_qpos(model, data, ik.joint_ids),
+        "R_ee_from_orientation": None,
         "head_anchor_quat_Q": None,
         "raw_wrist_zero_Q": None,
     }
@@ -626,7 +947,13 @@ def main():
     last_qdot = np.zeros(len(ik.joint_ids), dtype=np.float64)
     last_qdot_pos = np.zeros(len(ik.joint_ids), dtype=np.float64)
     last_qdot_null = np.zeros(len(ik.joint_ids), dtype=np.float64)
-    filtered_hand = SAFE_OPEN_HAND.copy()
+    last_ik_ms = 0.0
+    last_ik_status = "idle"
+    last_ik_iterations = 0
+    last_min_singular = float("nan")
+    last_effective_damping = float(args.ik_damping)
+    last_pinch_distance = float("nan")
+    last_pinch_strength = 0.0
 
     with mujoco.viewer.launch_passive(
         model,
@@ -668,26 +995,39 @@ def main():
                             landmarks_wrist=quest_frame.landmarks_wrist,
                         )
                         state["target_pos_B"] = ee_pos_B.copy()
-                        state["target_R_B"] = (
-                            absolute_orientation_target_B(quest_frame, R_BQ, args.orientation_source)
-                            if args.control_orientation and args.orientation_tracking == "absolute"
-                            else ee_R_B.copy()
-                        )
+                        if args.control_orientation and args.orientation_tracking == "absolute":
+                            state["R_ee_from_orientation"] = calibrate_absolute_orientation_offset(
+                                quest_frame,
+                                R_BQ,
+                                args.orientation_source,
+                                ee_R_B,
+                            )
+                        state["target_R_B"] = ee_R_B.copy()
                         state["last_qtarget"] = joint_qpos(model, data, ik.joint_ids)
+                        ik.prev_qtarget = state["last_qtarget"].copy()
                         state["raw_wrist_zero_Q"] = np.asarray(quest_frame_raw.wrist_pos_world, dtype=np.float64).copy()
                         print(f"Teleop zero set in {args.reference_frame} frame: current Quest wrist maps to current robot end-effector pose.")
 
                     target = arm_channel.compute_target(quest_frame)
                     state["target_pos_B"] = np.clip(target.target_pos_B, workspace_min, workspace_max)
                     if args.control_orientation and args.orientation_tracking == "absolute":
-                        state["target_R_B"] = absolute_orientation_target_B(quest_frame, R_BQ, args.orientation_source)
+                        state["target_R_B"] = absolute_orientation_target_B(
+                            quest_frame,
+                            R_BQ,
+                            args.orientation_source,
+                            state["R_ee_from_orientation"],
+                        )
                     elif target.target_R_B is not None:
                         state["target_R_B"] = target.target_R_B.copy()
                     last_delta_p_ref = target.delta_p_Q
                     if state["raw_wrist_zero_Q"] is not None:
                         last_delta_p_Q = np.asarray(quest_frame_raw.wrist_pos_world, dtype=np.float64) - state["raw_wrist_zero_Q"]
 
-                    _raw_hand, filtered_hand = hand_retargeter(quest_frame.landmarks_wrist)
+                    hand_result = hand_channel.process(
+                        quest_frame.landmarks_wrist
+                    )
+                    last_pinch_distance = hand_result.pinch_distance_m
+                    last_pinch_strength = hand_result.pinch_strength
 
             now = time.time()
             raw_control_dt = max(0.0, now - last_control_time)
@@ -702,21 +1042,63 @@ def main():
                 last_velocity = cmd.xdot
                 last_error = cmd.position_error
                 last_rot_error = np.zeros(3, dtype=np.float64) if cmd.rotation_error is None else cmd.rotation_error
-                if args.ik_mode == "full_pose":
-                    weighted_xdot = cmd.xdot.copy()
-                    weighted_xdot[:3] *= float(args.position_weight)
-                    if args.control_orientation:
-                        weighted_xdot[3:] *= float(args.orientation_weight)
+                weighted_xdot = cmd.xdot.copy()
+                weighted_xdot[:3] *= float(args.position_weight)
+                if args.control_orientation:
+                    weighted_xdot[3:] *= float(args.orientation_weight)
+                ik_start = time.perf_counter()
+                if args.ik_solver == "osqp":
+                    try:
+                        (
+                            qtarget,
+                            last_qdot,
+                            last_qdot_pos,
+                            last_qdot_null,
+                            ik_diag,
+                        ) = solve_osqp_task_space_ik(
+                            ik,
+                            data,
+                            weighted_xdot,
+                            dt=last_control_dt,
+                            control_orientation=args.control_orientation,
+                            joint_motion_weights=joint_motion_weights,
+                            task_weights=qp_task_weights,
+                            prev_qdot=last_qdot,
+                            accel_weight=args.qp_accel_weight,
+                            max_joint_accel=args.qp_max_joint_accel,
+                            singular_damping_threshold=args.qp_singular_damping_threshold,
+                            singular_damping_gain=args.qp_singular_damping_gain,
+                        )
+                        last_ik_status = f"osqp:{ik_diag['status']}"
+                        last_ik_iterations = int(ik_diag["iterations"])
+                        last_min_singular = float(ik_diag["min_singular"])
+                        last_effective_damping = float(
+                            ik_diag["effective_damping"]
+                        )
+                    except RuntimeError as exc:
+                        print(f"OSQP IK fallback to DLS: {exc}")
+                        qtarget, last_qdot, last_qdot_pos, last_qdot_null = (
+                            solve_full_task_space_ik(
+                                ik,
+                                data,
+                                weighted_xdot,
+                                dt=last_control_dt,
+                                control_orientation=args.control_orientation,
+                                joint_motion_weights=joint_motion_weights,
+                            )
+                        )
+                        last_ik_status = "osqp_fallback_dls"
+                elif args.ik_mode == "full_pose":
                     qtarget, last_qdot, last_qdot_pos, last_qdot_null = solve_full_task_space_ik(
                         ik,
                         data,
                         weighted_xdot,
                         dt=last_control_dt,
                         control_orientation=args.control_orientation,
+                        joint_motion_weights=joint_motion_weights,
                     )
+                    last_ik_status = "dls_full_pose"
                 else:
-                    weighted_xdot = cmd.xdot.copy()
-                    weighted_xdot[:3] *= float(args.position_weight)
                     qtarget, last_qdot, last_qdot_pos, last_qdot_null = solve_nullspace_task_space_ik(
                         ik,
                         data,
@@ -725,6 +1107,8 @@ def main():
                         orientation_gain=args.orientation_weight,
                         control_orientation=args.control_orientation,
                     )
+                    last_ik_status = "dls_position_nullspace"
+                last_ik_ms = 1e3 * (time.perf_counter() - ik_start)
                 state["last_qtarget"] = qtarget.copy()
                 ik.apply_position_targets(data, qtarget)
             else:
@@ -734,13 +1118,14 @@ def main():
                 last_qdot = np.zeros(len(ik.joint_ids), dtype=np.float64)
                 last_qdot_pos = np.zeros(len(ik.joint_ids), dtype=np.float64)
                 last_qdot_null = np.zeros(len(ik.joint_ids), dtype=np.float64)
+                last_ik_ms = 0.0
+                last_ik_status = "paused_or_stale"
+                last_ik_iterations = 0
                 ik.apply_position_targets(data, state["last_qtarget"])
                 if stale:
-                    alpha = float(np.clip(args.hand_smoothing_alpha, 0.0, 1.0))
-                    filtered_hand = alpha * filtered_hand + (1.0 - alpha) * SAFE_OPEN_HAND
-                    hand_retargeter.prev_action = filtered_hand.astype(np.float32)
+                    hand_channel.relax_to_safe_open()
 
-            normalized_aero_hand_to_ctrl(model, filtered_hand, ctrl=data.ctrl)
+            hand_channel.apply(model, data.ctrl)
             last_sim_steps = 0
             while sim_accumulator >= sim_step_dt and last_sim_steps < 10:
                 mujoco.mj_step(model, data)
@@ -767,9 +1152,14 @@ def main():
                     f"qdot={np.array2string(last_qdot, precision=4, suppress_small=True)} "
                     f"qdot_pos={np.array2string(last_qdot_pos, precision=4, suppress_small=True)} "
                     f"qdot_null={np.array2string(last_qdot_null, precision=4, suppress_small=True)} "
+                    f"ik_status={last_ik_status} ik_iter={last_ik_iterations} "
+                    f"min_sv={last_min_singular:.5f} damp={last_effective_damping:.5f} "
+                    f"ik_ms={last_ik_ms:.3f} "
                     f"dt={last_control_dt:.4f} "
                     f"sim_steps={last_sim_steps} "
-                    f"hand={np.array2string(filtered_hand, precision=3, suppress_small=True)}"
+                    f"pinch_dist={last_pinch_distance:.4f} "
+                    f"pinch_strength={last_pinch_strength:.3f} "
+                    f"hand={np.array2string(hand_channel.action, precision=3, suppress_small=True)}"
                 )
                 last_debug_time = now
 

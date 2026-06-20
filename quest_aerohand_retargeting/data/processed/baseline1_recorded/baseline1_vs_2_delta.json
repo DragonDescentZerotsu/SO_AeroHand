@@ -1,0 +1,10 @@
+{
+  "human_pinch_distance_mean": 0.0,
+  "robot_thumb_index_distance_mean": -0.0513423264065556,
+  "final_fingertip_error": 0.01576158156463811,
+  "pinch_success_rate": 0.06126418152350081,
+  "contact_success_rate": 0.00032414910858995135,
+  "object_slip_rate": 0.0,
+  "control_smoothness": -0.0018564898279188023,
+  "teleoperation_latency_mean_s": 0.0
+}

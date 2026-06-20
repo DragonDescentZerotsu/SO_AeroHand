@@ -5,22 +5,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from aero_quest.retargeting import (  # noqa: F401
-    ACTION_NAMES,
-    GeometricRetargeter,
-    angle_between,
-    as_points_array,
-    clamp01,
-    finger_joint_bends,
-    get_quest_points_21,
-    joint_bend,
-    map_7d_to_mujoco_ctrl,
-    normalize,
-    normalize_bend,
-    points_to_palm_local,
-    print_actuator_info,
-    quest_points_to_action_7d,
-)
+from aero_quest.retargeting import GeometricRetargeter
 
 
 class HandRetargeter:
@@ -36,4 +21,3 @@ class HandRetargeter:
     def __call__(self, landmarks):
         _, filtered_action = self.retargeter(landmarks)
         return filtered_action
-

@@ -3,10 +3,10 @@ base_model: models/so101_aero_hand/SO101_aerohand.xml
 output_model: models/so101_aero_hand/scenes/SO101_aerohand_pipette_table.xml
 
 # The base SO101 model places the robot on the floor. For table-top tasks, lift
-# the robot base so it stands on the AutoBio Vention table surface.
+# and shift the robot base so the default Aero palm sits over the table center.
 base_pose:
   body_path: [base]
-  pos: [0.0, -0.25, 0.836]
+  pos: [-0.30623, 0.00047, 0.836]
   quat: [1.0, 0.0, 0.0, 0.0]
 
 static_models:
@@ -22,20 +22,20 @@ static_models:
 objects:
   - id: pipette_0
     model_name: pipette_model
-    source: /data/tianang/projects/AutoBio/autobio/model/object/pipette.gen.xml
+    source: external/AutoBio/autobio/model/object/pipette.gen.xml
     body: pipette
     prefix: pipette_0/
     freejoint: true
     init:
       # Settled freejoint pose for the wrapper body. The attached AutoBio
       # pipette has internal body offsets, so these wrapper coordinates place
-      # the visible pipette lying on the tabletop near x ~= 0.37, y ~= 0.05.
-      pos: [0.21985, 0.05181, 0.79854]
+      # the visible pipette on the tabletop about 12 cm in front of the palm.
+      pos: [-0.03342, 0.00169, 0.79854]
       quat: [0.72864, -0.00355, -0.68487, -0.00410]
     randomize:
       pos:
-        x: [0.17, 0.30]
-        y: [-0.08, 0.14]
+        x: [-0.06, -0.01]
+        y: [-0.03, 0.03]
         z: [0.790, 0.820]
       yaw: [-0.8, 0.8]
 

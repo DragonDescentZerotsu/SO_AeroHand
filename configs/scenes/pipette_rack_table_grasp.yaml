@@ -29,7 +29,7 @@ static_models:
 
   - id: pipette_rack_0
     model_name: pipette_rack_model
-    source: /data/tianang/projects/AutoBio/autobio/model/object/pipette_rack.gen.xml
+    source: external/AutoBio/autobio/model/object/pipette_rack.gen.xml
     body: pipette_rack
     prefix: pipette_rack_0/
     init:
@@ -40,7 +40,7 @@ static_models:
 objects:
   - id: pipette_0
     model_name: pipette_model
-    source: /data/tianang/projects/AutoBio/autobio/model/object/pipette.gen.xml
+    source: external/AutoBio/autobio/model/object/pipette.gen.xml
     body: pipette
     prefix: pipette_0/
     freejoint: true

@@ -1,0 +1,47 @@
+{
+  "frames": 300,
+  "variants": {
+    "A_default": {
+      "lambda_pinch": 25.0,
+      "lambda_close": 10.0,
+      "metrics": {
+        "human_pinch_distance_mean": 0.06264011064989773,
+        "robot_thumb_index_distance_mean": 0.0644873214459339,
+        "final_fingertip_error": 0.004477798820197269,
+        "pinch_success_rate": 0.05,
+        "contact_success_rate": 0.03333333333333333,
+        "object_slip_rate": 0.0,
+        "control_smoothness": 0.035174859455359336,
+        "teleoperation_latency_mean_s": 0.0
+      }
+    },
+    "B_closure": {
+      "lambda_pinch": 35.0,
+      "lambda_close": 15.0,
+      "metrics": {
+        "human_pinch_distance_mean": 0.06264011064989773,
+        "robot_thumb_index_distance_mean": 0.06094430349256508,
+        "final_fingertip_error": 0.0001527128463139453,
+        "pinch_success_rate": 0.06,
+        "contact_success_rate": 0.06333333333333334,
+        "object_slip_rate": 0.0,
+        "control_smoothness": 0.04661472220939097,
+        "teleoperation_latency_mean_s": 0.0
+      }
+    },
+    "C_natural": {
+      "lambda_pinch": 20.0,
+      "lambda_close": 5.0,
+      "metrics": {
+        "human_pinch_distance_mean": 0.06264011064989773,
+        "robot_thumb_index_distance_mean": 0.06648325362223738,
+        "final_fingertip_error": 0.005663921388052794,
+        "pinch_success_rate": 0.016666666666666666,
+        "contact_success_rate": 0.016666666666666666,
+        "object_slip_rate": 0.0,
+        "control_smoothness": 0.0356597201331989,
+        "teleoperation_latency_mean_s": 0.0
+      }
+    }
+  }
+}

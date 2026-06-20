@@ -387,6 +387,78 @@ class DampedLeastSquaresIK:
         self.prev_qtarget = q_target.copy()
         return q_target, qdot
 
+    def solve_osqp(
+        self,
+        data,
+        xdot_cmd: np.ndarray,
+        dt: float,
+        control_orientation: bool = False,
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Solve bounded resolved-rate IK through the shared OSQP solver."""
+        try:
+            from aero_quest.osqp_ik import OSQPIKConfig, OSQPVelocityIK
+        except ImportError as exc:
+            raise RuntimeError(
+                "OSQP IK requires the optional dependencies: pip install osqp scipy"
+            ) from exc
+
+        xdot_cmd = np.asarray(xdot_cmd, dtype=np.float64)
+        J = self.jacobian(data, control_orientation=control_orientation)
+        if J.shape[0] != xdot_cmd.shape[0]:
+            raise ValueError(
+                f"Jacobian/task velocity mismatch: J rows={J.shape[0]}, "
+                f"xdot shape={xdot_cmd.shape}"
+            )
+
+        task_dimension, joint_count = J.shape
+        solver = getattr(self, "_osqp_solver", None)
+        if (
+            solver is None
+            or solver.joint_count != joint_count
+            or solver.task_dimension != task_dimension
+        ):
+            solver = OSQPVelocityIK(
+                joint_count=joint_count,
+                task_dimension=task_dimension,
+                joint_motion_weights=np.ones(joint_count, dtype=np.float64),
+                task_weights=np.ones(task_dimension, dtype=np.float64),
+                config=OSQPIKConfig(
+                    base_damping=self.damping,
+                    accel_weight=0.0,
+                    max_joint_speed=self.max_joint_speed,
+                    max_joint_accel=0.0,
+                    singular_damping_threshold=0.0,
+                    singular_damping_gain=0.0,
+                ),
+            )
+            self._osqp_solver = solver
+
+        q_current = joint_qpos(self.model, data, self.joint_ids)
+        lo, hi = joint_ranges(self.model, self.joint_ids)
+        result = solver.solve(J, xdot_cmd, q_current, lo, hi, dt)
+        qdot = result.qdot
+        q_target = np.clip(q_current + qdot * float(dt), lo, hi)
+        self.prev_qtarget = q_target.copy()
+        return q_target, qdot
+
+    def set_joint_positions(self, data, qpos: np.ndarray) -> np.ndarray:
+        """Initialize selected arm joints and their position actuators."""
+        qpos = np.asarray(qpos, dtype=np.float64)
+        if qpos.shape != (len(self.joint_ids),):
+            raise ValueError(
+                f"Expected {len(self.joint_ids)} joint values for "
+                f"{self.joint_names}, got {qpos.shape}"
+            )
+        lo, hi = joint_ranges(self.model, self.joint_ids)
+        qpos = np.clip(qpos, lo, hi)
+        for joint_id, value in zip(self.joint_ids, qpos):
+            data.qpos[self.model.jnt_qposadr[joint_id]] = float(value)
+            data.qvel[self.model.jnt_dofadr[joint_id]] = 0.0
+        self.apply_position_targets(data, qpos)
+        self.prev_qtarget = qpos.copy()
+        mujoco.mj_forward(self.model, data)
+        return qpos.copy()
+
     def apply_position_targets(self, data, q_target: np.ndarray) -> None:
         """Write selected arm joint targets to matching MuJoCo position actuators."""
         for joint_id, target in zip(self.joint_ids, np.asarray(q_target, dtype=np.float64)):
