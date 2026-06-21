@@ -13,6 +13,7 @@ from pathlib import Path
 import time
 
 import numpy as np
+from scipy.spatial.transform import Rotation
 
 try:
     import mujoco
@@ -110,14 +111,15 @@ def index_thumb_alignment(
 
 
 def orientation_error(target_R: np.ndarray, current_R: np.ndarray) -> np.ndarray:
-    """Return a compact world-frame rotation error vector."""
+    """Return the shortest world-frame SO(3) rotation vector to the target.
+
+    The previous cross-product approximation scaled the error by sin(theta),
+    so it incorrectly approached zero for rotations near 180 degrees.
+    """
     target_R = np.asarray(target_R, dtype=np.float64).reshape(3, 3)
     current_R = np.asarray(current_R, dtype=np.float64).reshape(3, 3)
-    return 0.5 * (
-        np.cross(current_R[:, 0], target_R[:, 0])
-        + np.cross(current_R[:, 1], target_R[:, 1])
-        + np.cross(current_R[:, 2], target_R[:, 2])
-    )
+    relative_R_world = target_R @ current_R.T
+    return Rotation.from_matrix(relative_R_world).as_rotvec()
 
 
 def rotation_angle_from_matrix(R: np.ndarray) -> float:

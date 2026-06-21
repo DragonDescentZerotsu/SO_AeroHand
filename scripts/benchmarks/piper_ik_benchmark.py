@@ -36,6 +36,7 @@ DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "outputs/piper_ik_benchmark"
 ARM_JOINTS = ["joint1", "joint2", "joint3", "joint4", "joint5", "joint6"]
 HOME_QPOS = np.array([0.0, 1.57, -1.3485, 0.0, 0.0, 0.0], dtype=np.float64)
 TRAJECTORY_ANCHOR_QPOS = np.array([0.18, 1.48, -1.30, 0.82, 0.62, 0.30], dtype=np.float64)
+WRIST_SWEEP_ANCHOR_QPOS = np.array([0.18, 1.48, -1.30, 0.45, 0.35, 0.30], dtype=np.float64)
 JOINT_MOTION_WEIGHTS = np.array([0.7, 1.0, 1.0, 0.35, 0.22, 0.08], dtype=np.float64)
 TASK_WEIGHTS = np.array([1.0, 1.0, 1.0, 1.2, 1.2, 1.2], dtype=np.float64)
 ACTUATOR_KP = np.array([140.0, 140.0, 140.0, 100.0, 90.0, 90.0], dtype=np.float64)
@@ -120,6 +121,22 @@ class TrajectoryResult:
     max_osqp_wall_time_ms: float
     min_jacobian_singular_value: float
     max_effective_damping: float
+    osqp_failures: int
+
+
+@dataclass
+class OrientationSweepResult:
+    name: str
+    success: bool
+    duration_s: float
+    max_position_error_m: float
+    final_position_error_m: float
+    max_orientation_error_deg: float
+    final_orientation_error_deg: float
+    min_jacobian_singular_value: float
+    min_orientation_scale: float
+    max_abs_qdot_rad_s: float
+    max_abs_qacc_rad_s2: float
     osqp_failures: int
 
 
@@ -582,6 +599,151 @@ def run_continuous_trajectory(
     )
 
 
+def run_fixed_position_orientation_sweep(
+    model,
+    data,
+    ik: DampedLeastSquaresIK,
+    solver: OSQPVelocityIK,
+    velocity_controller: VelocityTeleopController,
+    anchor_target: PoseTarget,
+    renderer,
+    render_camera,
+    video_writer,
+    video_fps: int,
+    min_command_lead: float,
+    max_command_lead: float,
+    max_position_limit_m: float,
+    final_position_limit_m: float,
+) -> OrientationSweepResult:
+    dt = float(model.opt.timestep)
+    duration_s = 10.0
+    lower, upper = joint_ranges(model, ik.joint_ids)
+    command_qpos = joint_qpos(model, data, ik.joint_ids)
+    qdot_previous = np.zeros(len(ik.joint_ids), dtype=np.float64)
+    position_errors = []
+    orientation_errors = []
+    min_singular = float("inf")
+    min_orientation_scale = 1.0
+    max_abs_qdot = 0.0
+    max_abs_qacc = 0.0
+    failures = 0
+    frame_period = 1.0 / float(video_fps)
+    next_frame_time = 0.0
+    solver.reset()
+
+    for step in range(int(np.ceil(duration_s / dt))):
+        sim_time = step * dt
+        if sim_time < 2.0:
+            angle_deg = 70.0 * sim_time / 2.0
+        elif sim_time < 3.0:
+            angle_deg = 70.0
+        elif sim_time < 8.0:
+            angle_deg = 70.0 - 140.0 * (sim_time - 3.0) / 5.0
+        else:
+            angle_deg = -70.0
+        target_rotation = anchor_target.rotation @ rotation_from_rotvec(
+            np.array([0.0, np.radians(angle_deg), 0.0], dtype=np.float64)
+        )
+
+        current_position, current_rotation = ik.ee_pose(data)
+        position_error = float(np.linalg.norm(anchor_target.position - current_position))
+        orientation_error = rotation_angle(target_rotation, current_rotation)
+        position_errors.append(position_error)
+        orientation_errors.append(orientation_error)
+
+        command = velocity_controller.compute(
+            anchor_target.position,
+            target_rotation,
+            current_position,
+            current_rotation,
+        )
+        task_velocity = command.xdot.copy()
+        task_velocity[3:] *= 1.5
+        q_current = joint_qpos(model, data, ik.joint_ids)
+        try:
+            result = solver.solve(
+                ik.jacobian(data, control_orientation=True),
+                task_velocity,
+                q_current,
+                lower,
+                upper,
+                dt,
+            )
+            qdot = result.qdot
+            min_singular = min(min_singular, result.min_singular)
+            min_orientation_scale = min(min_orientation_scale, result.orientation_scale)
+            status = f"{result.status} ori_scale={result.orientation_scale:.2f}"
+        except RuntimeError:
+            qdot = np.zeros_like(qdot_previous)
+            failures += 1
+            status = "failed"
+
+        qacc = (qdot - qdot_previous) / dt
+        max_abs_qdot = max(max_abs_qdot, float(np.max(np.abs(qdot))))
+        max_abs_qacc = max(max_abs_qacc, float(np.max(np.abs(qacc))))
+        qdot_previous = qdot.copy()
+        command_qpos = np.clip(command_qpos + qdot * dt, lower, upper)
+        error_scale = max(
+            position_error / 0.10,
+            orientation_error / np.radians(30.0),
+        )
+        command_lead = abs(float(min_command_lead)) + (
+            abs(float(max_command_lead)) - abs(float(min_command_lead))
+        ) * float(np.clip(error_scale, 0.0, 1.0))
+        command_qpos = np.clip(
+            command_qpos,
+            q_current - command_lead,
+            q_current + command_lead,
+        )
+        apply_arm_targets(model, data, ik.joint_ids, command_qpos)
+        mujoco.mj_step(model, data)
+
+        if renderer is not None and sim_time + 1e-12 >= next_frame_time:
+            target = PoseTarget(
+                name=f"fixed_position_wrist_pitch_{angle_deg:+.0f}deg",
+                position=anchor_target.position,
+                rotation=target_rotation,
+                source_qpos=anchor_target.source_qpos,
+            )
+            renderer.update_scene(data, camera=render_camera)
+            add_target_visuals(renderer.scene, target)
+            frame = annotate_frame(
+                renderer.render(),
+                target,
+                sim_time,
+                position_error,
+                orientation_error,
+                status,
+            )
+            video_writer.append_data(frame)
+            next_frame_time += frame_period
+
+    max_position_error = max(position_errors)
+    final_position_error = position_errors[-1]
+    max_orientation_error = max(orientation_errors)
+    final_orientation_error = orientation_errors[-1]
+    success = bool(
+        max_position_error <= max_position_limit_m
+        and final_position_error <= final_position_limit_m
+        and min_orientation_scale < 1.0
+        and failures == 0
+    )
+    return OrientationSweepResult(
+        name="fixed_position_wrist_pitch_plus70_to_minus70",
+        success=success,
+        duration_s=duration_s,
+        max_position_error_m=max_position_error,
+        final_position_error_m=final_position_error,
+        max_orientation_error_deg=float(np.degrees(max_orientation_error)),
+        final_orientation_error_deg=float(np.degrees(final_orientation_error)),
+        min_jacobian_singular_value=min_singular,
+        min_orientation_scale=min_orientation_scale,
+        max_abs_qdot_rad_s=max_abs_qdot,
+        max_abs_qacc_rad_s2=max_abs_qacc,
+        osqp_failures=failures,
+    )
+
+
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--model", default=str(DEFAULT_MODEL))
@@ -600,6 +762,8 @@ def parse_args():
     parser.add_argument("--trajectory-period", type=float, default=8.0)
     parser.add_argument("--trajectory-p95-position-mm", type=float, default=25.0)
     parser.add_argument("--trajectory-p95-orientation-deg", type=float, default=8.0)
+    parser.add_argument("--wrist-sweep-max-position-mm", type=float, default=40.0)
+    parser.add_argument("--wrist-sweep-final-position-mm", type=float, default=10.0)
     parser.add_argument("--min-command-lead", type=float, default=0.08)
     parser.add_argument("--max-command-lead", type=float, default=0.20)
     parser.add_argument("--record-video", action=argparse.BooleanOptionalAction, default=False)
@@ -693,6 +857,7 @@ def main() -> int:
     random_results = []
     video_results = []
     trajectory_result = None
+    orientation_sweep_result = None
     start = time.perf_counter()
     try:
         for target in fixed_targets:
@@ -818,6 +983,40 @@ def main() -> int:
                 f"rot_p95={trajectory_result.p95_orientation_error_deg:.2f}deg"
             )
 
+            sweep_target = generate_targets(
+                model,
+                data,
+                ik,
+                (("wrist_sweep_anchor", WRIST_SWEEP_ANCHOR_QPOS.copy()),),
+            )[0]
+            set_arm_state(model, data, ik.joint_ids, WRIST_SWEEP_ANCHOR_QPOS)
+            mujoco.mj_forward(model, data)
+            orientation_sweep_result = run_fixed_position_orientation_sweep(
+                model=model,
+                data=data,
+                ik=ik,
+                solver=solver,
+                velocity_controller=velocity_controller,
+                anchor_target=sweep_target,
+                renderer=renderer,
+                render_camera=render_camera,
+                video_writer=video_writer,
+                video_fps=args.video_fps,
+                min_command_lead=args.min_command_lead,
+                max_command_lead=args.max_command_lead,
+                max_position_limit_m=args.wrist_sweep_max_position_mm / 1000.0,
+                final_position_limit_m=args.wrist_sweep_final_position_mm / 1000.0,
+            )
+            print(
+                f"stress/{orientation_sweep_result.name}: success={orientation_sweep_result.success} "
+                f"max_pos={orientation_sweep_result.max_position_error_m * 1000:.2f}mm "
+                f"final_pos={orientation_sweep_result.final_position_error_m * 1000:.2f}mm "
+                f"max_rot={orientation_sweep_result.max_orientation_error_deg:.2f}deg "
+                f"final_rot={orientation_sweep_result.final_orientation_error_deg:.2f}deg "
+                f"min_sv={orientation_sweep_result.min_jacobian_singular_value:.6f} "
+                f"min_ori_scale={orientation_sweep_result.min_orientation_scale:.3f}"
+            )
+
             for target in random_targets:
                 set_arm_state(model, data, ik.joint_ids, HOME_QPOS)
                 mujoco.mj_forward(model, data)
@@ -870,12 +1069,20 @@ def main() -> int:
         "all_fixed_targets_reached": fixed_success,
         "random_success_rate": random_success_rate >= args.min_random_success_rate,
         "continuous_trajectory": trajectory_result is None or trajectory_result.success,
+        "fixed_position_wrist_sweep": (
+            orientation_sweep_result is None or orientation_sweep_result.success
+        ),
         "video_sequence": not video_results or all(result.success for result in video_results),
         "max_settle_time_s": max(settle_times, default=float("inf")) <= args.max_settle_seconds,
         "osqp_p95_wall_time_ms": p95_solve_ms <= args.max_osqp_p95_ms,
         "zero_osqp_failures": (
             sum(result.osqp_failures for result in all_results)
             + (trajectory_result.osqp_failures if trajectory_result is not None else 0)
+            + (
+                orientation_sweep_result.osqp_failures
+                if orientation_sweep_result is not None
+                else 0
+            )
         )
         == 0,
     }
@@ -894,6 +1101,8 @@ def main() -> int:
             "max_osqp_p95_ms": args.max_osqp_p95_ms,
             "trajectory_p95_position_mm": args.trajectory_p95_position_mm,
             "trajectory_p95_orientation_deg": args.trajectory_p95_orientation_deg,
+            "wrist_sweep_max_position_mm": args.wrist_sweep_max_position_mm,
+            "wrist_sweep_final_position_mm": args.wrist_sweep_final_position_mm,
             "min_command_lead_rad": args.min_command_lead,
             "max_command_lead_rad": args.max_command_lead,
         },
@@ -952,6 +1161,11 @@ def main() -> int:
             for index, result in enumerate(random_results)
         ],
         "trajectory": asdict(trajectory_result) if trajectory_result is not None else None,
+        "orientation_sweep": (
+            asdict(orientation_sweep_result)
+            if orientation_sweep_result is not None
+            else None
+        ),
         "video_sequence": [asdict(result) for result in video_results],
         "video": str(video_path.resolve()) if args.record_video else None,
     }

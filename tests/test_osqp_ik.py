@@ -63,6 +63,7 @@ def test_piper_osqp_ik_respects_bounds_and_damps_near_singularity():
     assert np.all(np.abs(qdot) <= 120.0 * 0.005 + 1e-4)
     assert result.min_singular < 0.10
     assert result.effective_damping > ik.damping
+    assert 0.0 < result.orientation_scale < 1.0
     assert abs(qdot[5]) > 1e-3
 
     second = solver.solve(
@@ -77,6 +78,41 @@ def test_piper_osqp_ik_respects_bounds_and_damps_near_singularity():
     assert second.wall_time_s < 0.01
 
 
+def test_osqp_adaptive_orientation_reduces_priority_near_joint_limit():
+    solver = OSQPVelocityIK(
+        joint_count=6,
+        task_dimension=6,
+        joint_motion_weights=np.ones(6),
+        task_weights=np.ones(6),
+        config=OSQPIKConfig(
+            adaptive_orientation=True,
+            orientation_singularity_threshold=0.05,
+            orientation_joint_limit_margin=0.20,
+            minimum_orientation_scale=0.08,
+        ),
+    )
+    jacobian = np.eye(6)
+    lower = -np.ones(6)
+    upper = np.ones(6)
+    task_velocity = np.ones(6)
+
+    centered = solver.solve(jacobian, task_velocity, np.zeros(6), lower, upper, dt=0.01)
+    solver.reset()
+    near_limit = solver.solve(
+        jacobian,
+        task_velocity,
+        np.array([0.95, 0.0, 0.0, 0.0, 0.0, 0.0]),
+        lower,
+        upper,
+        dt=0.01,
+    )
+
+    assert centered.orientation_scale == 1.0
+    assert np.isclose(near_limit.orientation_scale, 0.25)
+    assert np.linalg.norm(near_limit.qdot[:3]) > np.linalg.norm(near_limit.qdot[3:])
+
+
 if __name__ == "__main__":
     test_piper_osqp_ik_respects_bounds_and_damps_near_singularity()
+    test_osqp_adaptive_orientation_reduces_priority_near_joint_limit()
     print("OSQP IK smoke test passed")

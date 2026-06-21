@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mujoco model="piper_dual_pipette_rack_table">
+  <compiler angle="radian" autolimits="true" />
+  <option integrator="implicitfast" cone="elliptic" impratio="10" timestep="0.005" />
+  <visual>
+    <headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3" specular="0 0 0" />
+    <rgba haze="0.15 0.25 0.35 1" />
+    <global azimuth="0" elevation="-25" />
+  </visual>
+  <asset>
+    <model name="piper_original_model" file="../../../mujoco_menagerie/agilex_piper/piper.xml" content_type="text/xml" />
+    <model name="piper_aerohand_model" file="../Piper_aerohand.xml" content_type="text/xml" />
+    <model name="table_model" file="../../so101_aero_hand/objects/vention_table_top.xml" content_type="text/xml" />
+    <model name="pipette_rack_model" file="../../../../AutoBio/autobio/model/object/pipette_rack.gen.xml" content_type="text/xml" />
+    <model name="pipette_model" file="../../../../AutoBio/autobio/model/object/pipette.gen.xml" content_type="text/xml" />
+  </asset>
+  <worldbody>
+    <frame name="piper_original" pos="-0.24 -0.39 0.827" quat="0.70710678 0 0 0.70710678">
+      <attach model="piper_original_model" body="base_link" prefix="piper_original/" />
+    </frame>
+    <frame name="piper_aerohand" pos="0.24 -0.39 0.827" quat="0.70710678 0 0 0.70710678">
+      <attach model="piper_aerohand_model" body="base_link" prefix="piper_aerohand/" />
+    </frame>
+    <frame name="table_0" pos="0 0 0" quat="1 0 0 0">
+      <attach model="table_model" body="vention_table_top" prefix="table_0/" />
+    </frame>
+    <frame name="pipette_rack_0" pos="0 0 0.827" quat="1 0 0 0">
+      <attach model="pipette_rack_model" body="pipette_rack" prefix="pipette_rack_0/" />
+    </frame>
+    <body name="pipette_0" pos="0.05918 -0.085 1.07" quat="0.7044 -0.0616 0.0616 0.7044">
+      <freejoint name="pipette_0_free" />
+      <attach model="pipette_model" body="pipette" prefix="pipette_0/" />
+    </body>
+  </worldbody>
+  <statistic center="0 -0.05 0.95" extent="1.05" meansize="0.01" />
+</mujoco>

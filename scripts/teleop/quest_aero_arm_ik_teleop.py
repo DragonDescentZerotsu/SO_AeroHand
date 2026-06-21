@@ -66,6 +66,11 @@ DEFAULT_QP_ACCEL_WEIGHT = 0.02
 DEFAULT_QP_MAX_JOINT_ACCEL = 80.0
 DEFAULT_QP_SINGULAR_DAMPING_THRESHOLD = 0.08
 DEFAULT_QP_SINGULAR_DAMPING_GAIN = 0.08
+DEFAULT_QP_ADAPTIVE_ORIENTATION = True
+DEFAULT_QP_ORIENTATION_SINGULARITY_THRESHOLD = 0.05
+DEFAULT_QP_ORIENTATION_JOINT_LIMIT_MARGIN = 0.20
+DEFAULT_QP_MINIMUM_ORIENTATION_SCALE = 0.08
+DEFAULT_QP_ADAPTIVE_POSITION_BOOST = 25.0
 SAFE_OPEN_HAND = np.array([1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float32)
 
 # Quest/Unity Q: +X right, +Y up, +Z forward.
@@ -515,6 +520,7 @@ def solve_osqp_task_space_ik(
         "iterations": result.iterations,
         "min_singular": result.min_singular,
         "effective_damping": result.effective_damping,
+        "orientation_scale": result.orientation_scale,
         "solve_time_s": result.solve_time_s,
         "wall_time_s": result.wall_time_s,
     }
@@ -638,6 +644,32 @@ def parse_args():
     parser.add_argument("--qp-max-joint-accel", type=float, default=DEFAULT_QP_MAX_JOINT_ACCEL)
     parser.add_argument("--qp-singular-damping-threshold", type=float, default=DEFAULT_QP_SINGULAR_DAMPING_THRESHOLD)
     parser.add_argument("--qp-singular-damping-gain", type=float, default=DEFAULT_QP_SINGULAR_DAMPING_GAIN)
+    parser.add_argument(
+        "--qp-adaptive-orientation",
+        action=argparse.BooleanOptionalAction,
+        default=DEFAULT_QP_ADAPTIVE_ORIENTATION,
+        help="Reduce orientation priority near arm singularities and joint limits so position remains stable.",
+    )
+    parser.add_argument(
+        "--qp-orientation-singularity-threshold",
+        type=float,
+        default=DEFAULT_QP_ORIENTATION_SINGULARITY_THRESHOLD,
+    )
+    parser.add_argument(
+        "--qp-orientation-joint-limit-margin",
+        type=float,
+        default=DEFAULT_QP_ORIENTATION_JOINT_LIMIT_MARGIN,
+    )
+    parser.add_argument(
+        "--qp-minimum-orientation-scale",
+        type=float,
+        default=DEFAULT_QP_MINIMUM_ORIENTATION_SCALE,
+    )
+    parser.add_argument(
+        "--qp-adaptive-position-boost",
+        type=float,
+        default=DEFAULT_QP_ADAPTIVE_POSITION_BOOST,
+    )
     parser.add_argument("--control-orientation", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--orientation-source", choices=["palm_landmarks", "wrist_pose"], default=DEFAULT_ORIENTATION_SOURCE)
     parser.add_argument("--orientation-tracking", choices=["absolute", "relative"], default="relative")
@@ -735,6 +767,11 @@ def main():
                 max_joint_accel=args.qp_max_joint_accel,
                 singular_damping_threshold=args.qp_singular_damping_threshold,
                 singular_damping_gain=args.qp_singular_damping_gain,
+                adaptive_orientation=args.qp_adaptive_orientation,
+                orientation_singularity_threshold=args.qp_orientation_singularity_threshold,
+                orientation_joint_limit_margin=args.qp_orientation_joint_limit_margin,
+                minimum_orientation_scale=args.qp_minimum_orientation_scale,
+                adaptive_position_boost=args.qp_adaptive_position_boost,
             ),
         )
     vel_controller = VelocityTeleopController(
@@ -806,7 +843,12 @@ def main():
         f"osqp_enabled={osqp_solver is not None} qp_task_weights={np.array2string(qp_task_weights, precision=4, suppress_small=True)} "
         f"qp_accel_weight={args.qp_accel_weight:.4f} qp_max_joint_accel={args.qp_max_joint_accel:.4f} "
         f"qp_singular_damping_threshold={args.qp_singular_damping_threshold:.4f} "
-        f"qp_singular_damping_gain={args.qp_singular_damping_gain:.4f}"
+        f"qp_singular_damping_gain={args.qp_singular_damping_gain:.4f} "
+        f"qp_adaptive_orientation={args.qp_adaptive_orientation} "
+        f"qp_orientation_singularity_threshold={args.qp_orientation_singularity_threshold:.4f} "
+        f"qp_orientation_joint_limit_margin={args.qp_orientation_joint_limit_margin:.4f} "
+        f"qp_minimum_orientation_scale={args.qp_minimum_orientation_scale:.4f} "
+        f"qp_adaptive_position_boost={args.qp_adaptive_position_boost:.4f}"
     )
     print(f"disable_hand_retargeting={args.disable_hand_retargeting}")
     print_combined_actuator_info(model, arm_actuator_names=ik.joint_names)
@@ -852,6 +894,7 @@ def main():
     last_ik_iterations = 0
     last_min_singular = float("nan")
     last_effective_damping = float(args.ik_damping)
+    last_orientation_scale = 1.0
     filtered_hand = SAFE_OPEN_HAND.copy()
 
     with mujoco.viewer.launch_passive(
@@ -960,6 +1003,7 @@ def main():
                         last_ik_iterations = 0
                         last_min_singular = float("nan")
                         last_effective_damping = float(args.ik_damping)
+                        last_orientation_scale = 1.0
                     else:
                         try:
                             qtarget, last_qdot, last_qdot_pos, last_qdot_null, ik_diag = solve_osqp_task_space_ik(
@@ -994,6 +1038,7 @@ def main():
                             last_ik_iterations = int(ik_diag["iterations"])
                             last_min_singular = float(ik_diag["min_singular"])
                             last_effective_damping = float(ik_diag["effective_damping"])
+                            last_orientation_scale = float(ik_diag["orientation_scale"])
                         except RuntimeError as exc:
                             print(f"OSQP IK failed, falling back to DLS for this step: {exc}")
                             qtarget, last_qdot, last_qdot_pos, last_qdot_null = solve_full_task_space_ik(
@@ -1008,6 +1053,7 @@ def main():
                             last_ik_iterations = 0
                             last_min_singular = float("nan")
                             last_effective_damping = float(args.ik_damping)
+                            last_orientation_scale = 1.0
                 elif args.ik_mode == "full_pose":
                     weighted_xdot = cmd.xdot.copy()
                     weighted_xdot[:3] *= float(args.position_weight)
@@ -1025,6 +1071,7 @@ def main():
                     last_ik_iterations = 0
                     last_min_singular = float("nan")
                     last_effective_damping = float(args.ik_damping)
+                    last_orientation_scale = 1.0
                 else:
                     weighted_xdot = cmd.xdot.copy()
                     weighted_xdot[:3] *= float(args.position_weight)
@@ -1040,6 +1087,7 @@ def main():
                     last_ik_iterations = 0
                     last_min_singular = float("nan")
                     last_effective_damping = float(args.ik_damping)
+                    last_orientation_scale = 1.0
                 state["last_qtarget"] = qtarget.copy()
                 ik.apply_position_targets(data, qtarget)
                 last_qtarget_error = qtarget - joint_qpos(model, data, ik.joint_ids)
@@ -1088,6 +1136,7 @@ def main():
                     f"xdot={np.array2string(last_velocity, precision=4, suppress_small=True)} "
                     f"ik_status={last_ik_status} ik_iter={last_ik_iterations} "
                     f"min_sv={last_min_singular:.5f} damp={last_effective_damping:.5f} "
+                    f"ori_scale={last_orientation_scale:.3f} "
                     f"qdot={np.array2string(last_qdot, precision=4, suppress_small=True)} "
                     f"qerr={np.array2string(last_qtarget_error, precision=4, suppress_small=True)} "
                     f"qdot_pos={np.array2string(last_qdot_pos, precision=4, suppress_small=True)} "

@@ -1,0 +1,98 @@
+name: piper_dual_pipette_rack_table
+output_model: models/piper_aero_hand/scenes/Piper_dual_pipette_rack_table.xml
+
+# This scene intentionally starts from an empty root and instantiates reusable
+# robot/object models. That keeps the dual-arm layout independent of any one
+# robot base XML and makes later task scenes easier to extend.
+
+viewer:
+  statistic:
+    center: [0.0, -0.05, 0.95]
+    extent: 1.05
+    meansize: 0.01
+  global:
+    azimuth: 0
+    elevation: -25
+
+model_instances:
+  - id: piper_original
+    model_name: piper_original_model
+    source: mujoco_menagerie/agilex_piper/piper.xml
+    body: base_link
+    prefix: piper_original/
+    init:
+      # Left robot on the long table edge, facing toward table center.
+      pos: [-0.24, -0.39, 0.827]
+      quat: [0.70710678, 0.0, 0.0, 0.70710678]
+
+  - id: piper_aerohand
+    model_name: piper_aerohand_model
+    source: models/piper_aero_hand/Piper_aerohand.xml
+    body: base_link
+    prefix: piper_aerohand/
+    init:
+      # Right robot on the same long table edge, facing toward table center.
+      pos: [0.24, -0.39, 0.827]
+      quat: [0.70710678, 0.0, 0.0, 0.70710678]
+
+static_models:
+  - id: table_0
+    model_name: table_model
+    source: models/so101_aero_hand/objects/vention_table_top.xml
+    body: vention_table_top
+    prefix: table_0/
+    init:
+      pos: [0.0, 0.0, 0.0]
+      quat: [1.0, 0.0, 0.0, 0.0]
+
+  - id: pipette_rack_0
+    model_name: pipette_rack_model
+    source: /data/tianang/projects/AutoBio/autobio/model/object/pipette_rack.gen.xml
+    body: pipette_rack
+    prefix: pipette_rack_0/
+    init:
+      # Original SO101-tuned rack pose before layout_groups moves the pair.
+      pos: [0.34, -0.08, 0.827]
+      quat: [1.0, 0.0, 0.0, 0.0]
+
+objects:
+  - id: pipette_0
+    model_name: pipette_model
+    source: /data/tianang/projects/AutoBio/autobio/model/object/pipette.gen.xml
+    body: pipette
+    prefix: pipette_0/
+    freejoint: true
+    init:
+      # Original SO101-tuned freejoint wrapper pose with the pipette resting
+      # in the rack. Keep this pose paired with pipette_rack_0.
+      pos: [0.39918, -0.165, 1.07]
+      quat: [0.7044, -0.0616, 0.0616, 0.7044]
+    randomize:
+      group: pipette_rack_set
+
+layout_groups:
+  - id: pipette_rack_set
+    # The source origin is the tuned rack pose from the SO101 rack scene.
+    # Moving this group preserves the rack/pipette relative transform.
+    source_origin: [0.34, -0.08, 0.827]
+    target_origin: [0.0, 0.0, 0.827]
+    # yaw=0 keeps the rack side that holds the pipette facing the robots on
+    # the negative-Y table edge.
+    yaw: 0.0
+    members:
+      - section: static_models
+        id: pipette_rack_0
+      - section: objects
+        id: pipette_0
+
+task:
+  type: dual_arm_rack_grasp_object
+  robots: [piper_original, piper_aerohand]
+  active_robot: piper_aerohand
+  target_objects: [pipette_0]
+  support: pipette_rack_0
+  object_groups:
+    - pipette_rack_set
+  success:
+    lift_height: 0.05
+    hold_steps: 20

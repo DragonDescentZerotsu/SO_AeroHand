@@ -115,6 +115,7 @@ OSQP IK 会同时处理：
 - 关节位置限位。
 - 相邻控制周期的 `qdot` 平滑/加速度限制。
 - 接近奇异值时自适应增加 damping。
+- 接近奇异位形或关节软限位时，自适应降低姿态任务权重并提高位置任务权重，避免为追不可达姿态而让 palm 大幅漂移。
 
 修改 Piper IK 或控制参数后，先运行自动 benchmark：
 
@@ -138,6 +139,7 @@ python scripts/benchmarks/piper_ik_benchmark.py \
 - `damp`：奇异附近实际使用的 damping。
 - `qdot`：当前 IK 输出关节速度。
 - `qerr`：MuJoCo position actuator 当前目标误差。
+- `ori_scale`：当前姿态任务缩放；`1.0` 表示正常 full-pose，接近 `0.08` 表示因奇异/限位正在优先保护位置。
 
 ### `quest_so101_aero_ik_teleop.py`
 
@@ -290,6 +292,7 @@ R_BQ =
 - 改 Quest 数据解析或坐标帧转换时，优先看 `aero_quest/quest_hand_frame.py`。
 - 改完整遥操作循环或通用 IK 接线时，优先看 `quest_aero_arm_ik_teleop.py`。
 - 改 DLS 速度控制时看 `aero_quest/arm_teleop.py`；改 OSQP IK 时看 `aero_quest/osqp_ik.py`。
+- `aero_quest/arm_teleop.py::orientation_error` 必须使用 SO(3) rotation vector/log-map；不要改回按 `sin(theta)` 缩放、在 180° 附近趋近于零的叉积近似。
 - 改 Aero Hand 手指重定向时，优先看 `aero_quest/retargeting.py`。
 - 新增机器人完整遥操作入口时，像现有 SO101/Piper 入口一样复用 `quest_aero_arm_ik_teleop.py`，只覆盖模型、关节、IK 和控制参数默认值。
 

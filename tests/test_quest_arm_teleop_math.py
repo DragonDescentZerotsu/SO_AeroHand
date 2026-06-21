@@ -7,7 +7,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from aero_quest.arm_teleop import QuestArmTeleopController, compute_palm_pose
+from aero_quest.arm_teleop import QuestArmTeleopController, compute_palm_pose, orientation_error
 
 
 class FakeRobot:
@@ -67,6 +67,46 @@ def make_oriented_pose_points(wrist, x_axis, y_axis):
     P[9] = wrist + y_axis
     P[17] = wrist - x_axis
     return P
+
+
+def rotation_matrix(axis, angle):
+    axis = np.asarray(axis, dtype=np.float64)
+    axis /= np.linalg.norm(axis)
+    cross = np.array(
+        [
+            [0.0, -axis[2], axis[1]],
+            [axis[2], 0.0, -axis[0]],
+            [-axis[1], axis[0], 0.0],
+        ],
+        dtype=np.float64,
+    )
+    return np.eye(3) + np.sin(angle) * cross + (1.0 - np.cos(angle)) * (cross @ cross)
+
+
+def test_orientation_error_zero():
+    np.testing.assert_allclose(orientation_error(np.eye(3), np.eye(3)), np.zeros(3), atol=1e-12)
+
+
+def test_orientation_error_world_frame_direction_and_magnitude():
+    axis = np.array([0.2, -0.4, 0.7], dtype=np.float64)
+    axis /= np.linalg.norm(axis)
+    angle = np.radians(90.0)
+    error = orientation_error(rotation_matrix(axis, angle), np.eye(3))
+    np.testing.assert_allclose(error, axis * angle, atol=1e-10)
+
+
+def test_orientation_error_remains_large_near_180_degrees():
+    axis = np.array([0.3, 0.4, -0.5], dtype=np.float64)
+    axis /= np.linalg.norm(axis)
+    angle = np.radians(179.9)
+    error = orientation_error(rotation_matrix(axis, angle), np.eye(3))
+    assert np.isclose(np.linalg.norm(error), angle, atol=1e-9)
+    assert np.dot(error, axis) > 0.0
+
+
+def test_orientation_error_uses_shortest_rotation():
+    error = orientation_error(rotation_matrix([0.0, 0.0, 1.0], np.radians(181.0)), np.eye(3))
+    np.testing.assert_allclose(error, [0.0, 0.0, -np.radians(179.0)], atol=1e-10)
 
 
 def test_compute_palm_pose():

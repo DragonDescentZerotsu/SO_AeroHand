@@ -18,7 +18,12 @@ class OSQPIKConfig:
     max_joint_accel: float = 120.0
     singular_damping_threshold: float = 0.10
     singular_damping_gain: float = 0.10
-    max_iter: int = 80
+    adaptive_orientation: bool = True
+    orientation_singularity_threshold: float = 0.05
+    orientation_joint_limit_margin: float = 0.20
+    minimum_orientation_scale: float = 0.08
+    adaptive_position_boost: float = 25.0
+    max_iter: int = 200
     eps_abs: float = 1e-4
     eps_rel: float = 1e-4
 
@@ -30,6 +35,7 @@ class OSQPIKResult:
     iterations: int
     min_singular: float
     effective_damping: float
+    orientation_scale: float
     solve_time_s: float
     wall_time_s: float
 
@@ -102,22 +108,44 @@ class OSQPVelocityIK:
         self,
         jacobian: np.ndarray,
         task_velocity: np.ndarray,
-    ) -> tuple[np.ndarray, np.ndarray, float, float]:
-        effective_damping, min_singular = effective_singular_damping(
-            jacobian,
-            base_damping=self.config.base_damping,
-            threshold=self.config.singular_damping_threshold,
-            gain=self.config.singular_damping_gain,
-        )
-        weighted_jacobian = self.task_weights[:, None] * jacobian
-        weighted_velocity = self.task_weights * task_velocity
+        effective_damping: float,
+        task_weights: np.ndarray,
+    ) -> tuple[np.ndarray, np.ndarray]:
+        weighted_jacobian = task_weights[:, None] * jacobian
+        weighted_velocity = task_weights * task_velocity
         regularization = np.diag((effective_damping * self.joint_motion_weights) ** 2)
         hessian = weighted_jacobian.T @ weighted_jacobian + regularization
         gradient = -(weighted_jacobian.T @ weighted_velocity)
         if self.config.accel_weight > 0.0:
             hessian += self.config.accel_weight * np.eye(self.joint_count, dtype=np.float64)
             gradient += -self.config.accel_weight * self.prev_qdot
-        return hessian, gradient, effective_damping, min_singular
+        return hessian, gradient
+
+    def _orientation_scale(
+        self,
+        min_singular: float,
+        q_current: np.ndarray,
+        joint_lower: np.ndarray,
+        joint_upper: np.ndarray,
+    ) -> float:
+        if not self.config.adaptive_orientation or self.task_dimension != 6:
+            return 1.0
+
+        minimum_scale = float(np.clip(self.config.minimum_orientation_scale, 0.0, 1.0))
+        singular_threshold = max(float(self.config.orientation_singularity_threshold), 1e-12)
+        singular_scale = float(np.clip(min_singular / singular_threshold, 0.0, 1.0))
+
+        margin = max(float(self.config.orientation_joint_limit_margin), 1e-12)
+        finite = np.isfinite(joint_lower) & np.isfinite(joint_upper)
+        if np.any(finite):
+            distance = np.minimum(
+                q_current[finite] - joint_lower[finite],
+                joint_upper[finite] - q_current[finite],
+            )
+            joint_limit_scale = float(np.clip(np.min(distance) / margin, 0.0, 1.0))
+        else:
+            joint_limit_scale = 1.0
+        return max(minimum_scale, min(singular_scale, joint_limit_scale))
 
     def _bounds(
         self,
@@ -166,7 +194,29 @@ class OSQPVelocityIK:
         joint_lower = np.asarray(joint_lower, dtype=np.float64).reshape(self.joint_count)
         joint_upper = np.asarray(joint_upper, dtype=np.float64).reshape(self.joint_count)
 
-        hessian, gradient, effective_damping, min_singular = self._objective(jacobian, task_velocity)
+        effective_damping, min_singular = effective_singular_damping(
+            jacobian,
+            base_damping=self.config.base_damping,
+            threshold=self.config.singular_damping_threshold,
+            gain=self.config.singular_damping_gain,
+        )
+        orientation_scale = self._orientation_scale(
+            min_singular,
+            q_current,
+            joint_lower,
+            joint_upper,
+        )
+        effective_task_weights = self.task_weights.copy()
+        if self.task_dimension == 6:
+            boost = max(float(self.config.adaptive_position_boost), 1.0)
+            effective_task_weights[:3] *= 1.0 + (boost - 1.0) * (1.0 - orientation_scale)
+            effective_task_weights[3:] *= orientation_scale
+        hessian, gradient = self._objective(
+            jacobian,
+            task_velocity,
+            effective_damping,
+            effective_task_weights,
+        )
         lower, upper = self._bounds(q_current, joint_lower, joint_upper, dt)
         p_matrix = 2.0 * 0.5 * (hessian + hessian.T)
         q_vector = 2.0 * gradient
@@ -209,6 +259,7 @@ class OSQPVelocityIK:
             iterations=int(result.info.iter),
             min_singular=min_singular,
             effective_damping=effective_damping,
+            orientation_scale=orientation_scale,
             solve_time_s=float(result.info.solve_time),
             wall_time_s=wall_time_s,
         )
