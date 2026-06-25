@@ -167,7 +167,7 @@ python scripts/teleop/quest_so101_aero_ik_teleop.py \
 
 ## 代码地图
 
-- 专家轨迹主线：`aero_tasks/motion_planning.py`、`aero_tasks/lerobot_export.py`、`scripts/planning/plan_piper_gripper_pipette_handoff.py`、`scripts/planning/generate_piper_pipette_handoff_lerobot.py`、`scripts/planning/preview_lerobot_cameras.py`、`scripts/planning/replay_trajectory.py`。具体命令、数据布局和回放按键见 `scripts/planning/AGENTS.md`。
+- 专家轨迹主线：`aero_tasks/motion_planning.py`、`aero_tasks/task_sampling.py`、`aero_tasks/payload_collision.py`、`aero_tasks/lerobot_export.py`、`scripts/planning/plan_piper_gripper_pipette_handoff.py`、`scripts/planning/generate_piper_pipette_handoff_lerobot.py`、`scripts/planning/preview_lerobot_cameras.py`、`scripts/planning/replay_trajectory.py`。具体命令、数据布局和回放按键见 `scripts/planning/AGENTS.md`。
 - 接收：`scripts/04_receive_quest_tcp.py`，完整遥操作在 `scripts/teleop/`。
 - 解析和类型化坐标帧模型：`aero_quest/quest_hand_frame.py`。
 - 机械臂速度控制和 DLS IK 辅助：`aero_quest/arm_teleop.py`。
@@ -231,7 +231,9 @@ python -m mujoco.viewer --mjcf=models/piper_aero_hand/scenes/Piper_dual_pipette_
 
 新增任务场景时，优先新增 `configs/scenes/<task>.yaml`，不要复制粘贴基础机器人 XML。机器人或整机模型实例放在 `model_instances`，桌子、rack 等固定物体放在 `static_models`，pipette 等可抓取物体放在 `objects` 并设置 `freejoint: true`。需要把 rack/pipette 这类已经调好的相对位姿整体挪动或旋转时，使用 `layout_groups` 记录 `source_origin`、`target_origin`、`yaw` 和成员列表；这会在生成 XML 时保持组内相对位姿不变。
 
-需要训练 policy 时，MJCF 负责拓扑和碰撞，episode reset 时再由 Python 环境根据 YAML 中的 `randomize` 字段随机化 arm qpos、object freejoint pose、layout group pose 和 target object。可抓取物体必须放在带 `freejoint` 的 wrapper body 下，否则只是固定场景物体，无法被抓起来。
+需要训练 policy 时，MJCF 负责拓扑和碰撞，episode reset 时再由 Python 环境根据 YAML 中的 `randomize` 字段和任务 sampler 随机化 arm qpos、静态 body pose、object freejoint pose、layout group pose 和 target object。可抓取物体必须放在带 `freejoint` 的 wrapper body 下，否则只是固定场景物体，无法被抓起来。
+
+当前 Piper pipette handoff sampler 位于 `aero_tasks/task_sampling.py`：`--sample-pipette-rack-bar` 以 rack 横梁中心为 offset 参考点，默认沿 rack 局部 `+X` 在整根 `0.255m` 横梁上采样 pipette 初始位置，并同时随机 rack 的桌面平移和 yaw；`--fixed-rack-pose` 可关闭 rack pose 随机。每个 episode 的覆盖项写入 `raw/episode_xxxxxx/episode_spec.json`，planner、LeRobot 导出和交互回放都应使用这份 spec 保证场景一致。
 
 当前 `pipette_grasp.yaml` 直接引用本机 `/data/tianang/projects/AutoBio/autobio/model/object/pipette.gen.xml`。如果场景需要脱离这台机器运行，应先把相关 AutoBio MJCF 和 mesh assets 复制或子模块化到本项目，再更新 recipe 的 `source` 路径。
 
@@ -265,10 +267,11 @@ python scripts/teleop/quest_piper_aero_ik_teleop.py --dry-run
 python scripts/benchmarks/piper_ik_benchmark.py
 ```
 
-修改专家轨迹、LeRobot 导出或相机配置时，至少运行：
+修改专家轨迹、采样、payload collision、LeRobot 导出或相机配置时，至少运行：
 
 ```bash
-python -m py_compile aero_tasks/motion_planning.py aero_tasks/lerobot_export.py scripts/planning/plan_piper_gripper_pipette_handoff.py scripts/planning/generate_piper_pipette_handoff_lerobot.py scripts/planning/preview_lerobot_cameras.py
+python -m py_compile aero_tasks/motion_planning.py aero_tasks/task_sampling.py aero_tasks/payload_collision.py aero_tasks/lerobot_export.py scripts/planning/plan_piper_gripper_pipette_handoff.py scripts/planning/generate_piper_pipette_handoff_lerobot.py scripts/planning/preview_lerobot_cameras.py
+pytest tests/test_task_sampling.py
 MUJOCO_GL=egl python scripts/planning/preview_lerobot_cameras.py --out-dir outputs/lerobot/camera_preview_smoke --frame 8186
 ```
 
@@ -276,7 +279,7 @@ MUJOCO_GL=egl python scripts/planning/preview_lerobot_cameras.py --out-dir outpu
 
 ## 仓库布局
 
-- `aero_tasks/`：专家轨迹生成、运动规划、相机渲染和 LeRobot 导出共享 Python 包。
+- `aero_tasks/`：专家轨迹生成、任务采样、payload 碰撞检查、相机渲染和 LeRobot 导出共享 Python 包。
 - `aero_quest/`：Quest 坐标帧、重定向、遥操作、遥测和历史人工控制相关 Python 包。
 - `scripts/teleop/`：当前遥操作入口。
 - `scripts/scenes/`：基础组合模型和配置场景生成入口。

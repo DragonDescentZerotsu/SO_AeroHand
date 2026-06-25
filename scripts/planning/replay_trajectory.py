@@ -17,6 +17,8 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
+from aero_tasks.task_sampling import apply_episode_spec_to_model, load_episode_spec  # noqa: E402
+
 try:
     import mujoco
     import mujoco.viewer
@@ -285,6 +287,9 @@ def replay(
     summary_path: Path | None,
 ) -> None:
     model = mujoco.MjModel.from_xml_path(str(trajectory.model_path))
+    episode_spec_path = trajectory.path.parent / "episode_spec.json"
+    if episode_spec_path.exists():
+        apply_episode_spec_to_model(model, load_episode_spec(episode_spec_path))
     if trajectory.qpos.shape[1] != model.nq:
         raise ValueError(
             f"Trajectory qpos width is {trajectory.qpos.shape[1]}, but model.nq is {model.nq}"

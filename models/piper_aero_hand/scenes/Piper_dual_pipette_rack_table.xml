@@ -27,7 +27,7 @@
     <frame name="pipette_rack_0" pos="0 0 0.827" quat="1 0 0 0">
       <attach model="pipette_rack_model" body="pipette_rack" prefix="pipette_rack_0/" />
     </frame>
-    <body name="pipette_0" pos="0.05918 -0.085 1.07" quat="0.7044 -0.0616 0.0616 0.7044">
+    <body name="pipette_0" pos="0.05918 -0.085 1.08" quat="0.7044 -0.0616 0.0616 0.7044">
       <freejoint name="pipette_0_free" />
       <attach model="pipette_model" body="pipette" prefix="pipette_0/" />
     </body>

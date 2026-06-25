@@ -65,7 +65,7 @@ objects:
     init:
       # Original SO101-tuned freejoint wrapper pose with the pipette resting
       # in the rack. Keep this pose paired with pipette_rack_0.
-      pos: [0.39918, -0.165, 1.07]
+      pos: [0.39918, -0.165, 1.08]
       quat: [0.7044, -0.0616, 0.0616, 0.7044]
     randomize:
       group: pipette_rack_set
