@@ -1,8 +1,9 @@
 # Planning 脚本说明
 
-本目录放离线动作规划、合成专家轨迹和任务级 motion planning 入口。这里的脚本应尽量把通用规划器和具体任务逻辑分开：
+本目录放离线动作规划、合成专家轨迹、LeRobot 导出和轨迹检查入口。保持两层边界：
 
-- 通用 IK、碰撞检查、RRT-Connect 等基础能力放在 `aero_quest/motion_planning.py`。
+- 通用 IK、碰撞检查、RRT-Connect 等基础能力放在 `aero_tasks/motion_planning.py`。
+- 通用相机渲染、fixed-roll 相机和 LeRobot feature 定义放在 `aero_tasks/lerobot_export.py`。
 - 具体任务脚本放在 `scripts/planning/`，只负责读取 scene 中的 body/joint 名称、生成任务目标位姿、调用 planner、导出轨迹/视频。
 
 ## 当前入口
@@ -65,6 +66,55 @@ python scripts/planning/replay_trajectory.py \
 
 如果轨迹目录存在 `summary.json`，回放器会自动显示 handoff 标记：红球是指节中心，黄球是上方 hook 目标，绿球是 pipette hook reference，蓝线是指节长轴，青线是插入方向，紫线是 hook 到目标的当前误差。使用 `--no-markers` 可关闭；使用 `--summary <path>` 可指定其他摘要。
 
+### `generate_piper_pipette_handoff_lerobot.py`
+
+批量调用单 episode planner，并把成功轨迹导出成 LeRobot v3 风格数据集。默认 task 名称是 `piper_pipette_handoff`，输出根目录按 task 分组：
+
+```bash
+MUJOCO_GL=egl python scripts/planning/generate_piper_pipette_handoff_lerobot.py \
+  --num-episodes 2 \
+  --dataset-name <dataset_name> \
+  --width 320 \
+  --height 240 \
+  --fps 20
+```
+
+输出位置：
+
+```text
+outputs/lerobot/piper_pipette_handoff/<dataset_name>
+```
+
+目录结构：
+
+- `meta/`、`data/`、`videos/` 是 LeRobot 数据集主体。`observation.state` 保存完整 MuJoCo `qpos`，`action` 保存 `ctrl`，`observation.stage_index` 保存规划阶段编号。
+- `videos/observation.images.table_overview/`：固定在世界坐标中的主视角，eye 在桌子负 Y 的机械臂安装侧，朝桌面中心看。
+- `videos/observation.images.gripper_forward/`：固定在左侧 Piper `piper_original/link6` 局部坐标里，eye 在 gripper 后方略高处，roll 由 link6 局部轴锁定，随 gripper 一起旋转。
+- `videos/observation.images.palm_inner/`：固定在 Aero Hand `piper_aerohand/palm` 局部坐标里，从 palm 内侧看 pipette tip 区域；roll 由 palm 局部轴锁定，不再跟随 pipette 或左侧 gripper。当前默认 target 是用样例轨迹末帧的 `pipette_0/tip_site` 换算到 palm local 后填写的，随机化最终姿态后应重新计算或改成动态 target。
+- `raw/episode_xxxxxx/` 保存原始 MuJoCo `.npz` 和 `summary.json`，用于回放、排错和复核动力学成功条件。
+- `generation_manifest.json` 保存每个 episode 的 seed、成功指标、raw 路径、导出帧数和 camera 名称。
+
+快速验证只写 state/action 时可加 `--skip-render`。正式训练数据应保留视频。脚本会在写完后重新打开 `LeRobotDataset(repo_id, root=...)`，提前捕获 parquet footer 或视频 metadata 问题。
+
+相机参数集中在 `aero_tasks/lerobot_export.py` 的 `DEFAULT_HANDOFF_CAMERAS`：
+
+- `mode="world"`：`eye_offset_world` 是世界坐标 eye，`lookat` 是世界坐标目标点，适合桌面固定相机。
+- `mode="body_local"`：`body` 指定相机固定在哪个 body 上，`eye_offset_local` 和 `target_offset_local` 都在该 body 的局部坐标中，但 MuJoCo free camera 会自行确定画面 roll。
+- `mode="body_local_fixed_roll"`：同样使用 body 局部 eye/target，但额外用 `up_axis_local` 指定哪个 body 局部方向应投影到画面上方。这个模式适合真实安装在 gripper/palm 上的相机。
+- body 局部点到世界点的公式是 `world_point = body_pos_world + body_R @ local_point`。这里 `body_R` 是 3x3 旋转矩阵，列向量分别表示 body 局部 `+X/+Y/+Z` 在 MuJoCo 世界坐标里的方向。
+
+检查相机局部轴和画面时使用预览脚本：
+
+```bash
+MUJOCO_GL=egl python scripts/planning/preview_lerobot_cameras.py \
+  --out-dir outputs/lerobot/camera_preview_fixed_roll \
+  --frame 0 \
+  --frame 4000 \
+  --frame 8186
+```
+
+该脚本会输出每个相机的 PNG 预览和 `camera_debug.json`。诊断 JSON 中的 `body_R_rows` 是旋转矩阵，`body_local_axes_world_columns` 把矩阵列向量拆成局部 `+X/+Y/+Z` 的世界方向，`eye_minus_body_world` 应等于 `body_R @ eye_offset_local`。
+
 ## 当前限制
 
 - 当前版本已经移除了 kinematic attachment；`close` 后不会手动绑定 pipette，必须靠 MuJoCo contact/friction 夹起。
@@ -75,10 +125,12 @@ python scripts/planning/replay_trajectory.py \
 - 平行夹爪夹持近似圆柱 pipette 时需要 `condim=6` 的滚动阻力，否则 handoff 大角度旋转会让 hook 在两指之间滚动，目标位姿不可控。
 - OMPL 当前环境未安装；本项目第一版使用 MuJoCo collision checking + SciPy bounded IK + 轻量 RRT-Connect。之后如果安装 OMPL/MoveIt，可替换搜索后端但保留任务脚本接口。
 - 如果 `summary.json` 中 `pregrasp_cost/grasp_cost` 偏高，这些值现在表示 TCP 位置误差，说明 gripper center 没有足够接近目标；需要继续改进 grasp frame/site 标定、目标候选采样和末端几何误差检查。
+- 当前 LeRobot 批量脚本优先解决“固定场景成功轨迹 -> 可训练数据集”的链路；rack/pipette 随机化、颜色/纹理随机化、distractor 采样和 carried-pipette swept collision checking 应作为下一层 task sampler 接入，而不是塞进单 episode planner。
 
 ## 扩展规则
 
-- 新任务优先新增一个 task script，不要把任务条件硬编码进 `aero_quest/motion_planning.py`。
+- 新任务优先新增一个 task script，不要把任务条件硬编码进 `aero_tasks/motion_planning.py`。
 - 新物体或新机器人需要的 body/joint/site 名称应集中放在 task script 顶部或配置文件里。
 - 随机化任务时，先随机 scene/object pose，再复用同一套 IK + collision + RRT pipeline 生成专家轨迹。
 - 轨迹导出至少包含 `qpos`、`ctrl`、`labels` 和 `model`，方便回放、训练和人工检查。
+- 面向训练的批量数据统一放在 `outputs/lerobot/<task_name>/<dataset_name>/`；每个 task 保持自己的 dataset namespace，避免不同任务 episode 混在同一个目录里。

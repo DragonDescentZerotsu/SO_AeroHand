@@ -1,6 +1,6 @@
 # Aero Quest Sim 智能体说明
 
-本项目将 Meta Quest 手部追踪连接到 MuJoCo 遥操作，用于控制带有 Aero Hand 的 SO101 或 Piper 机械臂。当前里程碑是建立清晰的双通道数据流和可靠的机械臂 IK 控制。
+本项目当前主线是用 MuJoCo 生成 wet-lab bench 专家轨迹和 LeRobot 训练数据，重点任务是 Piper gripper 从 rack 取 pipette 并交给 Piper + Aero Hand。Meta Quest 遥操作仍保留用于人工验证和历史实验，但不是当前代码结构的中心。
 
 ## 文档和记忆规则
 
@@ -21,7 +21,7 @@ git submodule update --init --recursive
 
 主要 Python 依赖在 `pyproject.toml`。`mujoco_menagerie/` 和 `third_party/` 中的模型作为 git submodule 管理。
 
-Quest Hand Tracking Streamer 的 Python SDK 由 `hand-tracking-sdk` 提供。本地如需查看或修改上游 streamer，可克隆到被 git 忽略的 `external/hand-tracking-streamer/`，但项目专用解析、记录和控制逻辑必须留在 `aero_quest/` 与 `scripts/`。
+Quest Hand Tracking Streamer 的 Python SDK 由 `hand-tracking-sdk` 提供。本地如需查看或修改上游 streamer，可克隆到被 git 忽略的 `external/hand-tracking-streamer/`。项目内代码按用途放置：专家轨迹和数据导出放在 `aero_tasks/` 与 `scripts/planning/`，Quest/teleop 逻辑放在 `aero_quest/` 与 `scripts/teleop/`。
 
 ## Quest 数据入口
 
@@ -167,6 +167,7 @@ python scripts/teleop/quest_so101_aero_ik_teleop.py \
 
 ## 代码地图
 
+- 专家轨迹主线：`aero_tasks/motion_planning.py`、`aero_tasks/lerobot_export.py`、`scripts/planning/plan_piper_gripper_pipette_handoff.py`、`scripts/planning/generate_piper_pipette_handoff_lerobot.py`、`scripts/planning/preview_lerobot_cameras.py`、`scripts/planning/replay_trajectory.py`。具体命令、数据布局和回放按键见 `scripts/planning/AGENTS.md`。
 - 接收：`scripts/04_receive_quest_tcp.py`，完整遥操作在 `scripts/teleop/`。
 - 解析和类型化坐标帧模型：`aero_quest/quest_hand_frame.py`。
 - 机械臂速度控制和 DLS IK 辅助：`aero_quest/arm_teleop.py`。
@@ -176,7 +177,6 @@ python scripts/teleop/quest_so101_aero_ik_teleop.py \
 - MuJoCo landmark 辅助：`aero_quest/mujoco_landmarks.py`。
 - Quest 双通道记录、质量分析和回放：`aero_quest/quest_logger.py`、`aero_quest/quest_data_quality.py`、`aero_quest/quest_replay.py`。
 - 仿真入口点：`scripts/teleop/quest_so101_aero_ik_teleop.py`、`scripts/teleop/quest_piper_aero_ik_teleop.py`、`scripts/teleop/quest_arm_channel_so101_ik.py`、`scripts/teleop/quest_arm_channel_target_ball.py`。
-- 离线动作规划、合成专家轨迹和交互回放：`aero_quest/motion_planning.py`、`scripts/planning/plan_piper_gripper_pipette_handoff.py`、`scripts/planning/replay_trajectory.py`。具体命令和回放按键见 `scripts/planning/AGENTS.md`。
 - Piper IK 自动验证：`scripts/benchmarks/piper_ik_benchmark.py`。默认 full 套件包含固定工作区挑战、100 个确定性随机可达位姿、连续 6D 轨迹，以及固定位置 wrist `+70° -> -70°` 奇异/限位压力测试；修改 Piper IK 或控制参数后应先运行该 benchmark，再进行人工遥操作验证。
 
 更详细的专题资料：
@@ -201,7 +201,7 @@ python scripts/teleop/quest_so101_aero_ik_teleop.py \
 - `models/piper_aero_hand/Piper_aerohand.xml`：基础 AgileX Piper 机械臂 + Aero Hand 组合模型。这里保留 Piper 的 `link6/joint6` wrist roll，删除原平行夹爪 `link7/link8`，把 Aero palm 的安装轴对齐到 `link6` 的 `+Z` 末端轴。
 - `scripts/scenes/build_piper_aero_scene.py`：生成基础 Piper + Aero Hand 模型。
 - `configs/scenes/*.yaml`：任务场景 recipe。这里描述基础模型、机器人实例、要放入的物体、物体初始位姿、是否添加 `freejoint`，以及之后训练用的随机化/任务字段。
-- `aero_quest/scene_builder.py`：通用场景组合器。它读取 recipe，把外部 MJCF 机器人或物体通过 MuJoCo `<model>` / `<attach>` 组合到场景中，并按输出目录重写 mesh/model 路径。没有 `base_model` 时会创建空白 scene root，适合多机器人或纯任务场景。
+- `aero_quest/scene_builder.py`：当前场景组合器。它读取 recipe，把外部 MJCF 机器人或物体通过 MuJoCo `<model>` / `<attach>` 组合到场景中，并按输出目录重写 mesh/model 路径。没有 `base_model` 时会创建空白 scene root，适合多机器人或纯任务场景。它仍在 `aero_quest/` 是历史原因；之后如果继续清理主线，可迁到 `aero_tasks/` 或单独的 scene 包。
 - `scripts/scenes/build_scene_from_config.py`：从 `configs/scenes/*.yaml` 生成具体任务场景。
 - `models/so101_aero_hand/scenes/*.xml`：生成后的任务场景，例如 `SO101_aerohand_pipette.xml`。
 - `models/piper_aero_hand/scenes/*.xml`：Piper 相关任务场景，例如双 Piper 对比和 pipette rack 桌面场景。
@@ -265,11 +265,19 @@ python scripts/teleop/quest_piper_aero_ik_teleop.py --dry-run
 python scripts/benchmarks/piper_ik_benchmark.py
 ```
 
-窄改动可以只运行直接相关的测试；修改共享遥操作引擎、OSQP IK 或模型拓扑时，应运行完整的对应机器人 dry-run 和 benchmark。
+修改专家轨迹、LeRobot 导出或相机配置时，至少运行：
+
+```bash
+python -m py_compile aero_tasks/motion_planning.py aero_tasks/lerobot_export.py scripts/planning/plan_piper_gripper_pipette_handoff.py scripts/planning/generate_piper_pipette_handoff_lerobot.py scripts/planning/preview_lerobot_cameras.py
+MUJOCO_GL=egl python scripts/planning/preview_lerobot_cameras.py --out-dir outputs/lerobot/camera_preview_smoke --frame 8186
+```
+
+窄改动可以只运行直接相关的测试；修改共享遥操作引擎、OSQP IK 或模型拓扑时，应运行完整的对应机器人 dry-run 和 benchmark；修改专家轨迹主线时，应优先跑 planning/export 的编译和预览冒烟测试。
 
 ## 仓库布局
 
-- `aero_quest/`：坐标帧、重定向、IK、控制、遥测和场景组合 Python 包。
+- `aero_tasks/`：专家轨迹生成、运动规划、相机渲染和 LeRobot 导出共享 Python 包。
+- `aero_quest/`：Quest 坐标帧、重定向、遥操作、遥测和历史人工控制相关 Python 包。
 - `scripts/teleop/`：当前遥操作入口。
 - `scripts/scenes/`：基础组合模型和配置场景生成入口。
 - `scripts/planning/`：离线 motion planning、合成专家轨迹和任务级规划入口。
@@ -282,6 +290,8 @@ python scripts/benchmarks/piper_ik_benchmark.py
 - `mujoco_menagerie/`、`third_party/`：第三方资产和子模块。
 
 `logs/`、`outputs/` 和 `external/` 中的本地运行产物或上游 checkout 不应提交，除非任务明确要求。
+
+面向训练的本地 LeRobot 数据集按 task 分组放在 `outputs/lerobot/<task_name>/<dataset_name>/`，例如 `outputs/lerobot/piper_pipette_handoff/<dataset_name>/`；其中 `raw/` 只用于保存 MuJoCo 原始轨迹和摘要，训练主体读取 `meta/`、`data/`、`videos/`。
 
 ## 许可证和第三方资产
 
