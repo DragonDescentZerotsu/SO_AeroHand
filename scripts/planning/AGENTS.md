@@ -4,7 +4,7 @@
 
 - 通用 IK、碰撞检查、RRT-Connect 等基础能力放在 `aero_tasks/motion_planning.py`。
 - 通用 episode spec、静态 body pose/freejoint 初始状态覆盖和 rack 局部横梁采样放在 `aero_tasks/task_sampling.py`。
-- 通用 carried-payload kinematic sweep 碰撞检查放在 `aero_tasks/payload_collision.py`。
+- 通用 carried-payload pose 测量和 kinematic sweep 碰撞检查放在 `aero_tasks/payload_collision.py`。
 - 通用相机渲染、fixed-roll 相机和 LeRobot feature 定义放在 `aero_tasks/lerobot_export.py`。
 - 具体任务脚本放在 `scripts/planning/`，只负责读取 scene 中的 body/joint 名称、生成任务目标位姿、调用 planner、导出轨迹/视频。
 
@@ -22,13 +22,15 @@
 6. 夹爪闭合。
 7. pipette 保持 freejoint，由 MuJoCo 接触和摩擦决定是否被真实夹起。
 8. 沿世界 `+Z` 抬高 3cm 离开 rack。
-9. 从 `piper_aerohand/aero_index_proximal_site` 读取食指 proximal 指节中心，并用 `right_index_proximal_link` 局部 `+Z` 作为指节长轴。
-10. 从指节中心沿“世界向上投影到指节法平面”的方向偏置 8mm，再沿世界 `+Z` 上移 15mm，得到上方挂接目标；构造与指节轴垂直的 `link6 +Z` 接近方向并搜索无碰撞 roll。先移动到目标外侧 5cm 的 `pre_handoff`，再固定姿态沿法向执行 `hook_insert`。
-11. `hook_settle` 后逐渐张开原始 Piper gripper，沿 `link6` 局部 `-Z` 后退 8cm，再让 Aero Hand 的食指、中指、无名指和小指最大闭合；拇指保持不动。每个闭合关节的目标是硬上限减 `0.01rad`，用 PD 力矩持续驱动，直到达到上限附近或低速稳定。该 hand attachment 没有这些手指的可用 tendon actuator，因此使用关节 PD 力矩。
-12. 验证分成两个窗口：后退阶段必须保持 hook 与 proximal 指节接触、脱离原 gripper、且不碰桌面或 rack；最大闭合阶段必须至少有两个指尖碰到 pipette，末帧仍至少两个指尖接触，且不重新碰到原 gripper、桌面或 rack。摘要记录每个关节是达到 limit、停滞时已有指尖/手指链接触，还是未接触的动力学停滞；不要用任意 finger body 接触代替指尖抓握判据。
-13. pipette hook reference 使用它初始挂在 rack 上时 `pipette_body_collision_2` 的实际接触点，局部坐标约为 `[-0.02252, -0.00070, 0.17343]m`，不要用正 X 侧的 ejector/pusher mesh 代替。
-14. 支持 `--episode-spec <json>` 覆盖 episode 初始静态 body pose 和 freejoint pose。当前 batch sampler 会用它随机 rack pose，并把 pipette 放到 rack 局部横梁上的采样位置。
-15. 进入动力学 rollout 前会运行 carried-payload sweep：用 gripper TCP 刚性携带 pipette，检查离开 rack 后的 `pre_handoff/hook_insert/hook_settle` 阶段是否撞到 `table_0` 或 `pipette_rack_0`。刚从 rack 抬起时的支撑接触和最终与 Aero Hand 的目标接触不属于这个检查。
+9. 运行 pickup/lift 的 MuJoCo 动力学 rollout，从真实仿真 state 读取 gripper TCP、pipette freejoint wrapper pose 和 hook pose，重新计算 payload/hook 相对 TCP 的 offset。注意 hook reference local 属于 `pipette_0/pipette` body，不属于 wrapper body `pipette_0`；wrapper 只用于 freejoint 和 carried-payload sweep。
+10. 从 `piper_aerohand/aero_index_proximal_site` 读取食指 proximal 指节中心，并用 `right_index_proximal_link` 局部 `+Z` 作为指节长轴。
+11. Handoff 从真实 `post_pickup` state 重新规划，不再沿用理想几何抓取姿态。目标点来自 proximal 指节中心、8mm 表面 offset 和 15mm 世界 `+Z` offset；接近方向优先水平且垂直于指节轴。
+12. Handoff 使用固定 `post_pickup` TCP 作为 transition point：不额外加高、不沿 pickup 轨迹回退，而是从这个点出发逐步转到 handoff 姿态并靠近 `pre_handoff`，最后插入到 `hook_insert`。handoff 不再对已规划路径后处理 wrist roll；roll 候选限制在小角度内，并在 FK 中复算最终 hook 是否能落到目标点，防止 TCP 到 hook 的几何关系被破坏。
+13. `hook_settle` 后逐渐张开原始 Piper gripper，沿 `link6` 局部 `-Z` 后退 8cm，再让 Aero Hand 的食指、中指、无名指和小指最大闭合；拇指保持不动。每个闭合关节的目标是硬上限减 `0.01rad`，用 PD 力矩持续驱动，直到达到上限附近或低速稳定。该 hand attachment 没有这些手指的可用 tendon actuator，因此使用关节 PD 力矩。
+14. 验证分成两个窗口：后退阶段必须保持 hook 与 proximal 指节接触、脱离原 gripper、且不碰桌面或 rack；最大闭合阶段必须至少有两个指尖碰到 pipette，末帧仍至少两个指尖接触，且不重新碰到原 gripper、桌面或 rack。摘要记录每个关节是达到 limit、停滞时已有指尖/手指链接触，还是未接触的动力学停滞；不要用任意 finger body 接触代替指尖抓握判据。
+15. pipette hook reference 使用它初始挂在 rack 上时 `pipette_body_collision_2` 的实际接触点，局部坐标约为 `[-0.02252, -0.00070, 0.17343]m`，不要用正 X 侧的 ejector/pusher mesh 代替。
+16. 支持 `--episode-spec <json>` 覆盖 episode 初始静态 body pose 和 freejoint pose。当前 batch sampler 会用它随机 rack pose，并把 pipette 放到 rack 局部横梁上的采样位置。
+17. 进入 handoff 动力学 rollout 前会运行 carried-payload sweep：用 gripper TCP 刚性携带当前实际姿态的 pipette，检查 `pre_handoff/hook_insert/hook_settle` 阶段是否撞到 `table_0` 或 `pipette_rack_0`。刚从 rack 抬起时的支撑接触和最终与 Aero Hand 的目标接触不属于这个检查。
 
 运行：
 
@@ -161,11 +163,13 @@ MUJOCO_GL=egl python scripts/planning/preview_lerobot_cameras.py \
 ## 当前限制
 
 - 当前版本已经移除了 kinematic attachment；`close` 后不会手动绑定 pipette，必须靠 MuJoCo contact/friction 夹起。
-- 默认运行同时要求抓取保持、`hook_handoff_reached=true` 和 `release_survived=true`。挂接判据是：hook 与 proximal 指节真实接触、hook 顶部高度接近上方目标、沿指节长轴基本居中；释放后 pipette 不再接触 gripper、且不落到桌面或 rack。加 `--allow-failed-grasp` 只用于导出失败 rollout 和视频检查。
+- 默认运行同时要求抓取保持、`hook_handoff_reached=true`、`release_survived=true` 和 `palm_grasp_stable=true`。挂接判据分两层：hook 点到目标点的 3D 误差、顶部 offset、指节轴向 offset 必须都在阈值内；接触确认可以来自 `hook_settle` 阶段，也可以来自 release/retreat 阶段持续接触 proximal 指节。释放后 pipette 不再接触 gripper、且不落到桌面或 rack。加 `--allow-failed-grasp` 只用于导出失败 rollout 和视频检查。
 - 当前 `grasp_site_offset_m=0.12` 的结果可以动态夹起并保持 pipette。成功判据不能只看最终高度，因为 handoff 轨迹可能主动降低末端；应同时检查搬运阶段的抓取点相对误差和双指接触。修改 grasp site、场景或接触参数后必须重新检查 `summary.json` 的 `dynamics` 字段。
 - `summary.json` 会记录 `grasp_orientation_delta_deg`、`grasp_local_y_world_z` 和失败候选，便于检查必要姿态变化、水平约束、IK 不可达和 rack 碰撞。
+- handoff 阶段会记录 `handoff_transition_mode`、`handoff_transition_point_world`、`handoff_local_y_world_z` 和 `dynamics.max_abs_handoff_local_y_world_z`，用于检查固定 post-pickup transition 和 gripper 局部 Y 轴是否接近平行 global XY 平面。
 - Handoff 目标由目标 site/body 的局部几何实时计算，不使用固定世界 X/Y。`summary.json` 记录目标轴、接近轴、roll 搜索、hook 三维误差、目标接触和 rollout 校正历史；场景随机化后应复用同一规则重新求解。
 - 平行夹爪夹持近似圆柱 pipette 时需要 `condim=6` 的滚动阻力，否则 handoff 大角度旋转会让 hook 在两指之间滚动，目标位姿不可控。
+- 当前随机验证样本：`outputs/debug_rollouts/piper_pipette_handoff/random_review_50` 使用 seed `201-250` 生成 50 条 rack pose + rack-bar offset rollout，成功 48/50。失败集中在 rack 局部 `+X` 极端 offset 约 `+0.123m` 到 `+0.125m`，主要是 pickup/carry 阶段离 rack clearance 或夹持保持不足，不是 handoff 判据失败。
 - OMPL 当前环境未安装；本项目第一版使用 MuJoCo collision checking + SciPy bounded IK + 轻量 RRT-Connect。之后如果安装 OMPL/MoveIt，可替换搜索后端但保留任务脚本接口。
 - 如果 `summary.json` 中 `pregrasp_cost/grasp_cost` 偏高，这些值现在表示 TCP 位置误差，说明 gripper center 没有足够接近目标；需要继续改进 grasp frame/site 标定、目标候选采样和末端几何误差检查。
 - 当前 LeRobot 批量脚本已支持 rack 横梁上的 pipette 初始位置随机采样、rack 平面位置/yaw 随机化、失败 retry 和 carried-pipette 对 table/rack 的 sweep collision check。颜色/纹理随机化、distractor 采样和多任务 task sampler 仍是下一层。

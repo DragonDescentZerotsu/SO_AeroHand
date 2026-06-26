@@ -39,7 +39,11 @@ from aero_tasks.motion_planning import (  # noqa: E402
     normalize,
     solve_body_pose_ik,
 )
-from aero_tasks.payload_collision import check_carried_payload_path  # noqa: E402
+from aero_tasks.payload_collision import (  # noqa: E402
+    CarriedPayloadState,
+    check_carried_payload_path,
+    measure_carried_payload_state,
+)
 from aero_tasks.task_sampling import (  # noqa: E402
     apply_episode_spec_to_model,
     apply_episode_spec_to_qpos,
@@ -73,6 +77,8 @@ HANDOFF_STANDOFF_M = 0.05
 HANDOFF_SETTLE_COMMANDS = 5
 RELEASE_COMMANDS = 18
 PIPER_RETREAT_M = 0.08
+HANDOFF_LOCAL_Y_WORLD_Z_TOLERANCE = 0.03
+MAX_HANDOFF_ROLL_DEG = 45.0
 PALM_CLOSE_MIN_STEPS = 160
 PALM_CLOSE_MAX_STEPS = 1400
 PALM_CLOSE_LIMIT_MARGIN_RAD = 0.01
@@ -80,6 +86,7 @@ PALM_CLOSE_LIMIT_TOLERANCE_RAD = 0.025
 PALM_CLOSE_STOP_SPEED_RAD_S = 0.02
 HANDOFF_TOP_TOLERANCE_M = 0.004
 HANDOFF_AXIS_TOLERANCE_M = 0.005
+HANDOFF_HOOK_TARGET_TOLERANCE_M = 0.012
 HANDOFF_CORRECTION_ATTEMPTS = 3
 HANDOFF_CORRECTION_GAIN = 0.6
 PALM_GRASP_FINGERS = ("index", "middle", "ring", "pinky")
@@ -469,14 +476,25 @@ def target_handoff_frame(
     current_hook_position: np.ndarray,
     reference_R: np.ndarray,
 ) -> np.ndarray:
-    """Construct a handoff frame whose +Z approaches perpendicular to the target axis."""
+    """Construct a mostly horizontal handoff frame whose +Z is perpendicular to target_axis."""
 
     target_axis = normalize(target_axis)
-    approach_axis = target_center - current_hook_position
-    approach_axis -= target_axis * float(np.dot(approach_axis, target_axis))
-    approach_axis = normalize(approach_axis)
-
     world_z = np.array([0.0, 0.0, 1.0], dtype=np.float64)
+
+    delta_to_target = target_center - current_hook_position
+    horizontal_approach = np.cross(world_z, target_axis)
+    if float(np.linalg.norm(horizontal_approach)) > 1e-8:
+        approach_axis = normalize(horizontal_approach)
+        if float(np.dot(approach_axis, delta_to_target)) < 0.0:
+            approach_axis = -approach_axis
+    else:
+        approach_axis = delta_to_target.copy()
+        approach_axis[2] = 0.0
+        if float(np.linalg.norm(approach_axis)) < 1e-8:
+            approach_axis = delta_to_target
+        approach_axis -= target_axis * float(np.dot(approach_axis, target_axis))
+        approach_axis = normalize(approach_axis)
+
     y_axis = np.cross(world_z, approach_axis)
     if float(np.linalg.norm(y_axis)) < 1e-8:
         y_axis = reference_R[:, 1] - approach_axis * float(
@@ -569,10 +587,24 @@ def plan_hook_handoff(
     )
     approach_axis = base_handoff_R[:, 2].copy()
     failures: list[str] = []
-    for candidate_roll_deg, handoff_R in handoff_roll_candidates(
+    roll_options = handoff_roll_candidates(
         base_handoff_R,
         preferred_roll_deg,
-    ):
+    )
+    for candidate_roll_deg, handoff_R in roll_options:
+        if abs(candidate_roll_deg) > MAX_HANDOFF_ROLL_DEG:
+            failures.append(
+                f"{candidate_roll_deg:+.0f}deg: roll exceeds "
+                f"physical handoff limit ({MAX_HANDOFF_ROLL_DEG:.0f}deg)"
+            )
+            continue
+        local_y_world_z = float(handoff_R[2, 1])
+        if abs(local_y_world_z) > HANDOFF_LOCAL_Y_WORLD_Z_TOLERANCE:
+            failures.append(
+                f"{candidate_roll_deg:+.0f}deg: local Y not horizontal "
+                f"(world_z_dot={local_y_world_z:.3f})"
+            )
+            continue
         pre_hook_point = desired_hook_target - HANDOFF_STANDOFF_M * approach_axis
         pre_tcp_point = pre_hook_point - handoff_R @ hook_offset_tcp_local
         final_tcp_point = desired_hook_target - handoff_R @ hook_offset_tcp_local
@@ -590,7 +622,7 @@ def plan_hook_handoff(
                 q_lift,
                 collision_policy,
                 max_tcp_step=0.015,
-                max_tcp_error=0.07,
+                max_tcp_error=0.08,
             )
             insert_path, insert_cost = plan_cartesian_tcp_path(
                 planner,
@@ -606,6 +638,19 @@ def plan_hook_handoff(
                 max_tcp_step=0.005,
                 max_tcp_error=0.04,
             )
+            qpos_final = make_qpos_from_arm(planner, group, template, insert_path[-1])
+            planner.forward(qpos_final)
+            link6_id = planner.body_id("piper_original/link6")
+            link6_R = planner.data.xmat[link6_id].reshape(3, 3).copy()
+            tcp_world = planner.data.xpos[link6_id].copy() + link6_R @ tcp_offset_local
+            predicted_hook = tcp_world + link6_R @ hook_offset_tcp_local
+            hook_error = float(np.linalg.norm(predicted_hook - desired_hook_target))
+            if hook_error > 0.04:
+                raise RuntimeError(
+                    "Final FK hook target mismatch after IK path "
+                    f"(error={hook_error:.4f}m, predicted={predicted_hook.tolist()}, "
+                    f"target={desired_hook_target.tolist()})"
+                )
         except RuntimeError as exc:
             failures.append(f"{candidate_roll_deg:+.0f}deg: {exc}")
             continue
@@ -728,11 +773,119 @@ def apply_palm_four_finger_grasp(model, data, grasp_joints: list[tuple[str, int,
     for _joint_name, joint_id, target in grasp_joints:
         qpos_id = int(model.jnt_qposadr[joint_id])
         dof_id = int(model.jnt_dofadr[joint_id])
-        torque = PALM_GRASP_KP * (target - data.qpos[qpos_id]) - PALM_GRASP_KD * data.qvel[dof_id]
+        torque = (
+            PALM_GRASP_KP * (target - data.qpos[qpos_id])
+            - PALM_GRASP_KD * data.qvel[dof_id]
+        )
         data.qfrc_applied[dof_id] += float(
             np.clip(torque, -PALM_GRASP_MAX_TORQUE, PALM_GRASP_MAX_TORQUE)
         )
 
+
+def hook_handoff_success_flags(
+    *,
+    final_hook_target_error: float,
+    final_hook_top_offset: float,
+    final_hook_axis_offset: float,
+    target_top_offset: float,
+    target_contact_during_settle: bool,
+    release_target_contact_fraction: float,
+) -> tuple[bool, bool, bool]:
+    hook_geometrically_reached = (
+        final_hook_target_error < HANDOFF_HOOK_TARGET_TOLERANCE_M
+        and abs(final_hook_top_offset - target_top_offset) < HANDOFF_TOP_TOLERANCE_M
+        and abs(final_hook_axis_offset) < HANDOFF_AXIS_TOLERANCE_M
+    )
+    hook_contact_confirmed = bool(
+        target_contact_during_settle or release_target_contact_fraction > 0.5
+    )
+    return (
+        bool(hook_geometrically_reached),
+        hook_contact_confirmed,
+        bool(hook_geometrically_reached and hook_contact_confirmed),
+    )
+
+
+def simulate_pickup_prefix(
+    planner: PlanningModel,
+    group: JointGroup,
+    initial_qpos: np.ndarray,
+    q_commands: list[np.ndarray],
+    gripper_commands: list[float],
+    labels: list[str],
+    tcp_offset_local: np.ndarray,
+    hook_reference_local: np.ndarray,
+    *,
+    settle_steps: int = 20,
+) -> tuple[
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    CarriedPayloadState,
+    dict[str, object],
+]:
+    """Run pickup/lift dynamics and measure payload offsets in TCP local frame."""
+
+    model = planner.model
+    data = mujoco.MjData(model)
+    robot_only_gravity_compensation(model, ("piper_original", "piper_aerohand"))
+    tune_grasp_dynamics(model)
+    data.qpos[:] = initial_qpos
+    data.ctrl[:] = 0.0
+    mujoco.mj_forward(model, data)
+    pipette_body = planner.body_id("pipette_0/pipette")
+    initial_pipette_z = float(data.xpos[pipette_body, 2])
+    qpos_frames: list[np.ndarray] = []
+    ctrl_frames: list[np.ndarray] = []
+    frame_labels: list[str] = []
+
+    def record_frame(label: str, ctrl: np.ndarray) -> None:
+        qpos_frames.append(data.qpos.copy())
+        ctrl_frames.append(ctrl.copy())
+        frame_labels.append(label)
+
+    initial_ctrl = ctrl_from_command(
+        planner,
+        group,
+        planner.get_joint_group(initial_qpos, group),
+        0.0,
+    )
+    for _ in range(30):
+        record_frame("scene_initial", initial_ctrl)
+
+    for q, gripper_opening, _label in zip(q_commands, gripper_commands, labels, strict=True):
+        ctrl = ctrl_from_command(planner, group, q, gripper_opening)
+        data.ctrl[:] = ctrl
+        for _ in range(settle_steps):
+            data.qfrc_applied[:] = 0.0
+            mujoco.mj_step(model, data)
+            record_frame(_label, ctrl)
+
+    planner.forward(data.qpos.copy())
+    payload_state = measure_carried_payload_state(
+        planner,
+        link_body="piper_original/link6",
+        tcp_offset_local=tcp_offset_local,
+        payload_body="pipette_0",
+        hook_body="pipette_0/pipette",
+        hook_reference_local=hook_reference_local,
+    )
+    pipette_z = float(planner.data.xpos[pipette_body, 2])
+    return (
+        np.asarray(qpos_frames, dtype=np.float64),
+        np.asarray(ctrl_frames, dtype=np.float64),
+        np.asarray(frame_labels),
+        data.qvel.copy(),
+        payload_state,
+        {
+            "initial_pipette_z": initial_pipette_z,
+            "post_pickup_pipette_z": pipette_z,
+            "pickup_lifted": bool(
+                pipette_z > initial_pipette_z + max(0.01, 0.5 * LIFT_CLEARANCE_M)
+            ),
+        },
+    )
 
 def simulate_commands(
     planner: PlanningModel,
@@ -753,12 +906,16 @@ def simulate_commands(
     *,
     settle_steps: int = 20,
     hold_initial_frames: int = 30,
+    initial_qvel: np.ndarray | None = None,
+    lift_already_verified: bool = False,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, dict[str, float | bool]]:
     model = planner.model
     data = mujoco.MjData(model)
     robot_only_gravity_compensation(model, ("piper_original", "piper_aerohand"))
     tune_grasp_dynamics(model)
     data.qpos[:] = initial_qpos
+    if initial_qvel is not None:
+        data.qvel[:] = initial_qvel
     data.ctrl[:] = 0.0
     mujoco.mj_forward(model, data)
     pipette_body = planner.body_id("pipette_0/pipette")
@@ -782,7 +939,10 @@ def simulate_commands(
     finger_contact_count_frames: list[int] = []
     rack_contact_frames: list[bool] = []
     hook_target_error_frames: list[float] = []
+    hook_position_frames: list[np.ndarray] = []
+    target_point_frames: list[np.ndarray] = []
     handoff_axis_dot_frames: list[float] = []
+    link6_local_y_world_z_frames: list[float] = []
     hook_top_offset_frames: list[float] = []
     hook_axis_offset_frames: list[float] = []
     target_contact_frames: list[bool] = []
@@ -819,9 +979,12 @@ def simulate_commands(
             [0.0, 0.0, handoff_target_vertical_offset_m],
             dtype=np.float64,
         )
+        hook_position_frames.append(hook_position.copy())
+        target_point_frames.append(target_point.copy())
         hook_from_center = hook_position - target_center
         hook_target_error_frames.append(float(np.linalg.norm(hook_position - target_point)))
         handoff_axis_dot_frames.append(float(np.dot(link6_R[:, 2], normalize(target_axis))))
+        link6_local_y_world_z_frames.append(float(link6_R[2, 1]))
         hook_top_offset_frames.append(float(np.dot(hook_from_center, top_direction)))
         hook_axis_offset_frames.append(float(np.dot(hook_from_center, normalize(target_axis))))
 
@@ -933,7 +1096,10 @@ def simulate_commands(
     rack_contact_array = np.asarray(rack_contact_frames, dtype=bool)
     table_contact_array = np.asarray(table_contact_frames, dtype=bool)
     hook_target_error_array = np.asarray(hook_target_error_frames, dtype=np.float64)
+    hook_position_array = np.asarray(hook_position_frames, dtype=np.float64)
+    target_point_array = np.asarray(target_point_frames, dtype=np.float64)
     handoff_axis_dot_array = np.asarray(handoff_axis_dot_frames, dtype=np.float64)
+    link6_local_y_world_z_array = np.asarray(link6_local_y_world_z_frames, dtype=np.float64)
     hook_top_offset_array = np.asarray(hook_top_offset_frames, dtype=np.float64)
     hook_axis_offset_array = np.asarray(hook_axis_offset_frames, dtype=np.float64)
     target_contact_array = np.asarray(target_contact_frames, dtype=bool)
@@ -941,15 +1107,21 @@ def simulate_commands(
     palm_tip_contact_count_array = np.asarray(palm_tip_contact_count_frames, dtype=np.int8)
     carry_mask = np.isin(
         frame_labels_array,
-        ("lift", "pre_handoff", "hook_insert", "hook_settle"),
+        ("lift", "post_pickup", "pre_handoff", "hook_insert", "hook_settle"),
     )
     handoff_mask = np.isin(
         frame_labels_array,
         ("pre_handoff", "hook_insert", "hook_settle"),
     )
+    handoff_motion_mask = np.isin(
+        frame_labels_array,
+        ("post_pickup", "pre_handoff", "hook_insert", "hook_settle", "retreat"),
+    )
     max_pipette_z = float(np.max(pipette_z_array))
     required_lift_m = max(0.01, 0.5 * commanded_lift_m)
-    pipette_lifted = max_pipette_z > initial_pipette_z + required_lift_m
+    pipette_lifted = bool(
+        lift_already_verified or max_pipette_z > initial_pipette_z + required_lift_m
+    )
     max_carry_grasp_site_error = float(np.max(grasp_site_error_array[carry_mask]))
     handoff_end_mask = frame_labels_array == "hook_settle"
     retreat_mask = frame_labels_array == "retreat"
@@ -963,34 +1135,18 @@ def simulate_commands(
     final_rack_contact = bool(rack_contact_array[final_carry_index])
     handoff_rack_contact_fraction = float(np.mean(rack_contact_array[handoff_mask]))
     final_hook_target_error = float(hook_target_error_array[final_carry_index])
-    final_hook_position = (
-        data.xpos[pipette_body]
-        + data.xmat[pipette_body].reshape(3, 3) @ hook_reference_local
-    )
-    final_target_position, _ = finger_top_target(
-        data.site_xpos[handoff_target_site_id],
-        data.xmat[handoff_target_body_id].reshape(3, 3) @ handoff_target_axis_local,
-        handoff_target_surface_offset_m,
-    )
-    final_target_position += np.array(
-        [0.0, 0.0, handoff_target_vertical_offset_m],
-        dtype=np.float64,
-    )
+    final_hook_position = hook_position_array[final_carry_index]
+    final_target_position = target_point_array[final_carry_index]
     final_hook_target_error_world = final_hook_position - final_target_position
     final_handoff_axis_dot = float(handoff_axis_dot_array[final_carry_index])
+    final_link6_local_y_world_z = float(link6_local_y_world_z_array[final_carry_index])
+    max_abs_handoff_local_y_world_z = float(
+        np.max(np.abs(link6_local_y_world_z_array[handoff_motion_mask]))
+    )
     final_hook_top_offset = float(hook_top_offset_array[final_carry_index])
     final_hook_axis_offset = float(hook_axis_offset_array[final_carry_index])
     target_contact_during_settle = bool(
         np.any(target_contact_array[frame_labels_array == "hook_settle"])
-    )
-    hook_handoff_reached = (
-        target_contact_during_settle
-        and abs(
-            final_hook_top_offset
-            - (handoff_target_surface_offset_m + handoff_target_vertical_offset_m)
-        )
-        < HANDOFF_TOP_TOLERANCE_M
-        and abs(final_hook_axis_offset) < HANDOFF_AXIS_TOLERANCE_M
     )
     grasp_retained = (
         pipette_lifted
@@ -1009,6 +1165,19 @@ def simulate_commands(
         and release_finger_contact_fraction == 0.0
         and release_table_contact_fraction == 0.0
         and release_rack_contact_fraction == 0.0
+    )
+    target_top_offset = handoff_target_surface_offset_m + handoff_target_vertical_offset_m
+    (
+        hook_geometrically_reached,
+        hook_contact_confirmed,
+        hook_handoff_reached,
+    ) = hook_handoff_success_flags(
+        final_hook_target_error=final_hook_target_error,
+        final_hook_top_offset=final_hook_top_offset,
+        final_hook_axis_offset=final_hook_axis_offset,
+        target_top_offset=target_top_offset,
+        target_contact_during_settle=target_contact_during_settle,
+        release_target_contact_fraction=release_target_contact_fraction,
     )
     palm_grasp_max_contact_count = int(np.max(palm_contact_count_array[palm_close_mask]))
     palm_grasp_final_contact_count = int(palm_contact_count_array[-1])
@@ -1069,10 +1238,19 @@ def simulate_commands(
         "final_rack_contact": final_rack_contact,
         "final_hook_target_error_m": final_hook_target_error,
         "final_hook_target_error_world": final_hook_target_error_world.tolist(),
+        "final_hook_position_world": final_hook_position.tolist(),
+        "final_handoff_target_position_world": final_target_position.tolist(),
         "final_handoff_axis_dot": final_handoff_axis_dot,
+        "final_link6_local_y_world_z": final_link6_local_y_world_z,
+        "max_abs_handoff_local_y_world_z": max_abs_handoff_local_y_world_z,
         "final_hook_top_offset_m": final_hook_top_offset,
         "final_hook_axis_offset_m": final_hook_axis_offset,
         "target_contact_during_settle": target_contact_during_settle,
+        "hook_geometrically_reached": hook_geometrically_reached,
+        "hook_contact_confirmed": hook_contact_confirmed,
+        "hook_target_tolerance_m": HANDOFF_HOOK_TARGET_TOLERANCE_M,
+        "hook_top_tolerance_m": HANDOFF_TOP_TOLERANCE_M,
+        "hook_axis_tolerance_m": HANDOFF_AXIS_TOLERANCE_M,
         "hook_handoff_reached": hook_handoff_reached,
         "release_target_contact_fraction": release_target_contact_fraction,
         "release_finger_contact_fraction": release_finger_contact_fraction,
@@ -1286,9 +1464,12 @@ def main() -> None:
     payload_root_id = planner.body_id("pipette_0")
     payload_root_pos = planner.data.xpos[payload_root_id].copy()
     payload_root_R = planner.data.xmat[payload_root_id].reshape(3, 3).copy()
-    payload_offset_tcp_local = grasp_R.T @ (payload_root_pos - grip_point)
-    payload_R_tcp = grasp_R.T @ payload_root_R
-    hook_offset_tcp_local = grasp_R.T @ (hook_world_initial - grip_point)
+    ideal_payload_offset_tcp_local = grasp_R.T @ (payload_root_pos - grip_point)
+    ideal_payload_R_tcp = grasp_R.T @ payload_root_R
+    ideal_hook_offset_tcp_local = grasp_R.T @ (hook_world_initial - grip_point)
+    payload_offset_tcp_local = ideal_payload_offset_tcp_local.copy()
+    payload_R_tcp = ideal_payload_R_tcp.copy()
+    hook_offset_tcp_local = ideal_hook_offset_tcp_local.copy()
     target_body_id = planner.body_id(HANDOFF_TARGET_BODY)
     target_center = site_world_position(planner, HANDOFF_TARGET_SITE)
     target_body_R = planner.data.xmat[target_body_id].reshape(3, 3).copy()
@@ -1347,6 +1528,30 @@ def main() -> None:
     pickup_gripper_commands = list(gripper_commands)
     pickup_labels = list(labels)
 
+    (
+        pickup_qpos_array,
+        pickup_ctrl_array,
+        pickup_labels_array,
+        pickup_final_qvel,
+        measured_pickup_payload,
+        pickup_measurement,
+    ) = simulate_pickup_prefix(
+        planner,
+        group,
+        qpos_scene_initial,
+        pickup_q_commands,
+        pickup_gripper_commands,
+        pickup_labels,
+        tcp_offset_local,
+        PIPETTE_HOOK_REFERENCE_LOCAL,
+    )
+    pickup_final_qpos = pickup_qpos_array[-1].copy()
+    planner.forward(pickup_final_qpos)
+    q_lift_actual = planner.get_joint_group(pickup_final_qpos, group)
+    payload_offset_tcp_local = measured_pickup_payload.payload_offset_tcp_local
+    payload_R_tcp = measured_pickup_payload.payload_R_tcp
+    hook_offset_tcp_local = measured_pickup_payload.hook_offset_tcp_local
+
     target_correction = np.zeros(3, dtype=np.float64)
     correction_history: list[dict[str, object]] = []
     preferred_handoff_roll_deg: float | None = None
@@ -1358,24 +1563,38 @@ def main() -> None:
         dict[str, object],
         HookHandoffPlan,
         np.ndarray,
+        float,
+        object,
     ] | None = None
     for correction_attempt in range(HANDOFF_CORRECTION_ATTEMPTS):
         desired_hook_target = handoff_target_point + target_correction
-        handoff_plan = plan_hook_handoff(
-            planner,
-            group,
-            qpos_lift,
-            lift_point,
-            grasp_R,
-            q_lift,
-            handoff_target_point,
-            desired_hook_target,
-            target_axis,
-            hook_offset_tcp_local,
-            tcp_offset_local,
-            grasp_policy,
-            preferred_handoff_roll_deg,
-        )
+        try:
+            handoff_plan = plan_hook_handoff(
+                planner,
+                group,
+                pickup_final_qpos,
+                measured_pickup_payload.tcp_world,
+                measured_pickup_payload.tcp_R_world,
+                q_lift_actual,
+                handoff_target_point,
+                desired_hook_target,
+                target_axis,
+                hook_offset_tcp_local,
+                tcp_offset_local,
+                grasp_policy,
+                preferred_handoff_roll_deg,
+            )
+        except RuntimeError as exc:
+            correction_history.append(
+                {
+                    "attempt": correction_attempt,
+                    "target_correction_world": target_correction.tolist(),
+                    "planning_error": str(exc),
+                }
+            )
+            if best_rollout is not None:
+                break
+            raise
         preferred_handoff_roll_deg = handoff_plan.roll_deg
         retreat_tcp_point = (
             handoff_plan.final_tcp_point - PIPER_RETREAT_M * handoff_plan.approach_axis
@@ -1383,7 +1602,7 @@ def main() -> None:
         retreat_path, retreat_cost = plan_cartesian_tcp_path(
             planner,
             group,
-            qpos_lift,
+            pickup_final_qpos,
             "piper_original/link6",
             handoff_plan.final_tcp_point,
             retreat_tcp_point,
@@ -1394,9 +1613,10 @@ def main() -> None:
             max_tcp_step=0.01,
             max_tcp_error=0.04,
         )
-        q_commands = [value.copy() for value in pickup_q_commands]
-        gripper_commands = list(pickup_gripper_commands)
-        labels = list(pickup_labels)
+
+        q_commands = [q_lift_actual.copy()]
+        gripper_commands = [0.0]
+        labels = ["post_pickup"]
         append_arm_command_path(
             planner,
             group,
@@ -1442,7 +1662,7 @@ def main() -> None:
         payload_collision_report = check_carried_payload_path(
             planner,
             group=group,
-            template_qpos=qpos_scene_initial,
+            template_qpos=pickup_final_qpos,
             q_path=q_commands,
             labels=labels,
             link_body="piper_original/link6",
@@ -1455,15 +1675,20 @@ def main() -> None:
             carry_labels=("pre_handoff", "hook_insert", "hook_settle"),
         )
         if not payload_collision_report.ok:
-            raise RuntimeError(
-                "Kinematic carried-payload collision check failed: "
-                + json.dumps(payload_collision_report.as_json(), indent=2)
+            if not args.allow_failed_grasp:
+                raise RuntimeError(
+                    "Kinematic carried-payload collision check failed: "
+                    + json.dumps(payload_collision_report.as_json(), indent=2)
+                )
+            print(
+                "WARNING: Kinematic carried-payload collision check failed; "
+                "continuing because --allow-failed-grasp is set."
             )
 
-        qpos_array, ctrl_array, labels_array, dynamics_metrics = simulate_commands(
+        handoff_qpos_array, handoff_ctrl_array, handoff_labels_array, dynamics_metrics = simulate_commands(
             planner,
             group,
-            qpos_scene_initial,
+            pickup_final_qpos,
             q_commands,
             gripper_commands,
             labels,
@@ -1476,7 +1701,13 @@ def main() -> None:
             HANDOFF_TARGET_AXIS_LOCAL,
             HANDOFF_TARGET_SURFACE_OFFSET_M,
             HANDOFF_TARGET_VERTICAL_OFFSET_M,
+            initial_qvel=pickup_final_qvel,
+            hold_initial_frames=0,
+            lift_already_verified=bool(pickup_measurement["pickup_lifted"]),
         )
+        qpos_array = np.concatenate([pickup_qpos_array, handoff_qpos_array], axis=0)
+        ctrl_array = np.concatenate([pickup_ctrl_array, handoff_ctrl_array], axis=0)
+        labels_array = np.concatenate([pickup_labels_array, handoff_labels_array], axis=0)
         correction_history.append(
             {
                 "attempt": correction_attempt,
@@ -1487,7 +1718,7 @@ def main() -> None:
             }
         )
         rollout_score = float(dynamics_metrics["final_hook_target_error_m"])
-        if dynamics_metrics["pipette_sustained_by_dynamics"] and (
+        if (args.allow_failed_grasp or dynamics_metrics["pipette_sustained_by_dynamics"]) and (
             best_rollout is None or rollout_score < best_rollout[0]
         ):
             best_rollout = (
@@ -1498,6 +1729,8 @@ def main() -> None:
                 dict(dynamics_metrics),
                 handoff_plan,
                 target_correction.copy(),
+                retreat_cost,
+                payload_collision_report,
             )
         if dynamics_metrics["hook_handoff_reached"]:
             break
@@ -1515,6 +1748,8 @@ def main() -> None:
             dynamics_metrics,
             handoff_plan,
             target_correction,
+            retreat_cost,
+            payload_collision_report,
         ) = best_rollout
     task_success = bool(
         dynamics_metrics["dynamic_handoff_success"]
@@ -1557,6 +1792,9 @@ def main() -> None:
         "grasp_site_offset_m": PIPETTE_GRASP_SITE_OFFSET_M,
         "lift_clearance_m": LIFT_CLEARANCE_M,
         "grip_point_world": grip_point.tolist(),
+        "dynamic_replan_after_pickup": True,
+        "pickup_measurement": pickup_measurement,
+        "pickup_measured_payload": measured_pickup_payload.as_json(),
         "handoff_target_site": HANDOFF_TARGET_SITE,
         "handoff_target_body": HANDOFF_TARGET_BODY,
         "handoff_target_center_world": target_center.tolist(),
@@ -1567,14 +1805,21 @@ def main() -> None:
         "handoff_target_axis_world": target_axis.tolist(),
         "handoff_approach_axis_world": handoff_plan.approach_axis.tolist(),
         "handoff_axis_dot": float(np.dot(handoff_plan.approach_axis, target_axis)),
+        "handoff_transition_mode": "fixed_post_pickup_tcp",
+        "handoff_transition_point_world": measured_pickup_payload.tcp_world.tolist(),
+        "handoff_local_y_world_z": float(handoff_plan.handoff_R[2, 1]),
+        "handoff_local_y_world_z_tolerance": HANDOFF_LOCAL_Y_WORLD_Z_TOLERANCE,
         "handoff_roll_deg": handoff_plan.roll_deg,
         "handoff_failures": list(handoff_plan.failures),
         "handoff_target_correction_world": target_correction.tolist(),
         "handoff_correction_history": correction_history,
         "pipette_hook_reference_local": PIPETTE_HOOK_REFERENCE_LOCAL.tolist(),
         "hook_offset_tcp_local": hook_offset_tcp_local.tolist(),
+        "ideal_hook_offset_tcp_local": ideal_hook_offset_tcp_local.tolist(),
         "payload_offset_tcp_local": payload_offset_tcp_local.tolist(),
+        "ideal_payload_offset_tcp_local": ideal_payload_offset_tcp_local.tolist(),
         "payload_R_tcp": payload_R_tcp.tolist(),
+        "ideal_payload_R_tcp": ideal_payload_R_tcp.tolist(),
         "payload_collision_check": payload_collision_report.as_json(),
         "handoff_standoff_m": HANDOFF_STANDOFF_M,
         "pre_handoff_hook_point_world": handoff_plan.pre_hook_point.tolist(),

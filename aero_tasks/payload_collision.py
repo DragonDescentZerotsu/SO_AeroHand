@@ -50,8 +50,75 @@ class PayloadCollisionReport:
         }
 
 
+@dataclass(frozen=True)
+class CarriedPayloadState:
+    tcp_world: np.ndarray
+    tcp_R_world: np.ndarray
+    payload_world: np.ndarray
+    payload_R_world: np.ndarray
+    payload_offset_tcp_local: np.ndarray
+    payload_R_tcp: np.ndarray
+    hook_world: np.ndarray
+    hook_offset_tcp_local: np.ndarray
+
+    def as_json(self) -> dict[str, object]:
+        return {
+            "tcp_world": self.tcp_world.tolist(),
+            "payload_world": self.payload_world.tolist(),
+            "payload_offset_tcp_local": self.payload_offset_tcp_local.tolist(),
+            "hook_world": self.hook_world.tolist(),
+            "hook_offset_tcp_local": self.hook_offset_tcp_local.tolist(),
+        }
+
+
 def _matches(name: str, prefixes: Sequence[str]) -> bool:
     return any(name == prefix or name.startswith(f"{prefix}/") for prefix in prefixes)
+
+
+def measure_carried_payload_state(
+    planner: PlanningModel,
+    *,
+    link_body: str,
+    tcp_offset_local: np.ndarray,
+    payload_body: str,
+    hook_body: str,
+    hook_reference_local: np.ndarray,
+) -> CarriedPayloadState:
+    """Measure payload root and hook poses relative to the current TCP pose.
+
+    ``payload_body`` is usually the freejoint wrapper used for rigid sweep
+    collision checks. ``hook_body`` is the body that owns
+    ``hook_reference_local``; for the AutoBio pipette this is
+    ``pipette_0/pipette``, not the wrapper body ``pipette_0``.
+    """
+
+    model = planner.model
+    data = planner.data
+    link_body_id = planner.body_id(link_body)
+    payload_body_id = planner.body_id(payload_body)
+    hook_body_id = planner.body_id(hook_body)
+    tcp_offset_local = np.asarray(tcp_offset_local, dtype=np.float64).reshape(3)
+    hook_reference_local = np.asarray(hook_reference_local, dtype=np.float64).reshape(3)
+
+    link_pos = data.xpos[link_body_id].copy()
+    tcp_R_world = data.xmat[link_body_id].reshape(3, 3).copy()
+    tcp_world = link_pos + tcp_R_world @ tcp_offset_local
+    payload_world = data.xpos[payload_body_id].copy()
+    payload_R_world = data.xmat[payload_body_id].reshape(3, 3).copy()
+    hook_body_world = data.xpos[hook_body_id].copy()
+    hook_body_R_world = data.xmat[hook_body_id].reshape(3, 3).copy()
+    hook_world = hook_body_world + hook_body_R_world @ hook_reference_local
+
+    return CarriedPayloadState(
+        tcp_world=tcp_world,
+        tcp_R_world=tcp_R_world,
+        payload_world=payload_world,
+        payload_R_world=payload_R_world,
+        payload_offset_tcp_local=tcp_R_world.T @ (payload_world - tcp_world),
+        payload_R_tcp=tcp_R_world.T @ payload_R_world,
+        hook_world=hook_world,
+        hook_offset_tcp_local=tcp_R_world.T @ (hook_world - tcp_world),
+    )
 
 
 def check_carried_payload_path(
