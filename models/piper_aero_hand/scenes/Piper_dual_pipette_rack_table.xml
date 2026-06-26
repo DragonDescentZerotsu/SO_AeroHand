@@ -8,7 +8,7 @@
     <global azimuth="0" elevation="-25" />
   </visual>
   <asset>
-    <model name="piper_original_model" file="../../../mujoco_menagerie/agilex_piper/piper.xml" content_type="text/xml" />
+    <model name="piper_original_model" file="../Piper_original_gripper_black.xml" content_type="text/xml" />
     <model name="piper_aerohand_model" file="../Piper_aerohand.xml" content_type="text/xml" />
     <model name="table_model" file="../../so101_aero_hand/objects/vention_table_top.xml" content_type="text/xml" />
     <model name="pipette_rack_model" file="../../../../AutoBio/autobio/model/object/pipette_rack.gen.xml" content_type="text/xml" />

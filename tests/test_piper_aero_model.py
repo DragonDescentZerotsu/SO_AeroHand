@@ -14,6 +14,7 @@ from aero_quest.so101_aero_control import AERO_HAND_ACTION_MAP
 
 
 MODEL_PATH = PROJECT_ROOT / "models/piper_aero_hand/Piper_aerohand.xml"
+BLACK_GRIPPER_MODEL_PATH = PROJECT_ROOT / "models/piper_aero_hand/Piper_original_gripper_black.xml"
 PIPER_ARM_ACTUATOR_NAMES = ("joint1", "joint2", "joint3", "joint4", "joint5", "joint6")
 
 
@@ -70,6 +71,25 @@ def test_piper_aero_model_loads_aligns_and_steps():
     assert np.all(np.isfinite(landmarks))
 
 
+def test_original_piper_gripper_visuals_are_black():
+    assert BLACK_GRIPPER_MODEL_PATH.exists()
+    model = mujoco.MjModel.from_xml_path(str(BLACK_GRIPPER_MODEL_PATH))
+    black_mat_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_MATERIAL, "black_mat")
+    assert black_mat_id >= 0
+
+    for body_name in ("link6", "link7", "link8"):
+        body_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, body_name)
+        assert body_id >= 0
+        visual_geom_ids = [
+            geom_id
+            for geom_id in range(model.ngeom)
+            if int(model.geom_bodyid[geom_id]) == body_id and int(model.geom_group[geom_id]) == 2
+        ]
+        assert visual_geom_ids
+        assert all(int(model.geom_matid[geom_id]) == black_mat_id for geom_id in visual_geom_ids)
+
+
 if __name__ == "__main__":
     test_piper_aero_model_loads_aligns_and_steps()
+    test_original_piper_gripper_visuals_are_black()
     print("Piper + Aero Hand combined model smoke test passed")

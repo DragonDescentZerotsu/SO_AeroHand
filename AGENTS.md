@@ -199,7 +199,8 @@ python scripts/teleop/quest_so101_aero_ik_teleop.py \
 - `models/so101_aero_hand/SO101_aerohand.xml`：基础 SO101 机械臂 + Aero Hand 组合模型。这个文件只描述机器人本体和手，不要把 pipette、rack、桌面任务物体等直接塞进这里。
 - `scripts/scenes/build_so101_aero_scene.py`：只负责生成基础机器人模型 `SO101_aerohand.xml`。
 - `models/piper_aero_hand/Piper_aerohand.xml`：基础 AgileX Piper 机械臂 + Aero Hand 组合模型。这里保留 Piper 的 `link6/joint6` wrist roll，删除原平行夹爪 `link7/link8`，把 Aero palm 的安装轴对齐到 `link6` 的 `+Z` 末端轴。
-- `scripts/scenes/build_piper_aero_scene.py`：生成基础 Piper + Aero Hand 模型。
+- `models/piper_aero_hand/Piper_original_gripper_black.xml`：原始 AgileX Piper 模型的项目内视觉版本，仅把 `link6/link7/link8` gripper 可视 mesh 设为黑色，供左侧原始 gripper 任务实例使用。
+- `scripts/scenes/build_piper_aero_scene.py`：生成基础 Piper + Aero Hand 模型，以及左侧原始 Piper 的黑色 gripper 视觉模型。
 - `configs/scenes/*.yaml`：任务场景 recipe。这里描述基础模型、机器人实例、要放入的物体、物体初始位姿、是否添加 `freejoint`，以及之后训练用的随机化/任务字段。
 - `aero_quest/scene_builder.py`：当前场景组合器。它读取 recipe，把外部 MJCF 机器人或物体通过 MuJoCo `<model>` / `<attach>` 组合到场景中，并按输出目录重写 mesh/model 路径。没有 `base_model` 时会创建空白 scene root，适合多机器人或纯任务场景。它仍在 `aero_quest/` 是历史原因；之后如果继续清理主线，可迁到 `aero_tasks/` 或单独的 scene 包。
 - `scripts/scenes/build_scene_from_config.py`：从 `configs/scenes/*.yaml` 生成具体任务场景。

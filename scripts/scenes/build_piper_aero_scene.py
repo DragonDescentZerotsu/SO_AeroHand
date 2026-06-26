@@ -13,6 +13,7 @@ PIPER_XML = PROJECT_ROOT / "mujoco_menagerie/agilex_piper/piper.xml"
 AERO_XML = PROJECT_ROOT / "mujoco_menagerie/tetheria_aero_hand_open/right_hand.xml"
 OUTPUT_DIR = PROJECT_ROOT / "models/piper_aero_hand"
 OUTPUT_XML = OUTPUT_DIR / "Piper_aerohand.xml"
+PIPER_ORIGINAL_GRIPPER_BLACK_XML = OUTPUT_DIR / "Piper_original_gripper_black.xml"
 
 # Attach the Aero wrist close to the Piper wrist-roll axis, shifted slightly
 # outward along link6 +Z so the palm base does not intersect the wrist shell.
@@ -97,6 +98,38 @@ def remove_gripper_equality(equality: ET.Element | None) -> ET.Element | None:
         if child.tag == "joint" and {child.get("joint1"), child.get("joint2")} & {"joint7", "joint8"}:
             equality.remove(child)
     return equality if list(equality) else None
+
+
+def set_visual_material(body: ET.Element, material: str) -> None:
+    for geom in body.findall("geom"):
+        if geom.get("class") == "visual" or (geom.get("mesh") and geom.get("class") != "collision"):
+            geom.set("material", material)
+
+
+def build_original_piper_gripper_black_model() -> ET.ElementTree:
+    tree = ET.parse(PIPER_XML)
+    root = tree.getroot()
+    root.set("model", "piper_original_gripper_black")
+
+    compiler = root.find("compiler")
+    if compiler is not None:
+        compiler.attrib.pop("meshdir", None)
+
+    asset = root.find("asset")
+    if asset is None:
+        raise RuntimeError("Could not find Piper asset section")
+    set_mesh_paths(asset, PIPER_XML.parent / "assets")
+
+    worldbody = root.find("worldbody")
+    if worldbody is None:
+        raise RuntimeError("Could not find Piper worldbody")
+    for body_name in ("link6", "link7", "link8"):
+        body = find_body(worldbody, body_name)
+        if body is None:
+            raise RuntimeError(f"Could not find Piper body named {body_name!r}")
+        set_visual_material(body, "black_mat")
+
+    return tree
 
 
 def build_scene() -> ET.ElementTree:
@@ -273,6 +306,11 @@ def build_scene() -> ET.ElementTree:
 
 def main():
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    piper_original_tree = build_original_piper_gripper_black_model()
+    ET.indent(piper_original_tree, space="  ")
+    piper_original_tree.write(PIPER_ORIGINAL_GRIPPER_BLACK_XML, encoding="utf-8", xml_declaration=True)
+    print(f"Wrote {PIPER_ORIGINAL_GRIPPER_BLACK_XML}")
+
     tree = build_scene()
     ET.indent(tree, space="  ")
     tree.write(OUTPUT_XML, encoding="utf-8", xml_declaration=True)

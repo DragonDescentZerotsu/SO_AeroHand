@@ -17,7 +17,7 @@ viewer:
 model_instances:
   - id: piper_original
     model_name: piper_original_model
-    source: mujoco_menagerie/agilex_piper/piper.xml
+    source: models/piper_aero_hand/Piper_original_gripper_black.xml
     body: base_link
     prefix: piper_original/
     init:
