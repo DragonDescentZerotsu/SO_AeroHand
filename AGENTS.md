@@ -233,7 +233,7 @@ python -m mujoco.viewer --mjcf=models/piper_aero_hand/scenes/Piper_dual_pipette_
 
 需要训练 policy 时，MJCF 负责拓扑和碰撞，episode reset 时再由 Python 环境根据 YAML 中的 `randomize` 字段和任务 sampler 随机化 arm qpos、静态 body pose、object freejoint pose、layout group pose 和 target object。可抓取物体必须放在带 `freejoint` 的 wrapper body 下，否则只是固定场景物体，无法被抓起来。
 
-当前 Piper pipette handoff sampler 位于 `aero_tasks/task_sampling.py`：`--sample-pipette-rack-bar` 以 rack 横梁中心为 offset 参考点，默认沿 rack 局部 `+X` 在整根 `0.255m` 横梁上采样 pipette 初始位置，并同时随机 rack 的桌面平移和 yaw；`--fixed-rack-pose` 可关闭 rack pose 随机。每个 episode 的覆盖项写入 `raw/episode_xxxxxx/episode_spec.json`，planner、LeRobot 导出和交互回放都应使用这份 spec 保证场景一致。
+当前 Piper pipette handoff sampler 位于 `aero_tasks/task_sampling.py`：`--sample-pipette-rack-bar` 以 rack 横梁中心为 offset 参考点，默认沿 rack 局部 `+X` 在整根 `0.255m` 横梁上采样 pipette 初始位置。rack pose 默认以桌面中心 `rack_center_xy=(0,0)` 为参考，在桌面范围内采样 `x=[-0.36,0.36]m`、`y=[-0.12,0.24]m`、`yaw=[-30,30]deg`，并拒绝与两个 Piper 初始状态碰撞的样本；`--fixed-rack-pose` 可关闭 rack pose 随机。每个 episode 的覆盖项写入 `raw/episode_xxxxxx/episode_spec.json`，planner、LeRobot 导出和交互回放都应使用这份 spec 保证场景一致。
 
 当前 `pipette_grasp.yaml` 直接引用本机 `/data/tianang/projects/AutoBio/autobio/model/object/pipette.gen.xml`。如果场景需要脱离这台机器运行，应先把相关 AutoBio MJCF 和 mesh assets 复制或子模块化到本项目，再更新 recipe 的 `source` 路径。
 
@@ -272,6 +272,7 @@ python scripts/benchmarks/piper_ik_benchmark.py
 ```bash
 python -m py_compile aero_tasks/motion_planning.py aero_tasks/task_sampling.py aero_tasks/payload_collision.py aero_tasks/lerobot_export.py scripts/planning/plan_piper_gripper_pipette_handoff.py scripts/planning/generate_piper_pipette_handoff_lerobot.py scripts/planning/preview_lerobot_cameras.py
 pytest tests/test_task_sampling.py
+pytest tests/test_piper_handoff_success.py
 MUJOCO_GL=egl python scripts/planning/preview_lerobot_cameras.py --out-dir outputs/lerobot/camera_preview_smoke --frame 8186
 ```
 

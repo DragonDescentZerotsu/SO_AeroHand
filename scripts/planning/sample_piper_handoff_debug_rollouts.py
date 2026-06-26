@@ -56,12 +56,14 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Keep rack pose fixed and only slide pipette along the rack bar.",
     )
-    parser.add_argument("--rack-x-min-m", type=float, default=-0.04)
-    parser.add_argument("--rack-x-max-m", type=float, default=0.04)
-    parser.add_argument("--rack-y-min-m", type=float, default=-0.03)
-    parser.add_argument("--rack-y-max-m", type=float, default=0.03)
-    parser.add_argument("--rack-yaw-min-deg", type=float, default=-8.0)
-    parser.add_argument("--rack-yaw-max-deg", type=float, default=8.0)
+    parser.add_argument("--rack-center-x-m", type=float, default=0.0)
+    parser.add_argument("--rack-center-y-m", type=float, default=0.0)
+    parser.add_argument("--rack-x-min-m", type=float, default=-0.36)
+    parser.add_argument("--rack-x-max-m", type=float, default=0.36)
+    parser.add_argument("--rack-y-min-m", type=float, default=-0.12)
+    parser.add_argument("--rack-y-max-m", type=float, default=0.24)
+    parser.add_argument("--rack-yaw-min-deg", type=float, default=-30.0)
+    parser.add_argument("--rack-yaw-max-deg", type=float, default=30.0)
     parser.add_argument("--video-stride", type=int, default=5)
     parser.add_argument("--overwrite", action="store_true")
     return parser.parse_args()
@@ -91,6 +93,7 @@ def main() -> None:
     sampler_config = RackBarSampleConfig(
         offset_range_m=(args.rack_bar_offset_min_m, args.rack_bar_offset_max_m),
         sample_rack_pose=not args.fixed_rack_pose,
+        rack_center_xy_m=(args.rack_center_x_m, args.rack_center_y_m),
         rack_x_range_m=(args.rack_x_min_m, args.rack_x_max_m),
         rack_y_range_m=(args.rack_y_min_m, args.rack_y_max_m),
         rack_yaw_range_deg=(args.rack_yaw_min_deg, args.rack_yaw_max_deg),
@@ -216,6 +219,7 @@ def main() -> None:
                 args.rack_bar_offset_max_m,
             ],
             "sample_rack_pose": not args.fixed_rack_pose,
+            "rack_center_xy_m": [args.rack_center_x_m, args.rack_center_y_m],
             "rack_x_range_m": [args.rack_x_min_m, args.rack_x_max_m],
             "rack_y_range_m": [args.rack_y_min_m, args.rack_y_max_m],
             "rack_yaw_range_deg": [args.rack_yaw_min_deg, args.rack_yaw_max_deg],

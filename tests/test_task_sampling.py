@@ -25,12 +25,13 @@ def normalize(vector: np.ndarray) -> np.ndarray:
     return vector / np.linalg.norm(vector)
 
 
-def test_rack_bar_sampling_uses_bar_center_and_static_rack_pose():
+def test_rack_bar_sampling_uses_bar_center_and_table_centered_rack_pose():
     output_path = build_task_scene(load_yaml_config(PIPER_DUAL_RACK_TABLE_CONFIG_PATH))
     model = mujoco.MjModel.from_xml_path(str(output_path))
     config = RackBarSampleConfig(
         offset_range_m=(0.0, 0.0),
         sample_rack_pose=True,
+        rack_center_xy_m=(0.1, 0.05),
         rack_x_range_m=(0.02, 0.02),
         rack_y_range_m=(0.01, 0.01),
         rack_yaw_range_deg=(10.0, 10.0),
@@ -45,6 +46,7 @@ def test_rack_bar_sampling_uses_bar_center_and_static_rack_pose():
     assert config.rack_body in spec.body_poses
     assert config.object_freejoint in spec.freejoint_poses
     assert spec.metadata["offset_reference"] == "rack_bar_center"
+    assert spec.metadata["rack_center_xy_m"] == [0.1, 0.05]
 
     apply_episode_spec_to_model(model, spec)
     qpos = model.qpos0.copy()
@@ -58,7 +60,7 @@ def test_rack_bar_sampling_uses_bar_center_and_static_rack_pose():
     assert rack_body >= 0
     assert pipette_root >= 0
 
-    assert np.allclose(data.xpos[rack_body][:2], np.array([0.02, 0.01]), atol=1e-8)
+    assert np.allclose(data.xpos[rack_body][:2], np.array([0.12, 0.06]), atol=1e-8)
 
     rack_R = data.xmat[rack_body].reshape(3, 3)
     object_local = rack_R.T @ (data.xpos[pipette_root] - data.xpos[rack_body])

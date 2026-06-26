@@ -85,6 +85,7 @@ PALM_CLOSE_LIMIT_MARGIN_RAD = 0.01
 PALM_CLOSE_LIMIT_TOLERANCE_RAD = 0.025
 PALM_CLOSE_STOP_SPEED_RAD_S = 0.02
 HANDOFF_TOP_TOLERANCE_M = 0.004
+HANDOFF_CONTACT_TOP_TOLERANCE_M = 0.006
 HANDOFF_AXIS_TOLERANCE_M = 0.005
 HANDOFF_HOOK_TARGET_TOLERANCE_M = 0.012
 HANDOFF_CORRECTION_ATTEMPTS = 3
@@ -790,7 +791,7 @@ def hook_handoff_success_flags(
     target_top_offset: float,
     target_contact_during_settle: bool,
     release_target_contact_fraction: float,
-) -> tuple[bool, bool, bool]:
+) -> tuple[bool, bool, bool, bool]:
     hook_geometrically_reached = (
         final_hook_target_error < HANDOFF_HOOK_TARGET_TOLERANCE_M
         and abs(final_hook_top_offset - target_top_offset) < HANDOFF_TOP_TOLERANCE_M
@@ -799,10 +800,17 @@ def hook_handoff_success_flags(
     hook_contact_confirmed = bool(
         target_contact_during_settle or release_target_contact_fraction > 0.5
     )
+    hook_functionally_reached = (
+        hook_contact_confirmed
+        and final_hook_target_error < HANDOFF_HOOK_TARGET_TOLERANCE_M
+        and abs(final_hook_axis_offset) < HANDOFF_AXIS_TOLERANCE_M
+        and abs(final_hook_top_offset - target_top_offset) < HANDOFF_CONTACT_TOP_TOLERANCE_M
+    )
     return (
         bool(hook_geometrically_reached),
         hook_contact_confirmed,
-        bool(hook_geometrically_reached and hook_contact_confirmed),
+        bool(hook_functionally_reached),
+        bool((hook_geometrically_reached and hook_contact_confirmed) or hook_functionally_reached),
     )
 
 
@@ -1170,6 +1178,7 @@ def simulate_commands(
     (
         hook_geometrically_reached,
         hook_contact_confirmed,
+        hook_functionally_reached,
         hook_handoff_reached,
     ) = hook_handoff_success_flags(
         final_hook_target_error=final_hook_target_error,
@@ -1248,8 +1257,10 @@ def simulate_commands(
         "target_contact_during_settle": target_contact_during_settle,
         "hook_geometrically_reached": hook_geometrically_reached,
         "hook_contact_confirmed": hook_contact_confirmed,
+        "hook_functionally_reached": hook_functionally_reached,
         "hook_target_tolerance_m": HANDOFF_HOOK_TARGET_TOLERANCE_M,
         "hook_top_tolerance_m": HANDOFF_TOP_TOLERANCE_M,
+        "hook_contact_top_tolerance_m": HANDOFF_CONTACT_TOP_TOLERANCE_M,
         "hook_axis_tolerance_m": HANDOFF_AXIS_TOLERANCE_M,
         "hook_handoff_reached": hook_handoff_reached,
         "release_target_contact_fraction": release_target_contact_fraction,

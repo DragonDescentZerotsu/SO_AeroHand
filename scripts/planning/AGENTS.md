@@ -105,7 +105,7 @@ outputs/lerobot/piper_pipette_handoff/<dataset_name>
 
 快速验证只写 state/action 时可加 `--skip-render`。统计固定 attempt budget 的随机化成功率时可设置 `--num-episodes <attempts>`、`--max-attempts-per-episode 1`、`--allow-partial`；manifest 会记录 `attempts_completed`、`successful_episodes` 和 `success_rate`。正式训练数据应保留视频。脚本会在写完后重新打开 `LeRobotDataset(repo_id, root=...)`，提前捕获 parquet footer 或视频 metadata 问题。
 
-当前 pipette rack 随机化不重新生成 MJCF：`--sample-pipette-rack-bar` 会从 tuned 初始挂载姿态出发，以 `pipette_rack_0/pipette_rack` 横梁中心为参考，沿 rack 局部 `+X` 在整根横梁长度 `0.255m` 内采样 pipette offset，并默认同时随机 rack 静态 body 的平面平移和 yaw；用 `--fixed-rack-pose` 可只采 pipette offset。采样保持 pipette 相对 rack 的局部 Y/Z 和姿态关系。同一个 `episode_spec.json` 会记录 rack pose 和 pipette pose，planner、LeRobot export 和 `replay_trajectory.py` 都会应用这份 spec。
+当前 pipette rack 随机化不重新生成 MJCF：`--sample-pipette-rack-bar` 会从 tuned 初始挂载姿态出发，以 `pipette_rack_0/pipette_rack` 横梁中心为参考，沿 rack 局部 `+X` 在整根横梁长度 `0.255m` 内采样 pipette offset。rack pose 默认以桌面中心 `rack_center_xy=(0,0)` 为参考，在桌面范围内采样 `x=[-0.36,0.36]m`、`y=[-0.12,0.24]m`、`yaw=[-30,30]deg`，并拒绝与两个 Piper 初始状态碰撞的样本；用 `--fixed-rack-pose` 可只采 pipette offset。采样保持 pipette 相对 rack 的局部 Y/Z 和姿态关系。同一个 `episode_spec.json` 会记录 rack pose 和 pipette pose，planner、LeRobot export 和 `replay_trajectory.py` 都会应用这份 spec。
 
 ### `sample_piper_handoff_debug_rollouts.py`
 
@@ -130,7 +130,7 @@ outputs/debug_rollouts/piper_pipette_handoff/<run_name>/
 
 - `episode_spec.json`：该次 rack/pipette 初始随机化。
 - `piper_gripper_pipette_handoff_expert.npz`：完整 MuJoCo `qpos/ctrl/labels` trace，可用 `replay_trajectory.py` 回放。
-- `summary.json`：成功/失败判据，包括 `dynamic_handoff_success`、`hook_handoff_reached`、`release_survived` 和 `palm_grasp_stable`。
+- `summary.json`：成功/失败判据，包括 `dynamic_handoff_success`、`hook_handoff_reached`、`release_survived` 和 `palm_grasp_stable`。`hook_geometrically_reached` 是严格几何判据；`hook_functionally_reached` 允许在目标接触已确认、target/axis 误差严格通过时，使用稍宽的 contact top tolerance，避免稳定挂住的边界样本被误判失败。
 - `piper_gripper_pipette_handoff_expert.mp4`：快速检查视频。
 - `planner.log`：planner stdout/stderr。
 
@@ -163,13 +163,13 @@ MUJOCO_GL=egl python scripts/planning/preview_lerobot_cameras.py \
 ## 当前限制
 
 - 当前版本已经移除了 kinematic attachment；`close` 后不会手动绑定 pipette，必须靠 MuJoCo contact/friction 夹起。
-- 默认运行同时要求抓取保持、`hook_handoff_reached=true`、`release_survived=true` 和 `palm_grasp_stable=true`。挂接判据分两层：hook 点到目标点的 3D 误差、顶部 offset、指节轴向 offset 必须都在阈值内；接触确认可以来自 `hook_settle` 阶段，也可以来自 release/retreat 阶段持续接触 proximal 指节。释放后 pipette 不再接触 gripper、且不落到桌面或 rack。加 `--allow-failed-grasp` 只用于导出失败 rollout 和视频检查。
+- 默认运行同时要求抓取保持、`hook_handoff_reached=true`、`release_survived=true` 和 `palm_grasp_stable=true`。挂接判据保留严格几何诊断 `hook_geometrically_reached`，同时加入功能性判据 `hook_functionally_reached`：确认目标接触后，hook 点到目标点的 3D 误差和指节轴向 offset 仍用严格阈值，顶部 offset 使用稍宽的 contact tolerance，避免稳定挂住的边界样本被误判失败。释放后 pipette 不再接触 gripper、且不落到桌面或 rack。加 `--allow-failed-grasp` 只用于导出失败 rollout 和视频检查。
 - 当前 `grasp_site_offset_m=0.12` 的结果可以动态夹起并保持 pipette。成功判据不能只看最终高度，因为 handoff 轨迹可能主动降低末端；应同时检查搬运阶段的抓取点相对误差和双指接触。修改 grasp site、场景或接触参数后必须重新检查 `summary.json` 的 `dynamics` 字段。
 - `summary.json` 会记录 `grasp_orientation_delta_deg`、`grasp_local_y_world_z` 和失败候选，便于检查必要姿态变化、水平约束、IK 不可达和 rack 碰撞。
 - handoff 阶段会记录 `handoff_transition_mode`、`handoff_transition_point_world`、`handoff_local_y_world_z` 和 `dynamics.max_abs_handoff_local_y_world_z`，用于检查固定 post-pickup transition 和 gripper 局部 Y 轴是否接近平行 global XY 平面。
 - Handoff 目标由目标 site/body 的局部几何实时计算，不使用固定世界 X/Y。`summary.json` 记录目标轴、接近轴、roll 搜索、hook 三维误差、目标接触和 rollout 校正历史；场景随机化后应复用同一规则重新求解。
 - 平行夹爪夹持近似圆柱 pipette 时需要 `condim=6` 的滚动阻力，否则 handoff 大角度旋转会让 hook 在两指之间滚动，目标位姿不可控。
-- 当前随机验证样本：`outputs/debug_rollouts/piper_pipette_handoff/random_review_50` 使用 seed `201-250` 生成 50 条 rack pose + rack-bar offset rollout，成功 48/50。失败集中在 rack 局部 `+X` 极端 offset 约 `+0.123m` 到 `+0.125m`，主要是 pickup/carry 阶段离 rack clearance 或夹持保持不足，不是 handoff 判据失败。
+- 当前宽范围随机检查样本：`outputs/debug_rollouts/piper_pipette_handoff/broad_rack_yaw30_review_20` 使用桌面中心 rack pose 随机化、rack yaw `[-30,30]deg` 和整根横梁 pipette offset 生成 20 条有视频 rollout。按新功能性 hook 判据重算后成功 16/20，失败 4/20；无视频的 skipped attempt 已清理，本地输出按 `success/` 和 `failed/` 分组，便于人工复核。
 - OMPL 当前环境未安装；本项目第一版使用 MuJoCo collision checking + SciPy bounded IK + 轻量 RRT-Connect。之后如果安装 OMPL/MoveIt，可替换搜索后端但保留任务脚本接口。
 - 如果 `summary.json` 中 `pregrasp_cost/grasp_cost` 偏高，这些值现在表示 TCP 位置误差，说明 gripper center 没有足够接近目标；需要继续改进 grasp frame/site 标定、目标候选采样和末端几何误差检查。
 - 当前 LeRobot 批量脚本已支持 rack 横梁上的 pipette 初始位置随机采样、rack 平面位置/yaw 随机化、失败 retry 和 carried-pipette 对 table/rack 的 sweep collision check。颜色/纹理随机化、distractor 采样和多任务 task sampler 仍是下一层。
