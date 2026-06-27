@@ -201,6 +201,7 @@ python scripts/teleop/quest_so101_aero_ik_teleop.py \
 - `models/piper_aero_hand/Piper_aerohand.xml`：基础 AgileX Piper 机械臂 + Aero Hand 组合模型。这里保留 Piper 的 `link6/joint6` wrist roll，删除原平行夹爪 `link7/link8`，把 Aero palm 的安装轴对齐到 `link6` 的 `+Z` 末端轴。
 - `models/piper_aero_hand/Piper_original_gripper_black.xml`：原始 AgileX Piper 模型的项目内视觉版本，仅把 `link6/link7/link8` gripper 可视 mesh 设为黑色，供左侧原始 gripper 任务实例使用。
 - `models/piper_aero_hand/scenes/ejectable_pipette_tip_demo.xml`：可弹出 pipette tip 的简化验证模型。它把 tip 作为独立 free body，初始用 `tip_lock` weld 固定在 socket 上；`pipette_ejector` slide joint 行程为 `[-0.0095, 0]m`，当前弹簧设定约为未按下 `2N`、按到底 `5N`。`scripts/debug/demo_ejectable_pipette_tip.py` 会按下 ejector，到阈值后关闭 weld，并沿 `tip_socket_site` 的局部 `-Z` 方向给 tip 初速度。这个文件目前是 demo，不是 `Piper_dual_pipette_rack_table.xml` 的正式任务 pipette。
+- `models/piper_aero_hand/scenes/pipette_liquid_transfer_demo.xml`：pipette 吸液/排液可视化验证模型，使用 AutoBio pipette/tip mesh、一个 source tube 和一个 target well。实际 tip 液体渲染由 `scripts/debug/demo_mujoco_pipette_liquid_transfer.py` 在输出目录生成 64 段 frustum liquid proxy 的临时 MJCF，不把这些 proxy 当作正式任务模型拓扑。
 - `scripts/scenes/build_piper_aero_scene.py`：生成基础 Piper + Aero Hand 模型，以及左侧原始 Piper 的黑色 gripper 视觉模型。
 - `configs/scenes/*.yaml`：任务场景 recipe。这里描述基础模型、机器人实例、要放入的物体、物体初始位姿、是否添加 `freejoint`，以及之后训练用的随机化/任务字段。
 - `aero_quest/scene_builder.py`：当前场景组合器。它读取 recipe，把外部 MJCF 机器人或物体通过 MuJoCo `<model>` / `<attach>` 组合到场景中，并按输出目录重写 mesh/model 路径。没有 `base_model` 时会创建空白 scene root，适合多机器人或纯任务场景。它仍在 `aero_quest/` 是历史原因；之后如果继续清理主线，可迁到 `aero_tasks/` 或单独的 scene 包。
@@ -245,13 +246,13 @@ python -m mujoco.viewer --mjcf=models/piper_aero_hand/scenes/Piper_dual_pipette_
 
 BioDexBench 风格的液体转移不做真实 CFD 或微流控仿真。目标是支持生物学正确性评分，而不是精确流体物理：物理仿真继续负责手、pipette、tip、容器和孔板的接触；液体由隐藏 wet-lab 语义状态和可见液体代理共同表示。
 
-第一版必须维护这些隐藏状态：
+当前已完成第一版语义层，入口是 `aero_tasks/liquid.py`，测试在 `tests/test_liquid.py`。它维护这些隐藏状态：
 
 - `tip_attached`、`tip_clean_state`、`tip_sample_id`、`tip_volume_ul`、`tip_capacity_ul`、`air_aspirated_ul`。
 - 每个 source tube、reagent reservoir、well 的 `sample_id`、`volume_ul`、`capacity_ul`、`liquid_color`、`contaminated_by`。
-- 每次 aspirate/dispense/eject/touch_forbidden_surface 的事件日志，写入 episode 的 hidden semantic log，供 BCS/evaluator 使用，不作为 policy 输入。
+- 每次 aspirate/dispense/air_aspirate/spill/touch_forbidden_surface 的事件日志。之后接入专家轨迹时应写入 episode 的 hidden semantic log，供 BCS/evaluator 使用，不作为 policy 输入。
 
-体积转移使用语义账本，不依赖真实流体：
+体积转移使用语义账本，不依赖真实流体。`PipetteLiquidController` 根据 plunger/button qpos 增量触发吸液和排液，默认 `PlungerModel(qpos_pressed_m=-0.008, qpos_rest_m=0.0, stroke_volume_ul=200.0)`，即完整吸/排一次为 `200uL`：
 
 ```text
 aspirate_ul = min(request_ul, source.volume_ul, tip.capacity_ul - tip.volume_ul)
@@ -265,17 +266,26 @@ target.volume_ul += dispense_ul
 target.sample_id = mixture(target.sample_id, tip.sample_id)
 ```
 
-吸液/排液事件由 `tip_site` 是否位于有效容器液体区域、plunger/button 行程变化、tip 是否安装且未被禁用共同触发。空吸、源液不足、超过 tip 容量、错误孔位分液、tip 复用和禁忌接触都应进入诊断状态。BCS 至少覆盖 `well_ok`、`sample_ok`、`tip_hygiene_ok`、`no_contamination` 和 `volume_ok`。
+当前模块已经处理 tip 容量、空气占位、空吸、未对准 target 时 spill、容器容量上限、sample mixing 和污染标记。正式任务接入时，吸液/排液事件应由 `tip_site` 是否位于有效容器液体区域、plunger/button 行程变化、tip 是否安装且未被禁用共同触发；错误孔位分液、tip 复用和禁忌接触应进入诊断状态。BCS 至少覆盖 `well_ok`、`sample_ok`、`tip_hygiene_ok`、`no_contamination` 和 `volume_ok`。
 
-可视化分两类处理：
+当前 MuJoCo demo 入口：
 
-- Pipette tip 内液体：用 capillary-column 近似。液柱固定在 tip local frame 内，液面不随世界重力或加速度找水平。液柱长度按 `tip_volume_ul / tip_capacity_ul` 变化，颜色来自 `sample_id` 或 mixture。优先用 10-20 个半透明小段离散显示，按 volume 打开前 N 段，避免运行时频繁改 MuJoCo model topology。
-- 大容器液体：离心管、试剂槽和孔板 well 内是开放自由液面，可以参考 AutoBio `liquid.py` 的思路。容器根据 `volume_ul` 映射液面高度/plane distance，并根据重力和容器加速度估计液面 normal。第一版可用近似 `volume_to_height` 或查表：试剂槽用长方体截面积，well 用圆柱/截锥近似，离心管用底部锥形加上部圆柱的分段函数。
+```bash
+MUJOCO_GL=egl conda run -n aero_sim python scripts/debug/demo_mujoco_pipette_liquid_transfer.py \
+  --out-dir outputs/debug_rollouts/mujoco_pipette_liquid_transfer
+```
+
+这个脚本输出 `01_mujoco_tip_aspirate_close.mp4`、`02_mujoco_tip_dispense_close.mp4`、`03_mujoco_full_tube_to_well_transfer.mp4` 和 `04_mujoco_plunger_button_full_view.mp4`，并写入 `wet_state.jsonl`、`summary.json` 和临时渲染模型 `generated_pipette_liquid_transfer_frustum.xml`。
+
+可视化实现分两类：
+
+- Pipette tip 内液体：用 capillary-column 近似，液柱固定在 tip local frame 内，液面不随世界重力或加速度找水平。当前 MuJoCo demo 使用 64 段 frustum mesh stack 加一个 clipped boundary cylinder；`FrustumSegment` 按截锥体积反推当前液面高度，避免把体积线性映射成高度。这个 frustum stack 只是 MuJoCo 轻量可视化 proxy，不是隐藏语义状态来源，也不应绑定 Blender 渲染。
+- 大容器液体：`ContainerState.surface()` 根据 `volume_ul` 映射液面高度，并根据 `gravity_world - acceleration_world` 估计开放自由液面 normal。第一版已提供 constant-area、cylindrical 和 conical-cylindrical 近似；source tube、reservoir、well 之后可按实际容器选择几何或查表。
 
 渲染和数据导出采用双轨：
 
-- MuJoCo 渲染是训练默认路径。扩展 `aero_tasks/lerobot_export.py` 或新增 renderer，使 `MujocoTrajectoryRenderer` 可按 frame 从 wet state provider 往 `mjvScene` 加液柱/液面 overlay。LeRobot 视频默认使用 MuJoCo 渲染。
-- Blender 渲染用于高质量可视化、论文图和人工检查。参考 AutoBio 的 `render_blender.py` / `render_liquid.py` 架构，从同一份 wet semantic log 导出液体 USD/mesh animation，再导入 Blender scene。不要让训练主线依赖 Blender。
+- MuJoCo 渲染是训练默认路径。后续需要把 demo 中的 wet state provider 和 frustum/container overlay 接入 `aero_tasks/lerobot_export.py` 或新增 renderer，使 LeRobot 视频可按 frame 显示液柱和容器液面。
+- Blender 渲染用于高质量可视化、论文图和人工检查。它应读取同一份 `wet_state.jsonl` / semantic log，自行生成连续液体 mesh 或 USD animation；不要依赖 MuJoCo 的 `tip_liquid_seg_*` proxy，也不要让训练主线依赖 Blender。
 
 建议 episode 数据布局：
 
@@ -290,7 +300,7 @@ raw/episode_xxxxxx/
   liquid.usd
 ```
 
-实现时优先保证语义状态、体积账本和 BCS 评分可靠，再逐步提高液体视觉质量。AutoBio 可作为算法和渲染管线参考，但引入代码或资产前仍需检查许可证和本项目第三方资产记录。
+已完成：语义状态、体积账本、基本容器几何、tip frustum 体积反推、MuJoCo liquid transfer demo 和单元测试。未完成：和正式专家轨迹/planner 的 `tip_site` 容器检测集成、BCS/evaluator 写入、LeRobot renderer 接入、Blender/USD exporter。AutoBio 可作为算法和渲染管线参考，但引入代码或资产前仍需检查许可证和本项目第三方资产记录。
 
 ## Quest 遥测和离线回放
 
