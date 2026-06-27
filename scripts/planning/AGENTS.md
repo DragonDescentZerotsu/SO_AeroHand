@@ -32,6 +32,8 @@
 16. 支持 `--episode-spec <json>` 覆盖 episode 初始静态 body pose 和 freejoint pose。当前 batch sampler 会用它随机 rack pose，并把 pipette 放到 rack 局部横梁上的采样位置。
 17. 进入 handoff 动力学 rollout 前会运行 carried-payload sweep：用 gripper TCP 刚性携带当前实际姿态的 pipette，检查 `pre_handoff/hook_insert/hook_settle` 阶段是否撞到 `table_0` 或 `pipette_rack_0`。刚从 rack 抬起时的支撑接触和最终与 Aero Hand 的目标接触不属于这个检查。
 
+当前专家轨迹仍使用场景 YAML 中引用的 AutoBio `pipette.gen.xml`。`models/piper_aero_hand/scenes/ejectable_pipette_tip_demo.xml` 只是可弹出 tip 的独立 demo；如果之后接入 planning 主线，正式模型必须保留 `pipette_0_free`、`pipette_0/pipette`、`pipette_0/tip_site` 和 `pipette_0/pipette_ejector` 等名称，且要显式处理 tip free body、`tip_lock` weld 释放和新增 qpos/ctrl 对轨迹回放、LeRobot 导出的影响。
+
 运行：
 
 ```bash

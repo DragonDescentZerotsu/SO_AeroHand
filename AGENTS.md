@@ -200,6 +200,7 @@ python scripts/teleop/quest_so101_aero_ik_teleop.py \
 - `scripts/scenes/build_so101_aero_scene.py`：只负责生成基础机器人模型 `SO101_aerohand.xml`。
 - `models/piper_aero_hand/Piper_aerohand.xml`：基础 AgileX Piper 机械臂 + Aero Hand 组合模型。这里保留 Piper 的 `link6/joint6` wrist roll，删除原平行夹爪 `link7/link8`，把 Aero palm 的安装轴对齐到 `link6` 的 `+Z` 末端轴。
 - `models/piper_aero_hand/Piper_original_gripper_black.xml`：原始 AgileX Piper 模型的项目内视觉版本，仅把 `link6/link7/link8` gripper 可视 mesh 设为黑色，供左侧原始 gripper 任务实例使用。
+- `models/piper_aero_hand/scenes/ejectable_pipette_tip_demo.xml`：可弹出 pipette tip 的简化验证模型。它把 tip 作为独立 free body，初始用 `tip_lock` weld 固定在 socket 上；`pipette_ejector` slide joint 行程为 `[-0.0095, 0]m`，当前弹簧设定约为未按下 `2N`、按到底 `5N`。`scripts/debug/demo_ejectable_pipette_tip.py` 会按下 ejector，到阈值后关闭 weld，并沿 `tip_socket_site` 的局部 `-Z` 方向给 tip 初速度。这个文件目前是 demo，不是 `Piper_dual_pipette_rack_table.xml` 的正式任务 pipette。
 - `scripts/scenes/build_piper_aero_scene.py`：生成基础 Piper + Aero Hand 模型，以及左侧原始 Piper 的黑色 gripper 视觉模型。
 - `configs/scenes/*.yaml`：任务场景 recipe。这里描述基础模型、机器人实例、要放入的物体、物体初始位姿、是否添加 `freejoint`，以及之后训练用的随机化/任务字段。
 - `aero_quest/scene_builder.py`：当前场景组合器。它读取 recipe，把外部 MJCF 机器人或物体通过 MuJoCo `<model>` / `<attach>` 组合到场景中，并按输出目录重写 mesh/model 路径。没有 `base_model` 时会创建空白 scene root，适合多机器人或纯任务场景。它仍在 `aero_quest/` 是历史原因；之后如果继续清理主线，可迁到 `aero_tasks/` 或单独的 scene 包。
@@ -237,6 +238,8 @@ python -m mujoco.viewer --mjcf=models/piper_aero_hand/scenes/Piper_dual_pipette_
 当前 Piper pipette handoff sampler 位于 `aero_tasks/task_sampling.py`：`--sample-pipette-rack-bar` 以 rack 横梁中心为 offset 参考点，默认沿 rack 局部 `+X` 在整根 `0.255m` 横梁上采样 pipette 初始位置。rack pose 默认以桌面中心 `rack_center_xy=(0,0)` 为参考，在桌面范围内采样 `x=[-0.36,0.36]m`、`y=[-0.12,0.24]m`、`yaw=[-30,30]deg`，并拒绝与两个 Piper 初始状态碰撞的样本；`--fixed-rack-pose` 可关闭 rack pose 随机。每个 episode 的覆盖项写入 `raw/episode_xxxxxx/episode_spec.json`，planner、LeRobot 导出和交互回放都应使用这份 spec 保证场景一致。
 
 当前 `pipette_grasp.yaml` 直接引用本机 `/data/tianang/projects/AutoBio/autobio/model/object/pipette.gen.xml`。如果场景需要脱离这台机器运行，应先把相关 AutoBio MJCF 和 mesh assets 复制或子模块化到本项目，再更新 recipe 的 `source` 路径。
+
+如果之后把可 eject tip 的 pipette 接入专家轨迹，不要直接用当前 demo MJCF 替换 YAML 的 `source`：当前 scene builder 通过 `<attach model="pipette_model" body="pipette" prefix="pipette_0/">` 只挂指定 body subtree，而 demo 里的 `pipette_tip` 是独立 sibling body。正式模型或 scene builder 扩展必须继续保留 `pipette_0`、`pipette_0_free`、`pipette_0/pipette`、`pipette_0/tip_site`、`pipette_0/pipette_ejector` 和 `pipette_0/pipette_button` 等 planner 依赖名称，并同步处理 tip free body 初始 pose、weld 开关和新增 qpos/ctrl 维度。
 
 ## Quest 遥测和离线回放
 
