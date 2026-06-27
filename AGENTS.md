@@ -273,9 +273,19 @@ target.sample_id = mixture(target.sample_id, tip.sample_id)
 ```bash
 MUJOCO_GL=egl conda run -n aero_sim python scripts/debug/demo_mujoco_pipette_liquid_transfer.py \
   --out-dir outputs/debug_rollouts/mujoco_pipette_liquid_transfer
+
+MUJOCO_GL=egl conda run -n aero_sim python scripts/debug/demo_mujoco_pipette_liquid_transfer.py \
+  --liquid-style pale_highlight \
+  --out-dir outputs/debug_rollouts/mujoco_pipette_liquid_transfer_pale_highlight
 ```
 
-这个脚本输出 `01_mujoco_tip_aspirate_close.mp4`、`02_mujoco_tip_dispense_close.mp4`、`03_mujoco_full_tube_to_well_transfer.mp4` 和 `04_mujoco_plunger_button_full_view.mp4`，并写入 `wet_state.jsonl`、`summary.json` 和临时渲染模型 `generated_pipette_liquid_transfer_frustum.xml`。
+这个脚本输出 `01_mujoco_tip_aspirate_close.mp4`、`02_mujoco_tip_dispense_close.mp4`、`03_mujoco_full_tube_to_well_transfer.mp4` 和 `04_mujoco_plunger_button_full_view.mp4`，并写入 `wet_state.jsonl`、`summary.json` 和临时渲染模型 `generated_pipette_liquid_transfer_frustum.xml`。当前 demo 支持 `--liquid-style blue` 和 `--liquid-style pale_highlight`；`pale_highlight` 使用很淡的透明蓝 `rgba=(0.70, 0.92, 1.0, 0.24)`，并在 MJCF material 上使用较高 `specular/shininess` 近似清液高光。MuJoCo 原生 renderer 只支持透明度和简单高光，不支持真实折射；真实清液折射应留给 Blender/Cycles 路径。
+
+颜色和样本身份必须保持通用：
+
+- `liquid_color` 是 wet semantic state 的一部分，属于 `ContainerState`、`PipetteTipState` 和每个 sample/reagent，而不是全局常量。新增不同颜色液体时优先在 sample/reagent spec 中给出 `sample_id` 和 `liquid_color`，不要在 renderer 里按容器名硬编码颜色。
+- 吸液时 source 的 `liquid_color` 会随 `sample_id` 进入 tip；排液时 tip 的颜色进入 target；混合时当前实现按转移体积线性 blend。之后如需更生物学语义的颜色规则，可把 sample palette / mixture color policy 抽成独立配置，但体积账本和渲染 overlay 仍应读取同一份 wet state。
+- MuJoCo 可视化可以有 renderer-only style，例如 `blue` 用于强可见训练检查，`pale_highlight` 用于接近透明清液的人工检查；这些 style 只改变显示用 RGBA/材质，不改变 `volume_ul`、`sample_id` 或 BCS 语义。
 
 可视化实现分两类：
 

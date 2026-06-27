@@ -41,7 +41,10 @@ TARGET_RADIUS_M = 0.0045
 SOURCE_INITIAL_UL = 500.0
 SOURCE_CAPACITY_UL = 1500.0
 TARGET_CAPACITY_UL = 300.0
-BLUE_RGBA = (0.08, 0.36, 0.95, 0.68)
+LIQUID_STYLES = {
+    "blue": (0.08, 0.36, 0.95, 0.68),
+    "pale_highlight": (0.70, 0.92, 1.0, 0.24),
+}
 TIP_FRUSTUM_SEGMENT_COUNT = 64
 TIP_FRUSTUM_SIDES = 20
 TIP_LIQUID_BOTTOM_Z_M = -0.0495
@@ -102,6 +105,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--fps", type=int, default=60)
     parser.add_argument("--width", type=int, default=1280)
     parser.add_argument("--height", type=int, default=720)
+    parser.add_argument("--liquid-style", choices=sorted(LIQUID_STYLES), default="blue")
     parser.add_argument("--motion-frames", type=int, default=130)
     parser.add_argument("--move-frames", type=int, default=90)
     parser.add_argument("--hold-frames", type=int, default=35)
@@ -172,14 +176,14 @@ def make_state(args: argparse.Namespace, *, initial_qpos_m: float) -> WetLabLiqu
         volume_ul=SOURCE_INITIAL_UL,
         capacity_ul=SOURCE_CAPACITY_UL,
         sample_id="blue_sample",
-        liquid_color=BLUE_RGBA,
+        liquid_color=LIQUID_STYLES[args.liquid_style],
     )
     target = ContainerState(
         name="target_well",
         geometry=CylindricalGeometry(bottom_z_m=LIQUID_BOTTOM_Z_M, radius_m=TARGET_RADIUS_M),
         volume_ul=0.0,
         capacity_ul=TARGET_CAPACITY_UL,
-        liquid_color=BLUE_RGBA,
+        liquid_color=LIQUID_STYLES[args.liquid_style],
     )
     tip = PipetteTipState(capacity_ul=args.tip_capacity_ul)
     plunger = PlungerModel(qpos_rest_m=0.0, qpos_pressed_m=-0.008, stroke_volume_ul=args.stroke_volume_ul)
@@ -260,11 +264,11 @@ def generated_tip_liquid_assets_and_geoms(segment_count: int = TIP_FRUSTUM_SEGME
         )
         geoms.append(
             f'        <geom name="{geom_name}" type="mesh" mesh="{mesh_name}" pos="0 0 {center_z:.9g}" '
-            'contype="0" conaffinity="0" group="2" rgba="0.08 0.36 0.95 0" />'
+            'contype="0" conaffinity="0" group="2" material="liquid_blue" rgba="0.08 0.36 0.95 0" />'
         )
     geoms.append(
         '        <geom name="tip_liquid_boundary" type="cylinder" size="0.0001 0.000001" '
-        f'pos="0 0 {TIP_LIQUID_BOTTOM_Z_M:.9g}" contype="0" conaffinity="0" group="2" rgba="0.08 0.36 0.95 0" />'
+        f'pos="0 0 {TIP_LIQUID_BOTTOM_Z_M:.9g}" contype="0" conaffinity="0" group="2" material="liquid_blue" rgba="0.08 0.36 0.95 0" />'
     )
     return "\n".join(assets), "\n".join(geoms)
 
@@ -363,8 +367,8 @@ def set_tip_liquid_geoms(model: mujoco.MjModel, segment_proxies: list[TipSegment
 
 def apply_visual_state(model: mujoco.MjModel, ids: dict[str, int | list[int]], segment_proxies: list[TipSegmentProxy], state: WetLabLiquidState) -> float:
     tip_liquid_height_m = set_tip_liquid_geoms(model, segment_proxies, int(ids["tip_boundary"]), state.pipette.tip)
-    set_container_liquid_geom(model, ids["source_liquid"], state.containers["source_tube"], rgba=BLUE_RGBA)  # type: ignore[arg-type]
-    set_container_liquid_geom(model, ids["target_liquid"], state.containers["target_well"], rgba=BLUE_RGBA)  # type: ignore[arg-type]
+    set_container_liquid_geom(model, ids["source_liquid"], state.containers["source_tube"], rgba=state.containers["source_tube"].liquid_color)  # type: ignore[arg-type]
+    set_container_liquid_geom(model, ids["target_liquid"], state.containers["target_well"], rgba=state.containers["target_well"].liquid_color)  # type: ignore[arg-type]
     return tip_liquid_height_m
 
 
@@ -570,6 +574,8 @@ def main() -> None:
         "source_initial_ul": SOURCE_INITIAL_UL,
         "source_capacity_ul": SOURCE_CAPACITY_UL,
         "target_capacity_ul": TARGET_CAPACITY_UL,
+        "liquid_style": args.liquid_style,
+        "liquid_rgba": list(LIQUID_STYLES[args.liquid_style]),
         "tip_liquid_proxy": "64 MuJoCo frustum mesh segments attached to pipette_tip local frame plus one clipped boundary cylinder; segment height is derived by inverting frustum volume",
         "container_liquid_proxy": "MuJoCo cylinder height updated from semantic container volume",
         "wet_state_jsonl": str(jsonl_path),
