@@ -141,7 +141,10 @@ def make_material(name: str, rgba: np.ndarray, *, roughness: float = 0.45, metal
         material.blend_method = "BLEND"
         if hasattr(material, "surface_render_method"):
             material.surface_render_method = "BLENDED"
-        material.use_screen_refraction = True
+        if hasattr(material, "use_raytrace_refraction"):
+            material.use_raytrace_refraction = True
+        if hasattr(material, "use_screen_refraction"):
+            material.use_screen_refraction = True
         material.show_transparent_back = True
     return material
 
@@ -164,10 +167,11 @@ def make_glass_material(name: str, rgba: np.ndarray, *, ior: float = 1.333, roug
     material.blend_method = "OPAQUE"
     if hasattr(material, "surface_render_method"):
         material.surface_render_method = "BLENDED"
-    material.use_screen_refraction = True
     material.show_transparent_back = True
     if hasattr(material, "use_raytrace_refraction"):
         material.use_raytrace_refraction = True
+    if hasattr(material, "use_screen_refraction"):
+        material.use_screen_refraction = True
     return material
 
 

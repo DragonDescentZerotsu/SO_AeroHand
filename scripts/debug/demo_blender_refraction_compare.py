@@ -239,8 +239,6 @@ def configure_engine(engine: str, width: int, height: int, samples: int) -> str:
             for attr, value in (
                 ("use_raytracing", True),
                 ("ray_tracing_method", "SCREEN"),
-                ("use_ssr", True),
-                ("use_ssr_refraction", True),
                 ("taa_render_samples", int(samples)),
                 ("taa_samples", int(samples)),
             ):
