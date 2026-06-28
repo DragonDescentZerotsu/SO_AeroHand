@@ -6,6 +6,7 @@
 - 通用 episode spec、静态 body pose/freejoint 初始状态覆盖和 rack 局部横梁采样放在 `aero_tasks/task_sampling.py`。
 - 通用 carried-payload pose 测量和 kinematic sweep 碰撞检查放在 `aero_tasks/payload_collision.py`。
 - 通用相机渲染、fixed-roll 相机和 LeRobot feature 定义放在 `aero_tasks/lerobot_export.py`。
+- 通用 Blender 渲染调度放在 `aero_tasks/blender_render.py`，Blender 内 scene/geometry/camera 动画放在 `aero_tasks/blender_scene.py`，wet-state 液体 overlay 放在 `aero_tasks/blender_liquid.py`。
 - 具体任务脚本放在 `scripts/planning/`，只负责读取 scene 中的 body/joint 名称、生成任务目标位姿、调用 planner、导出轨迹/视频。
 
 ## 当前入口
@@ -73,6 +74,28 @@ python scripts/planning/replay_trajectory.py \
 该脚本恢复轨迹中每一帧的完整 `qpos`，不会重新运行控制器或重新积分动力学，因此会原样显示生成时的机械臂跟踪误差、物体滑动和掉落。默认读取 `.npz` 中的 `model` 字段，也可以用 `--model` 覆盖。
 
 如果轨迹目录存在 `summary.json`，回放器会自动显示 handoff 标记：红球是指节中心，黄球是上方 hook 目标，绿球是 pipette hook reference，蓝线是指节长轴，青线是插入方向，紫线是 hook 到目标的当前误差。使用 `--no-markers` 可关闭；使用 `--summary <path>` 可指定其他摘要。
+
+### `render_trajectory_blender.py`
+
+把任意导出的 MuJoCo `qpos` 轨迹渲染成 Blender 视频。它读取 `.npz` 中的 `qpos` 和 `model` 字段，复用 `aero_tasks/lerobot_export.py` 的 camera spec，并可选读取 `wet_state.jsonl` 叠加液面和 tip 液柱：
+
+```bash
+python scripts/planning/render_trajectory_blender.py \
+  --trajectory outputs/piper_gripper_pipette_handoff/piper_gripper_pipette_handoff_expert.npz \
+  --out-dir outputs/debug_rollouts/blender_handoff \
+  --max-frames 120
+```
+
+有液体语义日志时：
+
+```bash
+python scripts/planning/render_trajectory_blender.py \
+  --trajectory raw/episode_xxxxxx/piper_gripper_pipette_handoff_expert.npz \
+  --wet-state raw/episode_xxxxxx/wet_state.jsonl \
+  --out-dir raw/episode_xxxxxx/blender_videos
+```
+
+本地没有 `blender` 可执行文件时，脚本仍会写出 `blender_render_manifest.json` 和 `render_command.sh`，但不会生成 mp4。`scripts/debug/demo_blender_liquid_overlay.py` 可生成一个小型 freejoint tip + wet-state demo，用来检查 Blender liquid overlay 链路。
 
 ### `generate_piper_pipette_handoff_lerobot.py`
 

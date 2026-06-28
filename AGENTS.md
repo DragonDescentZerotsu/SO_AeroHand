@@ -168,6 +168,7 @@ python scripts/teleop/quest_so101_aero_ik_teleop.py \
 ## 代码地图
 
 - 专家轨迹主线：`aero_tasks/motion_planning.py`、`aero_tasks/task_sampling.py`、`aero_tasks/payload_collision.py`、`aero_tasks/lerobot_export.py`、`scripts/planning/plan_piper_gripper_pipette_handoff.py`、`scripts/planning/generate_piper_pipette_handoff_lerobot.py`、`scripts/planning/preview_lerobot_cameras.py`、`scripts/planning/replay_trajectory.py`。具体命令、数据布局和回放按键见 `scripts/planning/AGENTS.md`。
+- Blender 渲染基础设施：`aero_tasks/blender_render.py` 负责普通 Python 侧 manifest/命令调度，`aero_tasks/blender_scene.py` 负责 Blender 内 MuJoCo geom/camera animation，`aero_tasks/blender_liquid.py` 负责 `wet_state.jsonl` 液面和 tip 液柱 overlay；入口是 `scripts/planning/render_trajectory_blender.py`，Blender worker 是 `scripts/blender/render_trajectory_worker.py`。
 - 接收：`scripts/04_receive_quest_tcp.py`，完整遥操作在 `scripts/teleop/`。
 - 解析和类型化坐标帧模型：`aero_quest/quest_hand_frame.py`。
 - 机械臂速度控制和 DLS IK 辅助：`aero_quest/arm_teleop.py`。
@@ -316,7 +317,20 @@ MUJOCO_GL=egl conda run -n aero_sim python scripts/debug/demo_liquid_detection_e
 渲染和数据导出采用双轨：
 
 - MuJoCo 渲染是训练默认路径。后续需要把 demo 中的 wet state provider 和 frustum/container surface overlay 接入 `aero_tasks/lerobot_export.py` 或新增 renderer，使 LeRobot 视频可按 frame 显示 tip 液柱和大容器液面。MuJoCo 不负责大容器完整透明液体体积，也不要为了视觉效果塞入 bulk proxy。
-- Blender 渲染用于高质量可视化、论文图和人工检查。它应读取同一份 `wet_state.jsonl` / semantic log；对 meshplane 容器用 `calculate_mesh(distance)` 生成液面以下真实填充 mesh，并导出或读取 `liquid.usd` animation。不要依赖 MuJoCo 的 `tip_liquid_seg_*` proxy，也不要让训练主线依赖 Blender。
+- Blender 渲染用于高质量可视化、论文图和人工检查。当前已有三层基础版：`blender_render.py` 读取任意 planner 输出的 MJCF/qpos 轨迹并生成 Blender manifest，`blender_scene.py` 在 Blender 中重建 MuJoCo geom 和相机动画，`blender_liquid.py` 读取同一份 `wet_state.jsonl` 并叠加大容器液面和 tip 液柱。入口示例：
+
+```bash
+python scripts/planning/render_trajectory_blender.py \
+  --trajectory outputs/piper_gripper_pipette_handoff/piper_gripper_pipette_handoff_expert.npz \
+  --out-dir outputs/debug_rollouts/blender_handoff \
+  --max-frames 120
+
+python scripts/debug/demo_blender_liquid_overlay.py \
+  --out-dir outputs/debug_rollouts/blender_liquid_overlay_demo \
+  --render
+```
+
+本地没有 `blender` 可执行文件时，这两个入口会生成 `blender_render_manifest.json` 和 `render_command.sh`，但不能实际写出 mp4。后续高保真液体可继续参考 AutoBio：对 meshplane 容器用 `calculate_mesh(distance)` 生成液面以下真实填充 mesh，并导出或读取 `liquid.usd` animation。不要依赖 MuJoCo 的 `tip_liquid_seg_*` proxy，也不要让训练主线依赖 Blender。
 
 建议 episode 数据布局：
 
@@ -331,7 +345,7 @@ raw/episode_xxxxxx/
   liquid.usd
 ```
 
-已完成：语义状态、体积账本、基本解析容器几何、可选 meshplane geometry 后端、tip frustum 体积反推、圆形容器 `tip_site` 检测、第一版 BCS evaluator、MuJoCo tip liquid transfer demo、AutoBio meshplane 离心管液面 demo、检测/BCS demo 和单元测试。当前专家轨迹 planner 仍主要停留在 pipette 拿取/handoff 阶段，所以还不能把液体逻辑完整接进正式专家轨迹。之后要补：把正式 pipetting planner 的 `tip_site`、容器 registry 和 plunger qpos 接到 `PipetteLiquidController`；把 `wet_state.jsonl`、BCS/evaluator 结果写入 episode；把 tip 液柱和大容器液面 overlay 接入 LeRobot renderer；实现 Blender/USD exporter。AutoBio 可作为算法和渲染管线参考，但引入代码或资产前仍需检查许可证和本项目第三方资产记录。
+已完成：语义状态、体积账本、基本解析容器几何、可选 meshplane geometry 后端、tip frustum 体积反推、圆形容器 `tip_site` 检测、第一版 BCS evaluator、MuJoCo tip liquid transfer demo、AutoBio meshplane 离心管液面 demo、检测/BCS demo、通用 Blender 轨迹渲染基础版、Blender wet-state overlay 基础版和单元测试。当前专家轨迹 planner 仍主要停留在 pipette 拿取/handoff 阶段，所以还不能把液体逻辑完整接进正式专家轨迹。之后要补：把正式 pipetting planner 的 `tip_site`、容器 registry 和 plunger qpos 接到 `PipetteLiquidController`；把 `wet_state.jsonl`、BCS/evaluator 结果写入 episode；把 tip 液柱和大容器液面 overlay 接入 LeRobot renderer；把 Blender liquid overlay 扩展成 AutoBio 风格 `liquid.usd`/meshplane bulk exporter。AutoBio 可作为算法和渲染管线参考，但引入代码或资产前仍需检查许可证和本项目第三方资产记录。
 
 ## Quest 遥测和离线回放
 
