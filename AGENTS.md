@@ -350,7 +350,18 @@ raw/episode_xxxxxx/
   liquid.usd
 ```
 
-已完成：语义状态、体积账本、基本解析容器几何、可选 meshplane geometry 后端、tip frustum 体积反推、圆形容器 `tip_site` 检测、第一版 BCS evaluator、MuJoCo tip liquid transfer demo、AutoBio meshplane 离心管液面 demo、检测/BCS demo、通用 Blender 轨迹渲染基础版、Blender wet-state overlay 基础版、真实 pipette/tip + 离心管 Blender 检查 demo 和单元测试。当前专家轨迹 planner 仍主要停留在 pipette 拿取/handoff 阶段，所以还不能把液体逻辑完整接进正式专家轨迹。之后要补：把正式 pipetting planner 的 `tip_site`、容器 registry 和 plunger qpos 接到 `PipetteLiquidController`；把 `wet_state.jsonl`、BCS/evaluator 结果写入 episode；把 tip 液柱和大容器液面 overlay 接入 LeRobot renderer；把 Blender liquid overlay 扩展成 AutoBio 风格 `liquid.usd`/meshplane bulk exporter。AutoBio 可作为算法和渲染管线参考，但引入代码或资产前仍需检查许可证和本项目第三方资产记录。
+已完成：语义状态、体积账本、基本解析容器几何、可选 meshplane geometry 后端、tip frustum 体积反推、圆形容器 `tip_site` 检测、第一版 BCS evaluator、MuJoCo tip liquid transfer demo、AutoBio meshplane 离心管液面 demo、检测/BCS demo、通用 Blender 轨迹渲染基础版、Blender wet-state overlay 基础版、真实 pipette/tip + 离心管 Blender 检查 demo 和单元测试。当前专家轨迹 planner 仍主要停留在 pipette 拿取/handoff 阶段，所以还不能把液体逻辑完整接进正式专家轨迹。
+
+之后要补：
+
+- 把正式 pipetting planner 的 `tip_site`、容器 registry 和 plunger qpos 接到 `PipetteLiquidController`。
+- 把 `wet_state.jsonl`、BCS/evaluator 结果写入 episode。
+- 把 tip 液柱和大容器液面 overlay 接入 LeRobot renderer。
+- 把 Blender liquid overlay 扩展成 AutoBio 风格 `liquid.usd`/meshplane bulk exporter。
+- 正式 pipetting 视觉检查需要透明/半透明 tip visual 或专门的 tip close camera；当前 handoff pipette 视觉偏白且不透明，即使液体 overlay 正确，也不适合判断 tip 内液面。
+- 桌面、rack、Aero Hand 等非液体物体的 Blender 材质/颜色现在仍可后置。它们不影响 qpos 轨迹生成、液体语义账本或 BCS；但在最终 LeRobot 视频、论文图或人工评审视频导出前，应统一指定材质颜色和必要的视觉随机化，避免全白场景影响可读性。
+
+AutoBio 可作为算法和渲染管线参考，但引入代码或资产前仍需检查许可证和本项目第三方资产记录。
 
 ## Quest 遥测和离线回放
 
