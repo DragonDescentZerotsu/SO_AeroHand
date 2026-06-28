@@ -7,6 +7,7 @@ import importlib.util
 import json
 from pathlib import Path
 import shutil
+import site
 import subprocess
 import sys
 
@@ -32,7 +33,7 @@ class BlenderRenderConfig:
     height: int = 720
     max_frames: int | None = 120
     stride: int | None = None
-    engine: str = "BLENDER_EEVEE_NEXT"
+    engine: str = "AUTO"
     samples: int = 64
     blender: str = "blender"
     save_blend: bool = True
@@ -90,6 +91,23 @@ def camera_specs_json(camera_specs: tuple[RenderCameraSpec, ...] = DEFAULT_HANDO
     return [asdict(spec) for spec in camera_specs]
 
 
+def resolve_render_engine(config: BlenderRenderConfig) -> str:
+    """Choose a render engine from config and wet-state requirements.
+
+    Liquid overlays rely on real refraction, so they default to Cycles. Dry
+    trajectories without liquid use EEVEE as a fast preview path.
+    """
+
+    requested = config.engine.strip().upper()
+    if requested in {"AUTO", ""}:
+        return "CYCLES" if config.wet_state is not None else "BLENDER_EEVEE"
+    if config.wet_state is not None and requested in {"BLENDER_EEVEE", "BLENDER_EEVEE_NEXT", "EEVEE"}:
+        return "CYCLES"
+    if requested == "EEVEE":
+        return "BLENDER_EEVEE"
+    return requested
+
+
 def write_render_manifest(
     config: BlenderRenderConfig,
     *,
@@ -100,6 +118,7 @@ def write_render_manifest(
     out_dir = resolve_project_path(config.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     wet_state = None if config.wet_state is None else str(resolve_project_path(config.wet_state))
+    engine = resolve_render_engine(config)
     manifest = {
         "trajectory": str(resolve_project_path(config.trajectory)),
         "model": str(model_path),
@@ -110,11 +129,14 @@ def write_render_manifest(
         "fps": int(config.fps),
         "width": int(config.width),
         "height": int(config.height),
-        "engine": config.engine,
+        "engine": engine,
+        "requested_engine": config.engine,
+        "has_liquid": wet_state is not None,
         "samples": int(config.samples),
         "frame_indices": frame_indices.astype(int).tolist(),
         "camera_specs": camera_specs_json(camera_specs),
         "visible_groups": [int(group) for group in config.visible_groups],
+        "python_paths": [str(Path(path).resolve()) for path in site.getsitepackages() if Path(path).exists()],
     }
     manifest_path = out_dir / "blender_render_manifest.json"
     manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -192,4 +214,7 @@ def run_blender_render(
             f"Prepared manifest and command script under {out_dir}."
         )
     subprocess.run(command, cwd=PROJECT_ROOT, check=True)
-    return out_dir / config.output_name
+    output = out_dir / config.output_name
+    if not output.exists():
+        raise FileNotFoundError(f"Blender command completed but did not create expected video: {output}")
+    return output

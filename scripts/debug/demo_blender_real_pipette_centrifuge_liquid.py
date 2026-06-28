@@ -40,6 +40,7 @@ from scripts.debug.demo_meshplane_pipette_centrifuge_liquid import (  # noqa: E4
 
 
 DEFAULT_OUT_DIR = PROJECT_ROOT / "outputs/debug_rollouts/blender_real_pipette_centrifuge_liquid"
+TIP_MESH = AUTOBIO_ROOT / "assets/container/tip_200ul_vis/visual.obj"
 
 
 def parse_args() -> argparse.Namespace:
@@ -155,6 +156,34 @@ def make_controller(args: argparse.Namespace) -> PipetteLiquidController:
     return PipetteLiquidController.from_initial_qpos(tip=tip, plunger=plunger, qpos_m=-0.008)
 
 
+def estimate_tip_liquid_geometry(tip_mesh: Path = TIP_MESH) -> dict[str, float | int]:
+    """Estimate a safe liquid column from the real 200 uL tip visual mesh."""
+
+    mesh = trimesh.load(tip_mesh, force="mesh")
+    mesh.apply_scale(0.001)
+    vertices = np.asarray(mesh.vertices, dtype=np.float64)
+    local_z = vertices[:, 2]
+    radius = np.linalg.norm(vertices[:, :2], axis=1)
+    ring_stats: list[tuple[float, float]] = []
+    for z_value in np.unique(np.round(local_z, decimals=7)):
+        mask = np.isclose(local_z, z_value, atol=5e-8)
+        if mask.any():
+            ring_stats.append((float(z_value), float(np.min(radius[mask]))))
+    if len(ring_stats) < 2:
+        return {"height_m": 0.0325, "bottom_radius_m": 0.00012, "top_radius_m": 0.00098}
+
+    lower_z = min(z for z, _ in ring_stats)
+    upper_candidates = [(z, r) for z, r in ring_stats if z > lower_z + 1e-4 and r > 0.001]
+    upper_z, upper_inner_radius = min(upper_candidates, key=lambda item: item[0]) if upper_candidates else max(ring_stats, key=lambda item: item[0])
+    height_m = max(0.020, float(upper_z - lower_z - 0.0015))
+    top_radius_m = min(0.00105, max(0.00075, 0.50 * float(upper_inner_radius)))
+    return {
+        "height_m": height_m,
+        "bottom_radius_m": 0.00012,
+        "top_radius_m": top_radius_m,
+    }
+
+
 def joint_qpos_adr(model: mujoco.MjModel, name: str) -> int:
     joint_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, name)
     if joint_id < 0:
@@ -183,6 +212,26 @@ def surface_dict(geometry: MeshPlaneGeometry, container: ContainerState, tube_R:
         container_rot_world=tube_R,
     )
     return surface.as_json()
+
+
+def liquid_bulk_mesh_dict(geometry: MeshPlaneGeometry, surface: dict[str, object], tube_R: np.ndarray) -> dict[str, object] | None:
+    distance = surface.get("distance_m")
+    if distance is None:
+        return None
+    liquid_mesh = geometry.meshplane.calculate_mesh(float(distance))
+    vertices = np.asarray(liquid_mesh.vertices, dtype=np.float64)
+    faces = np.asarray(liquid_mesh.faces, dtype=np.int64)
+    if vertices.size == 0 or faces.size == 0:
+        return None
+    vertices_world = TUBE_POS + vertices @ tube_R.T
+    face_list: list[list[int]] = faces.astype(int).tolist()
+    boundary = np.asarray(getattr(liquid_mesh, "boundary", []), dtype=np.int64)
+    if boundary.size >= 3:
+        face_list.append(boundary.astype(int).tolist())
+    return {
+        "vertices": np.round(vertices_world, decimals=7).tolist(),
+        "faces": face_list,
+    }
 
 
 def qpos_for_frame(
@@ -233,6 +282,7 @@ def build_trajectory(model_path: Path, args: argparse.Namespace, out_dir: Path) 
         "tip_site": site_id(model, "tip_site"),
     }
     geometry = build_meshplane_geometry()
+    tip_liquid_geometry = estimate_tip_liquid_geometry()
     container = make_container(args.initial_tube_volume_ul, geometry)
     controller = make_controller(args)
     frames = build_frames(args)
@@ -250,6 +300,8 @@ def build_trajectory(model_path: Path, args: argparse.Namespace, out_dir: Path) 
             tip_in_target=bool(pre_in_tube),
         )
         surface = surface_dict(geometry, container, tube_R, frame.acceleration_world)
+        if container.volume_ul > 1e-6:
+            surface["bulk_mesh_world"] = liquid_bulk_mesh_dict(geometry, surface, tube_R)
         qpos, tip_pos, in_tube, submerged, signed_depth, radial = qpos_for_frame(base_qpos, model, ids, frame, surface)
         qpos_rows.append(qpos)
         records.append(
@@ -259,6 +311,7 @@ def build_trajectory(model_path: Path, args: argparse.Namespace, out_dir: Path) 
                 "qpos_m": frame.qpos_m,
                 "tip_site_world": tip_pos.tolist(),
                 "tip_axis_world": [0.0, 0.0, 1.0],
+                "tip_liquid_geometry": tip_liquid_geometry,
                 "tip_signed_depth_m": signed_depth,
                 "tip_radial_m": radial,
                 "tip_in_tube": in_tube,
@@ -292,6 +345,7 @@ def build_trajectory(model_path: Path, args: argparse.Namespace, out_dir: Path) 
         "initial_tube_volume_ul": args.initial_tube_volume_ul,
         "tip_capacity_ul": args.tip_capacity_ul,
         "stroke_volume_ul": args.stroke_volume_ul,
+        "tip_liquid_geometry": tip_liquid_geometry,
     }
     return trajectory_path, wet_state_path, summary
 
@@ -313,6 +367,7 @@ def eye_from_mujoco_free_camera(lookat: tuple[float, float, float], distance: fl
 
 
 def render_camera_specs() -> tuple[RenderCameraSpec, ...]:
+    tube_lookat = (float(TUBE_POS[0]), float(TUBE_POS[1]), float(TUBE_POS[2] + 0.020))
     return (
         RenderCameraSpec(
             name="real_liquid_full",
@@ -325,6 +380,12 @@ def render_camera_specs() -> tuple[RenderCameraSpec, ...]:
             mode="world",
             lookat=(0.0, 0.0, 0.030),
             eye_offset_world=eye_from_mujoco_free_camera((0.0, 0.0, 0.030), 0.13, 142.0, -14.0),
+        ),
+        RenderCameraSpec(
+            name="real_tube_liquid_close",
+            mode="world",
+            lookat=tube_lookat,
+            eye_offset_world=eye_from_mujoco_free_camera(tube_lookat, 0.12, 112.0, -18.0),
         ),
     )
 
@@ -352,7 +413,7 @@ def prepare_or_render(
         max_frames=args.max_frames,
         stride=1,
         blender=args.blender,
-        engine="BLENDER_EEVEE_NEXT",
+        engine="AUTO",
         samples=64,
         visible_groups=(0, 1, 2),
     )
@@ -387,6 +448,15 @@ def main() -> None:
             out_dir=args.out_dir,
             camera="real_tip_close",
             output_name="02_blender_real_tip_close.mp4",
+        ),
+        prepare_or_render(
+            args=args,
+            trajectory_path=trajectory_path,
+            wet_state_path=wet_state_path,
+            model_path=model_path,
+            out_dir=args.out_dir,
+            camera="real_tube_liquid_close",
+            output_name="03_blender_real_tube_liquid_close.mp4",
         ),
     ]
     summary["model"] = str(model_path)

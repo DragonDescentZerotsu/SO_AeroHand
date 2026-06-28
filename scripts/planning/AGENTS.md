@@ -95,7 +95,9 @@ python scripts/planning/render_trajectory_blender.py \
   --out-dir raw/episode_xxxxxx/blender_videos
 ```
 
-本地没有 `blender` 可执行文件但当前 Python 可 `import bpy` 时，脚本会 fallback 到当前 Python 解释器运行 `scripts/blender/render_trajectory_worker.py`，先输出 PNG 序列再用 `imageio/ffmpeg` 合成 mp4；当前 `aero_sim` 已安装 `bpy==5.0.1` 并使用这条路径。两者都不可用时，脚本仍会写出 `blender_render_manifest.json` 和 `render_command.sh` 供其他机器运行。`scripts/debug/demo_blender_liquid_overlay.py` 可生成一个小型 freejoint tip + wet-state demo，用来检查 Blender liquid overlay 链路。
+默认 `--engine AUTO`：有 `--wet-state` 时 manifest 会强制写入 `CYCLES`，并用 Glass BSDF/IOR `1.333` 的液体材质；没有液体时使用 EEVEE 做快速预览。不要用 EEVEE 结果判断清液折射质量，它只是近似路径。
+
+本地没有 `blender` 可执行文件但当前 Python 可 `import bpy` 时，脚本会 fallback 到当前 Python 解释器运行 `scripts/blender/render_trajectory_worker.py`，先输出 PNG 序列再用 `ffmpeg`/`imageio` 合成 mp4。使用 Blender binary 时，manifest 会把当前 `aero_sim` 的 site-packages 写入 `python_paths`，worker 会把它加入 `sys.path` 以加载 `mujoco` 等 planner 依赖。两者都不可用时，脚本仍会写出 `blender_render_manifest.json` 和 `render_command.sh` 供其他机器运行。`scripts/debug/demo_blender_liquid_overlay.py` 可生成一个小型 freejoint tip + wet-state demo，用来检查 Blender liquid overlay 链路。
 
 ### `generate_piper_pipette_handoff_lerobot.py`
 

@@ -40,7 +40,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--height", type=int, default=720)
     parser.add_argument("--max-frames", type=int, default=120)
     parser.add_argument("--stride", type=int, default=None)
-    parser.add_argument("--engine", default="BLENDER_EEVEE_NEXT")
+    parser.add_argument("--engine", default="AUTO", help="AUTO uses Cycles when --wet-state is present, otherwise EEVEE.")
     parser.add_argument("--samples", type=int, default=64)
     parser.add_argument("--blender", default="blender")
     parser.add_argument("--dry-run", action="store_true", help="Only write manifest and render_command.sh.")

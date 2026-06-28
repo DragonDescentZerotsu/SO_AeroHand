@@ -10,8 +10,16 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from aero_tasks.blender_liquid import WetStateSeries, surface_specs, tip_liquid_spec
-from aero_tasks.blender_render import BlenderRenderConfig, prepare_blender_render, selected_frame_indices
+from aero_tasks.blender_liquid import (
+    TIP_LIQUID_TOP_RADIUS_M,
+    LIQUID_SURFACE_RENDER_OFFSET_M,
+    WetStateSeries,
+    liquid_top_in_tip,
+    surface_specs,
+    tip_fill_height,
+    tip_liquid_spec,
+)
+from aero_tasks.blender_render import BlenderRenderConfig, prepare_blender_render, resolve_render_engine, selected_frame_indices
 
 
 def test_selected_frame_indices_limits_frames() -> None:
@@ -41,6 +49,28 @@ def test_prepare_blender_render_writes_manifest(tmp_path: Path) -> None:
     ]
 
 
+def test_wet_state_render_forces_cycles_manifest(tmp_path: Path) -> None:
+    model_path = tmp_path / "scene.xml"
+    model_path.write_text("<mujoco model='empty'><worldbody/></mujoco>\n", encoding="utf-8")
+    trajectory_path = tmp_path / "trajectory.npz"
+    wet_state_path = tmp_path / "wet_state.jsonl"
+    wet_state_path.write_text(json.dumps({"frame_index": 0, "tip": {"volume_ul": 0.0}}) + "\n", encoding="utf-8")
+    np.savez_compressed(trajectory_path, qpos=np.zeros((10, 0), dtype=np.float64), model=str(model_path))
+    config = BlenderRenderConfig(
+        trajectory=trajectory_path,
+        wet_state=wet_state_path,
+        out_dir=tmp_path / "render",
+        engine="AUTO",
+        max_frames=3,
+    )
+    assert resolve_render_engine(config) == "CYCLES"
+    manifest_path, _ = prepare_blender_render(config)
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    assert manifest["engine"] == "CYCLES"
+    assert manifest["requested_engine"] == "AUTO"
+    assert manifest["has_liquid"] is True
+
+
 def test_wet_state_series_and_overlay_specs(tmp_path: Path) -> None:
     path = tmp_path / "wet_state.jsonl"
     record = {
@@ -64,3 +94,12 @@ def test_wet_state_series_and_overlay_specs(tmp_path: Path) -> None:
     tip = tip_liquid_spec(loaded)
     assert tip is not None
     assert tip["fill_fraction"] == 0.25
+    assert tip["geometry"]["top_radius_m"] == TIP_LIQUID_TOP_RADIUS_M
+    assert tip["geometry"]["top_radius_m"] < 0.001
+    assert LIQUID_SURFACE_RENDER_OFFSET_M <= 0.00005
+    top = liquid_top_in_tip(1.0, tip["geometry"])
+    assert top is not None
+    assert np.isclose(top[0], tip["geometry"]["height_m"])
+    assert np.isclose(top[1], tip["geometry"]["top_radius_m"])
+    half_fill_height = tip_fill_height(0.5, tip["geometry"])
+    assert 0.5 * tip["geometry"]["height_m"] < half_fill_height < tip["geometry"]["height_m"]

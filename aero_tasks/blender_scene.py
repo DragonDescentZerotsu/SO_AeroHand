@@ -146,6 +146,31 @@ def make_material(name: str, rgba: np.ndarray, *, roughness: float = 0.45, metal
     return material
 
 
+def make_glass_material(name: str, rgba: np.ndarray, *, ior: float = 1.333, roughness: float = 0.0) -> Any:
+    import bpy
+
+    rgba = np.asarray(rgba, dtype=np.float64).reshape(4)
+    material = bpy.data.materials.new(safe_name(name, "material"))
+    material.diffuse_color = tuple(float(v) for v in rgba)
+    material.use_nodes = True
+    nodes = material.node_tree.nodes
+    nodes.clear()
+    output = nodes.new(type="ShaderNodeOutputMaterial")
+    glass = nodes.new(type="ShaderNodeBsdfGlass")
+    glass.inputs["Color"].default_value = srgb_to_linear_rgba(rgba)
+    glass.inputs["Roughness"].default_value = float(roughness)
+    glass.inputs["IOR"].default_value = float(ior)
+    material.node_tree.links.new(glass.outputs["BSDF"], output.inputs["Surface"])
+    material.blend_method = "OPAQUE"
+    if hasattr(material, "surface_render_method"):
+        material.surface_render_method = "BLENDED"
+    material.use_screen_refraction = True
+    material.show_transparent_back = True
+    if hasattr(material, "use_raytrace_refraction"):
+        material.use_raytrace_refraction = True
+    return material
+
+
 @dataclass
 class BlenderGeom:
     geom_id: int
@@ -346,12 +371,52 @@ def configure_render(*, width: int, height: int, fps: int, engine: str, samples:
     scene.render.resolution_x = int(width)
     scene.render.resolution_y = int(height)
     scene.render.fps = int(fps)
+    requested_engine = str(engine).strip().upper()
+    if requested_engine == "CYCLES":
+        try:
+            import addon_utils
+
+            addon_utils.enable("cycles", default_set=True, persistent=True)
+        except Exception:
+            pass
     try:
-        scene.render.engine = engine
-    except TypeError:
-        scene.render.engine = "BLENDER_EEVEE" if "BLENDER_EEVEE" in {item.identifier for item in scene.render.bl_rna.properties["engine"].enum_items} else "CYCLES"
+        scene.render.engine = requested_engine
+    except Exception:
+        available = {item.identifier for item in scene.render.bl_rna.properties["engine"].enum_items}
+        if requested_engine == "CYCLES":
+            raise RuntimeError("Requested Cycles render engine, but this Blender build cannot enable it.")
+        scene.render.engine = "BLENDER_EEVEE" if "BLENDER_EEVEE" in available else "CYCLES"
     if scene.render.engine == "CYCLES":
         scene.cycles.samples = int(samples)
+        scene.cycles.use_denoising = True
+        scene.cycles.device = "CPU"
+    elif str(scene.render.engine).startswith("BLENDER_EEVEE"):
+        eevee = getattr(scene, "eevee", None)
+        if eevee is not None:
+            for attr, value in (
+                ("use_raytracing", True),
+                ("ray_tracing_method", "SCREEN"),
+                ("taa_render_samples", int(samples)),
+                ("taa_samples", int(samples)),
+            ):
+                if hasattr(eevee, attr):
+                    try:
+                        setattr(eevee, attr, value)
+                    except Exception:
+                        pass
+            ray_options = getattr(eevee, "ray_tracing_options", None)
+            if ray_options is not None:
+                for attr, value in (
+                    ("screen_trace_quality", 1.0),
+                    ("screen_trace_thickness", 0.2),
+                    ("resolution_scale", "1"),
+                    ("use_denoise", True),
+                ):
+                    if hasattr(ray_options, attr):
+                        try:
+                            setattr(ray_options, attr, value)
+                        except Exception:
+                            pass
     scene.render.film_transparent = False
     output = Path(output_path)
     try:

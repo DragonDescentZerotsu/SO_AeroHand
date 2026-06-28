@@ -6,9 +6,9 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+import subprocess
 import sys
 
-import imageio.v2 as imageio
 import numpy as np
 
 
@@ -51,6 +51,33 @@ def encode_png_sequence(frames_dir: Path, output_video: Path, *, fps: int) -> No
     frame_paths = sorted(frames_dir.glob("*.png"))
     if not frame_paths:
         raise FileNotFoundError(f"No rendered PNG frames found in {frames_dir}")
+    try:
+        subprocess.run(
+            [
+                "ffmpeg",
+                "-y",
+                "-hide_banner",
+                "-loglevel",
+                "error",
+                "-framerate",
+                str(int(fps)),
+                "-i",
+                str(frames_dir / "frame_%04d.png"),
+                "-pix_fmt",
+                "yuv420p",
+                "-c:v",
+                "libx264",
+                "-crf",
+                "18",
+                str(output_video),
+            ],
+            check=True,
+        )
+        return
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        pass
+    import imageio.v2 as imageio
+
     with imageio.get_writer(output_video, fps=fps, codec="libx264", ffmpeg_params=["-crf", "18"]) as writer:
         for frame_path in frame_paths:
             writer.append_data(imageio.imread(frame_path))
@@ -58,11 +85,14 @@ def encode_png_sequence(frames_dir: Path, output_video: Path, *, fps: int) -> No
 
 def main() -> None:
     import bpy
-    import mujoco
 
     args = parse_worker_args()
     manifest_path = args.manifest.expanduser().resolve()
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    for path in manifest.get("python_paths", []):
+        if path and path not in sys.path:
+            sys.path.append(str(path))
+    import mujoco
 
     bpy.ops.wm.read_factory_settings(use_empty=True)
     model = mujoco.MjModel.from_xml_path(manifest["model"])
@@ -100,4 +130,8 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as exc:
+        print(f"Blender trajectory render failed: {exc}", file=sys.stderr)
+        raise SystemExit(1) from exc

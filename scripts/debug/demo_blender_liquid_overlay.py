@@ -208,7 +208,7 @@ def main() -> None:
         height=368,
         max_frames=args.max_frames,
         blender=args.blender,
-        engine="BLENDER_EEVEE_NEXT",
+        engine="AUTO",
         samples=64,
     )
     manifest, command = prepare_blender_render(config)
