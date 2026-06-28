@@ -27,12 +27,9 @@ AUTOBIO_ROOT = Path("/data/tianang/projects/AutoBio/autobio")
 AUTOBIO_ASSETS = AUTOBIO_ROOT / "assets"
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
-if str(AUTOBIO_ROOT) not in sys.path:
-    sys.path.insert(0, str(AUTOBIO_ROOT))
 
 from aero_tasks.liquid import ContainerState, PipetteLiquidController, PipetteTipState, PlungerModel  # noqa: E402
-from liquid import ContainerDefinition  # noqa: E402
-from meshplane import MeshPlane  # noqa: E402
+from aero_tasks.liquid_meshplane import MeshPlaneGeometry  # noqa: E402
 
 
 DEFAULT_BASE_MODEL = PROJECT_ROOT / "models/piper_aero_hand/scenes/pipette_liquid_transfer_demo.xml"
@@ -57,13 +54,6 @@ class DemoFrame:
     source_name: str | None = None
     target_name: str | None = None
     camera_mode: str = "close"
-
-
-@dataclass
-class MeshPlaneTube:
-    definition: ContainerDefinition
-    meshplane: MeshPlane
-    previous_distance: float | None = None
 
 
 def parse_args() -> argparse.Namespace:
@@ -178,17 +168,22 @@ def prepare_model_xml(base_model: Path, out_dir: Path) -> Path:
     return out_path
 
 
-def build_meshplane_tube() -> MeshPlaneTube:
+def build_meshplane_geometry() -> MeshPlaneGeometry:
     mesh = trimesh.load(TUBE_MESH)
     mesh.apply_scale(0.001)
-    definition = ContainerDefinition.from_object_mesh(mesh, split_top=True, split_bottom=False, opening="top")
-    return MeshPlaneTube(definition=definition, meshplane=MeshPlane(definition.interior))
+    return MeshPlaneGeometry.from_trimesh(
+        mesh,
+        autobio_root=AUTOBIO_ROOT,
+        split_top=True,
+        split_bottom=False,
+        opening="top",
+    )
 
 
-def make_container(volume_ul: float) -> ContainerState:
+def make_container(volume_ul: float, geometry: MeshPlaneGeometry) -> ContainerState:
     return ContainerState(
         name="centrifuge_tube",
-        geometry=None,  # MeshPlaneTube is the authoritative volume/height geometry for this demo.
+        geometry=geometry,
         volume_ul=volume_ul,
         capacity_ul=1500.0,
         sample_id="tube_sample",
@@ -216,27 +211,25 @@ def hide_original_source_target(model: mujoco.MjModel) -> None:
             model.geom_rgba[geom_id, 3] = 0.0
 
 
-def meshplane_surface(meshplane_tube: MeshPlaneTube, volume_ul: float, tube_R: np.ndarray, acceleration_world: np.ndarray) -> dict[str, object]:
-    effective_up = -(GRAVITY_WORLD - acceleration_world)
-    normal_world = effective_up / max(float(np.linalg.norm(effective_up)), 1e-12)
-    normal_local = tube_R.T @ normal_world
-    meshplane_tube.meshplane.set_plane_normal(*normal_local)
-    if meshplane_tube.previous_distance is None:
-        low, high, _ = meshplane_tube.meshplane.get_plane_distance_range()
-        meshplane_tube.previous_distance = 0.5 * (low + high)
-    distance = meshplane_tube.meshplane.solve_plane_distance(volume_ul * 1e-9, meshplane_tube.previous_distance)
-    meshplane_tube.previous_distance = distance
-    result = meshplane_tube.meshplane.calculate_plane(distance)
-    world_center = tube_R @ result.center + TUBE_POS
-    world_frame = tube_R @ result.frame
+def meshplane_surface(geometry: MeshPlaneGeometry, volume_ul: float, tube_R: np.ndarray, acceleration_world: np.ndarray) -> dict[str, object]:
+    surface = geometry.surface(
+        volume_ul,
+        gravity_world=GRAVITY_WORLD,
+        acceleration_world=acceleration_world,
+        container_pos_world=TUBE_POS,
+        container_rot_world=tube_R,
+    )
+    world_center = np.asarray(surface.center_world, dtype=np.float64)
+    world_frame = np.asarray(surface.frame_world, dtype=np.float64)
+    normal_world = np.asarray(surface.normal_world, dtype=np.float64)
     return {
-        "distance": float(distance),
-        "valid": bool(result.half_width > 0.0 and result.half_height > 0.0),
+        "distance": float(surface.distance_m),
+        "valid": bool(float(surface.half_width_m) > 0.0 and float(surface.half_height_m) > 0.0),
         "center_world": world_center,
         "frame_world": world_frame,
         "normal_world": normal_world,
-        "half_width": float(result.half_width),
-        "half_height": float(result.half_height),
+        "half_width": float(surface.half_width_m),
+        "half_height": float(surface.half_height_m),
     }
 
 
@@ -307,7 +300,7 @@ def set_scene(
     model: mujoco.MjModel,
     data: mujoco.MjData,
     ids: dict[str, int],
-    meshplane_tube: MeshPlaneTube,
+    meshplane_geometry: MeshPlaneGeometry,
     container: ContainerState,
     controller: PipetteLiquidController,
     frame: DemoFrame,
@@ -316,7 +309,7 @@ def set_scene(
     tube_R = quat_to_matrix(tube_q)
     model.body_pos[ids["tube_body"]] = TUBE_POS
     model.body_quat[ids["tube_body"]] = tube_q
-    surface = meshplane_surface(meshplane_tube, container.volume_ul, tube_R, frame.acceleration_world)
+    surface = meshplane_surface(meshplane_geometry, container.volume_ul, tube_R, frame.acceleration_world)
 
     set_liquid_polygon_patches(
         model,
@@ -456,8 +449,8 @@ def write_demo(args: argparse.Namespace, model_path: Path, name: str, frames: li
         "marker_geom": mj_id(model, mujoco.mjtObj.mjOBJ_GEOM, "tip_submerged_marker"),
     }
     ids["button_qpos_adr"] = int(model.jnt_qposadr[ids["button_joint"]])
-    meshplane_tube = build_meshplane_tube()
-    container = make_container(args.initial_tube_volume_ul)
+    meshplane_geometry = build_meshplane_geometry()
+    container = make_container(args.initial_tube_volume_ul, meshplane_geometry)
     controller = make_controller(args)
     camera = mujoco.MjvCamera()
     mujoco.mjv_defaultCamera(camera)
@@ -468,7 +461,7 @@ def write_demo(args: argparse.Namespace, model_path: Path, name: str, frames: li
         with imageio.get_writer(video_path, fps=args.fps, codec="libx264", ffmpeg_params=["-crf", "18"]) as writer:
             with jsonl_path.open("a", encoding="utf-8") as jsonl:
                 for frame_index, frame in enumerate(frames):
-                    pre = set_scene(model, data, ids, meshplane_tube, container, controller, frame)
+                    pre = set_scene(model, data, ids, meshplane_geometry, container, controller, frame)
                     events = controller.update(
                         frame.qpos_m,
                         source=container if frame.source_name == container.name else None,
@@ -476,7 +469,7 @@ def write_demo(args: argparse.Namespace, model_path: Path, name: str, frames: li
                         tip_in_liquid=bool(pre["tip_submerged"]),
                         tip_in_target=bool(pre["tip_in_tube"]),
                     )
-                    diagnostics = set_scene(model, data, ids, meshplane_tube, container, controller, frame)
+                    diagnostics = set_scene(model, data, ids, meshplane_geometry, container, controller, frame)
                     configure_camera(camera, frame)
                     renderer.update_scene(data, camera=camera)
                     writer.append_data(annotate(renderer.render(), frame, container, controller, diagnostics))

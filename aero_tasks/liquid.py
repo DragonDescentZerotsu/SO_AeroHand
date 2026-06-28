@@ -64,11 +64,21 @@ class LiquidSurface:
 
     height_m: float
     normal_world: tuple[float, float, float]
+    center_world: tuple[float, float, float] | None = None
+    frame_world: tuple[tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]] | None = None
+    half_width_m: float | None = None
+    half_height_m: float | None = None
+    distance_m: float | None = None
 
     def as_json(self) -> dict[str, object]:
         return {
             "height_m": float(self.height_m),
             "normal_world": list(self.normal_world),
+            "center_world": None if self.center_world is None else list(self.center_world),
+            "frame_world": None if self.frame_world is None else [list(row) for row in self.frame_world],
+            "half_width_m": self.half_width_m,
+            "half_height_m": self.half_height_m,
+            "distance_m": self.distance_m,
         }
 
 
@@ -123,6 +133,32 @@ class ContainerGeometry:
 
     def volume_to_height_m(self, volume_ul: float) -> float:
         raise NotImplementedError
+
+    def surface(
+        self,
+        volume_ul: float,
+        *,
+        gravity_world: np.ndarray = np.array([0.0, 0.0, -9.81], dtype=np.float64),
+        acceleration_world: np.ndarray = np.zeros(3, dtype=np.float64),
+        container_pos_world: np.ndarray | None = None,
+        container_rot_world: np.ndarray | None = None,
+    ) -> LiquidSurface:
+        effective_down = np.asarray(gravity_world, dtype=np.float64).reshape(3) - np.asarray(acceleration_world, dtype=np.float64).reshape(3)
+        normal_world = -_normalize(effective_down)
+        height_m = self.volume_to_height_m(volume_ul)
+        center_world = None
+        frame_world = None
+        if container_pos_world is not None:
+            pos = np.asarray(container_pos_world, dtype=np.float64).reshape(3)
+            rot = np.eye(3, dtype=np.float64) if container_rot_world is None else np.asarray(container_rot_world, dtype=np.float64).reshape(3, 3)
+            center_world = tuple((pos + rot @ np.array([0.0, 0.0, height_m], dtype=np.float64)).tolist())
+            frame_world = tuple(tuple(float(v) for v in row) for row in rot.tolist())
+        return LiquidSurface(
+            height_m=height_m,
+            normal_world=tuple(normal_world.tolist()),
+            center_world=center_world,
+            frame_world=frame_world,
+        )
 
 
 @dataclass(frozen=True)
@@ -221,14 +257,17 @@ class ContainerState:
         *,
         gravity_world: np.ndarray = np.array([0.0, 0.0, -9.81], dtype=np.float64),
         acceleration_world: np.ndarray = np.zeros(3, dtype=np.float64),
+        container_pos_world: np.ndarray | None = None,
+        container_rot_world: np.ndarray | None = None,
     ) -> LiquidSurface:
         """Return a quasi-static free surface for larger open containers."""
 
-        effective_down = np.asarray(gravity_world, dtype=np.float64).reshape(3) - np.asarray(acceleration_world, dtype=np.float64).reshape(3)
-        normal_world = tuple((-_normalize(effective_down)).tolist())
-        return LiquidSurface(
-            height_m=self.geometry.volume_to_height_m(self.volume_ul),
-            normal_world=normal_world,
+        return self.geometry.surface(
+            self.volume_ul,
+            gravity_world=gravity_world,
+            acceleration_world=acceleration_world,
+            container_pos_world=container_pos_world,
+            container_rot_world=container_rot_world,
         )
 
     def as_json(self) -> dict[str, object]:
