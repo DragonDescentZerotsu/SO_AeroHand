@@ -95,7 +95,7 @@ python scripts/planning/render_trajectory_blender.py \
   --out-dir raw/episode_xxxxxx/blender_videos
 ```
 
-本地没有 `blender` 可执行文件时，脚本仍会写出 `blender_render_manifest.json` 和 `render_command.sh`，但不会生成 mp4。`scripts/debug/demo_blender_liquid_overlay.py` 可生成一个小型 freejoint tip + wet-state demo，用来检查 Blender liquid overlay 链路。
+本地没有 `blender` 可执行文件但当前 Python 可 `import bpy` 时，脚本会 fallback 到当前 Python 解释器运行 `scripts/blender/render_trajectory_worker.py`，先输出 PNG 序列再用 `imageio/ffmpeg` 合成 mp4；当前 `aero_sim` 已安装 `bpy==5.0.1` 并使用这条路径。两者都不可用时，脚本仍会写出 `blender_render_manifest.json` 和 `render_command.sh` 供其他机器运行。`scripts/debug/demo_blender_liquid_overlay.py` 可生成一个小型 freejoint tip + wet-state demo，用来检查 Blender liquid overlay 链路。
 
 ### `generate_piper_pipette_handoff_lerobot.py`
 

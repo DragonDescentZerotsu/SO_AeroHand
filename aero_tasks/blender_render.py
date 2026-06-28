@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
+import importlib.util
 import json
 from pathlib import Path
 import shutil
 import subprocess
+import sys
 
 import numpy as np
 
@@ -118,6 +120,15 @@ def write_render_manifest(
 
 
 def build_blender_command(config: BlenderRenderConfig, manifest_path: Path, *, worker: Path = DEFAULT_WORKER) -> list[str]:
+    if shutil.which(config.blender) is None and importlib.util.find_spec("bpy") is not None:
+        return [
+            sys.executable,
+            str(worker),
+            "--",
+            "--manifest",
+            str(manifest_path),
+            "--save-blend" if config.save_blend else "--no-save-blend",
+        ]
     return [
         config.blender,
         "--background",
@@ -168,7 +179,7 @@ def run_blender_render(config: BlenderRenderConfig, *, dry_run: bool = False) ->
     out_dir = resolve_project_path(config.out_dir)
     if dry_run:
         return manifest_path
-    if shutil.which(config.blender) is None:
+    if command[0] == config.blender and shutil.which(config.blender) is None:
         raise FileNotFoundError(
             f"Blender executable {config.blender!r} is not available. "
             f"Prepared manifest and command script under {out_dir}."

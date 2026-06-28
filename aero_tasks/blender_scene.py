@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import math
+from pathlib import Path
 import re
 from typing import Any
 
@@ -51,15 +52,16 @@ def unit_box_mesh() -> tuple[list[tuple[float, float, float]], list[tuple[int, .
     return vertices, faces
 
 
-def unit_cylinder_mesh(segments: int = 32) -> tuple[list[tuple[float, float, float]], list[tuple[int, ...]]]:
+def unit_cylinder_mesh(segments: int = 32, *, caps: bool = True) -> tuple[list[tuple[float, float, float]], list[tuple[int, ...]]]:
     vertices: list[tuple[float, float, float]] = []
     for z in (-1.0, 1.0):
         for index in range(segments):
             angle = 2.0 * math.pi * index / segments
             vertices.append((math.cos(angle), math.sin(angle), z))
     faces: list[tuple[int, ...]] = []
-    faces.append(tuple(range(segments - 1, -1, -1)))
-    faces.append(tuple(range(segments, 2 * segments)))
+    if caps:
+        faces.append(tuple(range(segments - 1, -1, -1)))
+        faces.append(tuple(range(segments, 2 * segments)))
     for index in range(segments):
         nxt = (index + 1) % segments
         faces.append((index, nxt, segments + nxt, segments + index))
@@ -137,6 +139,8 @@ def make_material(name: str, rgba: np.ndarray, *, roughness: float = 0.45, metal
         bsdf.inputs["Metallic"].default_value = float(metallic)
     if rgba[3] < 0.999:
         material.blend_method = "BLEND"
+        if hasattr(material, "surface_render_method"):
+            material.surface_render_method = "BLENDED"
         material.use_screen_refraction = True
         material.show_transparent_back = True
     return material
@@ -150,15 +154,16 @@ class BlenderGeom:
 
 
 def geom_rgba(model: Any, geom_id: int) -> np.ndarray:
-    rgba = np.asarray(model.geom_rgba[geom_id], dtype=np.float64).copy()
-    if rgba[3] <= 1e-6 and int(model.geom_matid[geom_id]) >= 0:
+    if int(model.geom_matid[geom_id]) >= 0:
         rgba = np.asarray(model.mat_rgba[int(model.geom_matid[geom_id])], dtype=np.float64).copy()
+    else:
+        rgba = np.asarray(model.geom_rgba[geom_id], dtype=np.float64).copy()
     if rgba[3] <= 1e-6:
         rgba = np.array([0.75, 0.75, 0.75, 1.0], dtype=np.float64)
     return rgba
 
 
-def mesh_for_geom(model: Any, geom_id: int, cache: dict[str, Any]) -> tuple[Any, np.ndarray] | None:
+def mesh_for_geom(model: Any, geom_id: int, cache: dict[str, Any], *, transparent: bool = False) -> tuple[Any, np.ndarray] | None:
     import mujoco
 
     geom_type = int(model.geom_type[geom_id])
@@ -180,8 +185,8 @@ def mesh_for_geom(model: Any, geom_id: int, cache: dict[str, Any]) -> tuple[Any,
         cache.setdefault(key, make_mesh("primitive_cylinder", *unit_cylinder_mesh()))
         return cache[key], np.array([size[0], size[0], max(size[1] + size[0], 1e-6)])
     if geom_type == int(mujoco.mjtGeom.mjGEOM_CYLINDER):
-        key = "cylinder"
-        cache.setdefault(key, make_mesh("primitive_cylinder", *unit_cylinder_mesh()))
+        key = "open_cylinder" if transparent else "cylinder"
+        cache.setdefault(key, make_mesh(f"primitive_{key}", *unit_cylinder_mesh(caps=not transparent)))
         return cache[key], np.array([size[0], size[0], max(size[1], 1e-6)])
     if geom_type == int(mujoco.mjtGeom.mjGEOM_BOX):
         key = "box"
@@ -210,7 +215,7 @@ def create_blender_scene_from_mujoco(model: Any, *, visible_groups: set[int] | N
         rgba = geom_rgba(model, geom_id)
         if rgba[3] <= 1e-5:
             continue
-        mesh_scale = mesh_for_geom(model, geom_id, mesh_cache)
+        mesh_scale = mesh_for_geom(model, geom_id, mesh_cache, transparent=bool(rgba[3] < 0.5))
         if mesh_scale is None:
             continue
         mesh, scale = mesh_scale
@@ -331,7 +336,7 @@ def animate_camera(model: Any, qpos: np.ndarray, frame_indices: np.ndarray, spec
     return camera_obj
 
 
-def configure_render(*, width: int, height: int, fps: int, engine: str, samples: int, output_path: str) -> None:
+def configure_render(*, width: int, height: int, fps: int, engine: str, samples: int, output_path: str) -> dict[str, str]:
     import bpy
 
     scene = bpy.context.scene
@@ -345,14 +350,26 @@ def configure_render(*, width: int, height: int, fps: int, engine: str, samples:
     if scene.render.engine == "CYCLES":
         scene.cycles.samples = int(samples)
     scene.render.film_transparent = False
-    scene.render.image_settings.file_format = "FFMPEG"
-    scene.render.ffmpeg.format = "MPEG4"
-    scene.render.ffmpeg.codec = "H264"
-    scene.render.ffmpeg.constant_rate_factor = "MEDIUM"
-    scene.render.filepath = output_path
+    output = Path(output_path)
+    try:
+        scene.render.image_settings.file_format = "FFMPEG"
+        scene.render.ffmpeg.format = "MPEG4"
+        scene.render.ffmpeg.codec = "H264"
+        scene.render.ffmpeg.constant_rate_factor = "MEDIUM"
+        scene.render.filepath = str(output)
+        mode = {"mode": "ffmpeg", "output_video": str(output)}
+    except TypeError:
+        frames_dir = output.with_suffix("")
+        frames_dir.mkdir(parents=True, exist_ok=True)
+        for old_frame in frames_dir.glob("*.png"):
+            old_frame.unlink()
+        scene.render.image_settings.file_format = "PNG"
+        scene.render.filepath = str(frames_dir / "frame_")
+        mode = {"mode": "png_sequence", "frames_dir": str(frames_dir), "output_video": str(output)}
     world = scene.world or bpy.data.worlds.new("World")
     scene.world = world
     world.color = (0.02, 0.02, 0.025)
+    return mode
 
 
 def add_default_lighting() -> None:

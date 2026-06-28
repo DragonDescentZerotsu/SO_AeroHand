@@ -330,7 +330,7 @@ python scripts/debug/demo_blender_liquid_overlay.py \
   --render
 ```
 
-本地没有 `blender` 可执行文件时，这两个入口会生成 `blender_render_manifest.json` 和 `render_command.sh`，但不能实际写出 mp4。后续高保真液体可继续参考 AutoBio：对 meshplane 容器用 `calculate_mesh(distance)` 生成液面以下真实填充 mesh，并导出或读取 `liquid.usd` animation。不要依赖 MuJoCo 的 `tip_liquid_seg_*` proxy，也不要让训练主线依赖 Blender。
+本地没有 `blender` 可执行文件但 Python 环境可 `import bpy` 时，`blender_render.py` 会自动 fallback 到当前 Python 解释器运行 `scripts/blender/render_trajectory_worker.py`，先渲 PNG 序列再用 `imageio/ffmpeg` 合成 mp4；当前 `aero_sim` 已安装 `bpy==5.0.1` 并使用这条路径。若两者都不可用，入口仍会生成 `blender_render_manifest.json` 和 `render_command.sh` 供其他机器运行。后续高保真液体可继续参考 AutoBio：对 meshplane 容器用 `calculate_mesh(distance)` 生成液面以下真实填充 mesh，并导出或读取 `liquid.usd` animation。不要依赖 MuJoCo 的 `tip_liquid_seg_*` proxy，也不要让训练主线依赖 Blender。
 
 建议 episode 数据布局：
 

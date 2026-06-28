@@ -8,6 +8,7 @@ import json
 from pathlib import Path
 import sys
 
+import imageio.v2 as imageio
 import numpy as np
 
 
@@ -46,6 +47,15 @@ def choose_camera(camera_specs: list[dict[str, object]], name: str) -> dict[str,
     raise ValueError(f"Unknown camera {name!r}; available: {available}")
 
 
+def encode_png_sequence(frames_dir: Path, output_video: Path, *, fps: int) -> None:
+    frame_paths = sorted(frames_dir.glob("*.png"))
+    if not frame_paths:
+        raise FileNotFoundError(f"No rendered PNG frames found in {frames_dir}")
+    with imageio.get_writer(output_video, fps=fps, codec="libx264", ffmpeg_params=["-crf", "18"]) as writer:
+        for frame_path in frame_paths:
+            writer.append_data(imageio.imread(frame_path))
+
+
 def main() -> None:
     import bpy
     import mujoco
@@ -72,7 +82,7 @@ def main() -> None:
         BlenderLiquidOverlay().animate(wet_state, frame_indices)
 
     add_default_lighting()
-    configure_render(
+    render_info = configure_render(
         width=int(manifest["width"]),
         height=int(manifest["height"]),
         fps=int(manifest["fps"]),
@@ -84,6 +94,8 @@ def main() -> None:
     if args.save_blend:
         bpy.ops.wm.save_as_mainfile(filepath=str(Path(manifest["output_blend"])), check_existing=False, compress=True)
     bpy.ops.render.render(animation=True)
+    if render_info["mode"] == "png_sequence":
+        encode_png_sequence(Path(render_info["frames_dir"]), Path(render_info["output_video"]), fps=int(manifest["fps"]))
 
 
 if __name__ == "__main__":

@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+import subprocess
 import sys
 
 import numpy as np
@@ -15,7 +16,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from aero_tasks.blender_render import BlenderRenderConfig, prepare_blender_render, run_blender_render  # noqa: E402
+from aero_tasks.blender_render import BlenderRenderConfig, prepare_blender_render  # noqa: E402
 from aero_tasks.liquid import CylindricalGeometry, ContainerState, M3_TO_UL, PipetteLiquidController, PipetteTipState, PlungerModel  # noqa: E402
 
 
@@ -24,7 +25,22 @@ SOURCE_POS = np.array([-0.06, 0.0, 0.0], dtype=np.float64)
 TARGET_POS = np.array([0.06, 0.0, 0.0], dtype=np.float64)
 RADIUS_M = 0.004
 HEIGHT_M = 0.035
-LIQUID_COLOR = (0.70, 0.92, 1.0, 0.42)
+LIQUID_COLOR = (0.25, 0.68, 1.0, 0.72)
+
+LIQUID_CAMERA_SPEC = {
+    "name": "liquid_close",
+    "mode": "world",
+    "lookat": (0.0, 0.0, 0.025),
+    "distance": 1.0,
+    "azimuth": 0.0,
+    "elevation": -45.0,
+    "body": None,
+    "target_body": None,
+    "eye_offset_world": (0.16, -0.18, 0.13),
+    "eye_offset_local": (0.0, 0.0, 0.1),
+    "target_offset_local": (0.08, 0.0, 0.0),
+    "up_axis_local": (0.0, 0.0, 1.0),
+}
 
 
 def parse_args() -> argparse.Namespace:
@@ -58,7 +74,7 @@ def write_model(path: Path) -> None:
   <asset>
     <material name="table" rgba="0.78 0.78 0.74 1"/>
     <material name="container" rgba="0.72 0.92 1 0.25"/>
-    <material name="tip" rgba="0.92 0.94 0.96 1"/>
+    <material name="tip" rgba="0.92 0.94 0.96 0.36"/>
     <material name="tip_site" rgba="1 0.12 0.04 1"/>
   </asset>
   <worldbody>
@@ -186,21 +202,24 @@ def main() -> None:
         wet_state=wet_state_path,
         out_dir=out_dir,
         output_name="01_blender_liquid_overlay.mp4",
-        camera="table_overview",
+        camera="liquid_close",
         fps=args.fps,
+        width=640,
+        height=368,
         max_frames=args.max_frames,
         blender=args.blender,
         engine="BLENDER_EEVEE_NEXT",
         samples=64,
     )
-    if args.render:
-        try:
-            output = run_blender_render(config)
-            print(f"Wrote Blender video: {output}")
-            return
-        except FileNotFoundError as exc:
-            print(str(exc))
     manifest, command = prepare_blender_render(config)
+    manifest_data = json.loads(manifest.read_text(encoding="utf-8"))
+    manifest_data["camera"] = "liquid_close"
+    manifest_data["camera_specs"] = [LIQUID_CAMERA_SPEC]
+    manifest.write_text(json.dumps(manifest_data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    if args.render:
+        subprocess.run(command, cwd=PROJECT_ROOT, check=True)
+        print(f"Wrote Blender video: {out_dir / '01_blender_liquid_overlay.mp4'}")
+        return
     summary = {
         "model": str(model_path),
         "trajectory": str(trajectory_path),

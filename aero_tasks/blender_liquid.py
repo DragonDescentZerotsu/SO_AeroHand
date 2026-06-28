@@ -181,7 +181,8 @@ class BlenderLiquidOverlay:
     def set_surface(self, obj: Any, spec: dict[str, Any], frame: int) -> None:
         from mathutils import Matrix
 
-        center = np.asarray(spec["center_world"], dtype=np.float64).reshape(3)
+        normal = normalize(np.asarray(spec["normal_world"], dtype=np.float64))
+        center = np.asarray(spec["center_world"], dtype=np.float64).reshape(3) + normal * 0.0004
         if spec.get("frame_world") is not None:
             basis = np.asarray(spec["frame_world"], dtype=np.float64).reshape(3, 3)
         else:
@@ -201,7 +202,7 @@ class BlenderLiquidOverlay:
         obj.location = tuple(float(v) for v in site + np.array([0.0, 0.0, 0.5 * height]))
         obj.rotation_mode = "QUATERNION"
         obj.rotation_quaternion = (1.0, 0.0, 0.0, 0.0)
-        obj.scale = (0.0011, 0.0011, max(0.5 * height, 1e-5))
+        obj.scale = (0.0018, 0.0018, max(0.5 * height, 1e-5))
         self.show_object(obj, frame)
         obj.keyframe_insert(data_path="location", frame=frame)
         obj.keyframe_insert(data_path="rotation_quaternion", frame=frame)

@@ -35,7 +35,10 @@ def test_prepare_blender_render_writes_manifest(tmp_path: Path) -> None:
     assert manifest["model"] == str(model_path)
     assert manifest["frame_indices"] == [0]
     assert (tmp_path / "render" / "render_command.sh").exists()
-    assert command[:3] == ["blender", "--background", "--python"]
+    assert command[:3] == ["blender", "--background", "--python"] or command[1:3] == [
+        str(PROJECT_ROOT / "scripts/blender/render_trajectory_worker.py"),
+        "--",
+    ]
 
 
 def test_wet_state_series_and_overlay_specs(tmp_path: Path) -> None:

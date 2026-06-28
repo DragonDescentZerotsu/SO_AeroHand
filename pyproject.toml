@@ -23,6 +23,10 @@ quest = [
 dev = [
     "pytest>=8",
 ]
+blender = [
+    "bpy==5.0.1; python_version == '3.11'",
+    "imageio[ffmpeg]>=2.34",
+]
 
 [tool.setuptools.packages.find]
 include = ["aero_quest*", "aero_tasks*"]
