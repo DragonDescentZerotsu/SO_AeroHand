@@ -92,7 +92,8 @@ def build_xml() -> str:
   <asset>
     <material name="container_clear" rgba="0.72 0.92 1.0 0.20" specular="0.45" shininess="0.55"/>
     <material name="liquid" rgba="{LIQUID_RGBA[0]} {LIQUID_RGBA[1]} {LIQUID_RGBA[2]} {LIQUID_RGBA[3]}" specular="0.85" shininess="0.85"/>
-    <material name="tip" rgba="0.05 0.06 0.07 0.92" specular="0.25" shininess="0.4"/>
+    <material name="tip_shaft" rgba="0.92 0.94 0.96 0.96" specular="0.45" shininess="0.55"/>
+    <material name="tip_collar" rgba="0.78 0.82 0.86 0.98" specular="0.35" shininess="0.45"/>
     <material name="table" rgba="0.84 0.84 0.80 1"/>
   </asset>
   <worldbody>
@@ -111,8 +112,9 @@ def build_xml() -> str:
       <geom name="target_liquid" type="cylinder" size="{CONTAINER_RADIUS_M} 0.001" material="liquid" contype="0" conaffinity="0"/>
     </body>
     <body name="tip_body" pos="0 0 0.06">
-      <geom name="tip_body" type="capsule" fromto="0 0 0 0 0 0.040" size="0.0012" material="tip" contype="0" conaffinity="0"/>
-      <site name="tip_site" pos="0 0 0" size="0.0015" rgba="1 0.15 0.08 1"/>
+      <geom name="tip_shaft" type="capsule" fromto="0 0 0.000 0 0 0.050" size="0.0014" material="tip_shaft" contype="0" conaffinity="0"/>
+      <geom name="tip_collar" type="cylinder" pos="0 0 0.056" size="0.0036 0.006" material="tip_collar" contype="0" conaffinity="0"/>
+      <site name="tip_site" pos="0 0 0" size="0.0022" rgba="1 0.12 0.04 1"/>
     </body>
     <body name="tip_liquid_body" pos="0 0 0.02">
       <geom name="tip_liquid" type="cylinder" size="0.00085 0.001" material="liquid" contype="0" conaffinity="0"/>
