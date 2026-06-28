@@ -277,9 +277,14 @@ MUJOCO_GL=egl conda run -n aero_sim python scripts/debug/demo_mujoco_pipette_liq
 MUJOCO_GL=egl conda run -n aero_sim python scripts/debug/demo_mujoco_pipette_liquid_transfer.py \
   --liquid-style pale_highlight \
   --out-dir outputs/debug_rollouts/mujoco_pipette_liquid_transfer_pale_highlight
+
+MUJOCO_GL=egl conda run -n aero_sim python scripts/debug/demo_meshplane_pipette_centrifuge_liquid.py \
+  --out-dir outputs/debug_rollouts/meshplane_pipette_centrifuge_liquid
 ```
 
 这个脚本输出 `01_mujoco_tip_aspirate_close.mp4`、`02_mujoco_tip_dispense_close.mp4`、`03_mujoco_full_tube_to_well_transfer.mp4` 和 `04_mujoco_plunger_button_full_view.mp4`，并写入 `wet_state.jsonl`、`summary.json` 和临时渲染模型 `generated_pipette_liquid_transfer_frustum.xml`。当前 demo 支持 `--liquid-style blue` 和 `--liquid-style pale_highlight`；`pale_highlight` 使用很淡的透明蓝 `rgba=(0.70, 0.92, 1.0, 0.24)`，并在 MJCF material 上使用较高 `specular/shininess` 近似清液高光。MuJoCo 原生 renderer 只支持透明度和简单高光，不支持真实折射；真实清液折射应留给 Blender/Cycles 路径。
+
+`demo_meshplane_pipette_centrifuge_liquid.py` 是完整 pipette + AutoBio 离心管 meshplane 验证 demo：离心管液面由 AutoBio `ContainerDefinition.from_object_mesh(...)` 和 `MeshPlane.solve_plane_distance(...)` 从真实 interior mesh 及 `volume_ul` 求出，并随 `gravity_world - acceleration_world` 改变 normal；MuJoCo 只画液面 patch、surface normal 和 `tip_site` submerged marker，不再尝试画离心管内完整液体体积。
 
 颜色和样本身份必须保持通用：
 
@@ -290,12 +295,18 @@ MUJOCO_GL=egl conda run -n aero_sim python scripts/debug/demo_mujoco_pipette_liq
 可视化实现分两类：
 
 - Pipette tip 内液体：用 capillary-column 近似，液柱固定在 tip local frame 内，液面不随世界重力或加速度找水平。当前 MuJoCo demo 使用 64 段 frustum mesh stack 加一个 clipped boundary cylinder；`FrustumSegment` 按截锥体积反推当前液面高度，避免把体积线性映射成高度。这个 frustum stack 只是 MuJoCo 轻量可视化 proxy，不是隐藏语义状态来源，也不应绑定 Blender 渲染。
-- 大容器液体：`ContainerState.surface()` 根据 `volume_ul` 映射液面高度，并根据 `gravity_world - acceleration_world` 估计开放自由液面 normal。第一版已提供 constant-area、cylindrical 和 conical-cylindrical 近似；source tube、reservoir、well 之后可按实际容器选择几何或查表。
+- 大容器液体：MuJoCo 中只渲染开放液面，不渲染液面以下 bulk liquid 体积。之前试过用 cylinder/ellipsoid stack 近似 bulk liquid，但会和真实 tube mesh 穿模、和 meshplane 液面相交、透明排序差，容易产生误导；不要把这类 proxy 接入训练主线。当前通用 `aero_tasks/liquid.py` 使用 `ContainerState.surface()` 根据 `volume_ul` 映射液面高度，并根据 `gravity_world - acceleration_world` 估计开放自由液面 normal。第一版已提供 constant-area、cylindrical 和 conical-cylindrical 解析近似，source tube、reservoir、well 可按实际容器选择解析几何、查表或 meshplane 后端。
+
+容器几何后端按分层策略设计：
+
+- 默认使用解析几何：`ConstantAreaGeometry`、`CylindricalGeometry`、`ConicalCylindricalGeometry` 速度快、依赖少、可测试，适合 well plate、reservoir、标准 tube 近似和训练主线。
+- 真实形状容器使用 meshplane 后端：对 AutoBio 离心管、复杂瓶子或不规则容器，应从 watertight/opening-corrected container mesh 提取 interior mesh，用 `MeshPlane.solve_plane_distance(volume_m3, previous_distance)` 求液面距离，用 `calculate_plane` 或 `calculate_mesh` 得到液面/液体 mesh。当前 meshplane 后端已在 `scripts/debug/demo_meshplane_pipette_centrifuge_liquid.py` 中验证，但尚未抽象进 `aero_tasks/liquid.py` 的通用 `ContainerGeometry`。
+- `ContainerState` 仍然只负责语义账本：`volume_ul`、`sample_id`、`liquid_color`、污染和容量限制；具体 `volume -> surface` 由 geometry backend 决定。不要让 renderer 反向决定体积或样本身份。
 
 渲染和数据导出采用双轨：
 
-- MuJoCo 渲染是训练默认路径。后续需要把 demo 中的 wet state provider 和 frustum/container overlay 接入 `aero_tasks/lerobot_export.py` 或新增 renderer，使 LeRobot 视频可按 frame 显示液柱和容器液面。
-- Blender 渲染用于高质量可视化、论文图和人工检查。它应读取同一份 `wet_state.jsonl` / semantic log，自行生成连续液体 mesh 或 USD animation；不要依赖 MuJoCo 的 `tip_liquid_seg_*` proxy，也不要让训练主线依赖 Blender。
+- MuJoCo 渲染是训练默认路径。后续需要把 demo 中的 wet state provider 和 frustum/container surface overlay 接入 `aero_tasks/lerobot_export.py` 或新增 renderer，使 LeRobot 视频可按 frame 显示 tip 液柱和大容器液面。MuJoCo 不负责大容器完整透明液体体积，也不要为了视觉效果塞入 bulk proxy。
+- Blender 渲染用于高质量可视化、论文图和人工检查。它应读取同一份 `wet_state.jsonl` / semantic log；对 meshplane 容器用 `calculate_mesh(distance)` 生成液面以下真实填充 mesh，并导出或读取 `liquid.usd` animation。不要依赖 MuJoCo 的 `tip_liquid_seg_*` proxy，也不要让训练主线依赖 Blender。
 
 建议 episode 数据布局：
 
@@ -310,7 +321,7 @@ raw/episode_xxxxxx/
   liquid.usd
 ```
 
-已完成：语义状态、体积账本、基本容器几何、tip frustum 体积反推、MuJoCo liquid transfer demo 和单元测试。未完成：和正式专家轨迹/planner 的 `tip_site` 容器检测集成、BCS/evaluator 写入、LeRobot renderer 接入、Blender/USD exporter。AutoBio 可作为算法和渲染管线参考，但引入代码或资产前仍需检查许可证和本项目第三方资产记录。
+已完成：语义状态、体积账本、基本解析容器几何、tip frustum 体积反推、MuJoCo tip liquid transfer demo、AutoBio meshplane 离心管液面 demo 和单元测试。未完成：把 meshplane 后端抽象进 `aero_tasks/liquid.py` 的通用 geometry、和正式专家轨迹/planner 的 `tip_site` 容器检测集成、BCS/evaluator 写入、LeRobot renderer 接入、Blender/USD exporter。AutoBio 可作为算法和渲染管线参考，但引入代码或资产前仍需检查许可证和本项目第三方资产记录。
 
 ## Quest 遥测和离线回放
 
