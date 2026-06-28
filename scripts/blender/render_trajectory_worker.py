@@ -72,7 +72,8 @@ def main() -> None:
     if qpos.ndim != 2 or qpos.shape[1] != model.nq:
         raise ValueError(f"qpos shape {qpos.shape} does not match model.nq={model.nq}")
 
-    geoms = create_blender_scene_from_mujoco(model)
+    visible_groups = set(int(group) for group in manifest.get("visible_groups", [0, 1, 2]))
+    geoms = create_blender_scene_from_mujoco(model, visible_groups=visible_groups)
     animate_mujoco_geoms(model, qpos, frame_indices, geoms)
     camera_spec = choose_camera(manifest["camera_specs"], manifest["camera"])
     animate_camera(model, qpos, frame_indices, camera_spec)

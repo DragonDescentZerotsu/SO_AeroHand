@@ -154,10 +154,13 @@ class BlenderGeom:
 
 
 def geom_rgba(model: Any, geom_id: int) -> np.ndarray:
+    geom_rgba_value = np.asarray(model.geom_rgba[geom_id], dtype=np.float64).copy()
+    if geom_rgba_value[3] <= 1e-6:
+        return geom_rgba_value
     if int(model.geom_matid[geom_id]) >= 0:
         rgba = np.asarray(model.mat_rgba[int(model.geom_matid[geom_id])], dtype=np.float64).copy()
     else:
-        rgba = np.asarray(model.geom_rgba[geom_id], dtype=np.float64).copy()
+        rgba = geom_rgba_value
     if rgba[3] <= 1e-6:
         rgba = np.array([0.75, 0.75, 0.75, 1.0], dtype=np.float64)
     return rgba

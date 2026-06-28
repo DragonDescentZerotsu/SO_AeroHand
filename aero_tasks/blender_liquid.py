@@ -111,6 +111,7 @@ def tip_liquid_spec(record: dict[str, Any]) -> dict[str, Any] | None:
         return None
     return {
         "tip_site_world": tip_site,
+        "tip_axis_world": record.get("tip_axis_world", [0.0, 0.0, 1.0]),
         "fill_fraction": max(0.0, min(1.0, volume / capacity)),
         "color": tip.get("liquid_color", [0.35, 0.75, 1.0, 0.45]),
     }
@@ -197,11 +198,14 @@ class BlenderLiquidOverlay:
         obj.keyframe_insert(data_path="scale", frame=frame)
 
     def set_tip_liquid(self, obj: Any, spec: dict[str, Any], frame: int) -> None:
+        from mathutils import Matrix
+
         site = np.asarray(spec["tip_site_world"], dtype=np.float64).reshape(3)
+        axis = normalize(np.asarray(spec.get("tip_axis_world", [0.0, 0.0, 1.0]), dtype=np.float64))
         height = 0.035 * float(spec["fill_fraction"])
-        obj.location = tuple(float(v) for v in site + np.array([0.0, 0.0, 0.5 * height]))
+        obj.location = tuple(float(v) for v in site + axis * (0.5 * height))
         obj.rotation_mode = "QUATERNION"
-        obj.rotation_quaternion = (1.0, 0.0, 0.0, 0.0)
+        obj.rotation_quaternion = Matrix(frame_from_normal(axis).tolist()).to_quaternion()
         obj.scale = (0.0018, 0.0018, max(0.5 * height, 1e-5))
         self.show_object(obj, frame)
         obj.keyframe_insert(data_path="location", frame=frame)

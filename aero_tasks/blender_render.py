@@ -36,6 +36,7 @@ class BlenderRenderConfig:
     samples: int = 64
     blender: str = "blender"
     save_blend: bool = True
+    visible_groups: tuple[int, ...] = (0, 1, 2)
 
 
 def resolve_project_path(path: Path | str, *, base: Path = PROJECT_ROOT) -> Path:
@@ -113,6 +114,7 @@ def write_render_manifest(
         "samples": int(config.samples),
         "frame_indices": frame_indices.astype(int).tolist(),
         "camera_specs": camera_specs_json(camera_specs),
+        "visible_groups": [int(group) for group in config.visible_groups],
     }
     manifest_path = out_dir / "blender_render_manifest.json"
     manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -174,8 +176,13 @@ def prepare_blender_render(
     return manifest_path, command
 
 
-def run_blender_render(config: BlenderRenderConfig, *, dry_run: bool = False) -> Path:
-    manifest_path, command = prepare_blender_render(config)
+def run_blender_render(
+    config: BlenderRenderConfig,
+    *,
+    dry_run: bool = False,
+    camera_specs: tuple[RenderCameraSpec, ...] = DEFAULT_HANDOFF_CAMERAS,
+) -> Path:
+    manifest_path, command = prepare_blender_render(config, camera_specs=camera_specs)
     out_dir = resolve_project_path(config.out_dir)
     if dry_run:
         return manifest_path

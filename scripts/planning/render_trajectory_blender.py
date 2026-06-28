@@ -13,9 +13,18 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from aero_tasks.blender_render import BlenderRenderConfig, prepare_blender_render, run_blender_render  # noqa: E402
+from aero_tasks.lerobot_export import DEFAULT_HANDOFF_CAMERAS, RenderCameraSpec  # noqa: E402
 
 
 DEFAULT_TRAJECTORY = PROJECT_ROOT / "outputs/piper_gripper_pipette_handoff/piper_gripper_pipette_handoff_expert.npz"
+BLENDER_REVIEW_CAMERAS = DEFAULT_HANDOFF_CAMERAS + (
+    RenderCameraSpec(
+        name="handoff_mujoco_demo",
+        mode="world",
+        lookat=(0.0, -0.08, 1.05),
+        eye_offset_world=(0.0, -1.249134295, 1.725),
+    ),
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -25,7 +34,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--wet-state", type=Path, default=None)
     parser.add_argument("--out-dir", type=Path, default=PROJECT_ROOT / "outputs/debug_rollouts/blender_handoff")
     parser.add_argument("--output-name", default="blender_render.mp4")
-    parser.add_argument("--camera", default="table_overview")
+    parser.add_argument("--camera", default="handoff_mujoco_demo")
     parser.add_argument("--fps", type=int, default=20)
     parser.add_argument("--width", type=int, default=1280)
     parser.add_argument("--height", type=int, default=720)
@@ -59,16 +68,16 @@ def main() -> None:
         save_blend=not args.no_save_blend,
     )
     if args.dry_run:
-        manifest, command = prepare_blender_render(config)
+        manifest, command = prepare_blender_render(config, camera_specs=BLENDER_REVIEW_CAMERAS)
         print(f"Wrote Blender manifest: {manifest}")
         print(f"Wrote command script: {Path(args.out_dir) / 'render_command.sh'}")
         print("Command:")
         print(" ".join(command))
         return
     try:
-        output = run_blender_render(config)
+        output = run_blender_render(config, camera_specs=BLENDER_REVIEW_CAMERAS)
     except FileNotFoundError as exc:
-        manifest, _ = prepare_blender_render(config)
+        manifest, _ = prepare_blender_render(config, camera_specs=BLENDER_REVIEW_CAMERAS)
         print(str(exc))
         print(f"Blender manifest: {manifest}")
         print(f"Command script: {Path(args.out_dir) / 'render_command.sh'}")
