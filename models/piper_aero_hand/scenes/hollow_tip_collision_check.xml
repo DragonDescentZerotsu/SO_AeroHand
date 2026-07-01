@@ -1,0 +1,42 @@
+<mujoco model="hollow_tip_collision_check">
+  <compiler angle="radian" />
+  <option timestep="0.002" integrator="implicitfast" cone="elliptic" />
+
+  <visual>
+    <headlight diffuse="0.7 0.7 0.7" ambient="0.35 0.35 0.35" specular="0.1 0.1 0.1" />
+    <global azimuth="135" elevation="-20" offwidth="1280" offheight="720" />
+  </visual>
+
+  <asset>
+    <texture name="grid" type="2d" builtin="checker" width="512" height="512" rgb1="0.24 0.24 0.24" rgb2="0.31 0.31 0.31" />
+    <material name="floor_grid" texture="grid" texrepeat="4 4" reflectance="0.08" />
+    <material name="tip_clear" rgba="1 1 1 0.35" />
+    <material name="collision_hollow" rgba="0.1 0.65 1 0.35" />
+    <material name="collision_original" rgba="1 0.45 0.1 0.35" />
+    <material name="connector_ref" rgba="0.95 0.1 0.1 0.75" />
+
+    <mesh name="tip_visual" file="/data/tianang/projects/AutoBio/autobio/assets/container/tip_200ul_vis/visual.obj" scale="0.001 0.001 0.001" />
+    <mesh name="tip_original_collision" file="/data/tianang/projects/AutoBio/autobio/assets/container/tip_200ul_col/tip_collision_0.obj" scale="0.001 0.001 0.001" />
+    <mesh name="tip_hollow_collision" file="../assets/tip_200ul_hollow_visual_inner_collision.obj" scale="0.001 0.001 0.001" />
+  </asset>
+
+  <worldbody>
+    <light name="key" pos="0.25 -0.55 0.7" dir="-0.3 0.7 -1" diffuse="0.8 0.8 0.8" />
+    <geom name="floor" type="plane" size="0.15 0.12 0.02" material="floor_grid" />
+
+    <body name="original_solid_tip" pos="-0.04 0 0.07">
+      <geom name="original_visual" type="mesh" contype="0" conaffinity="0" group="2" mesh="tip_visual" material="tip_clear" />
+      <geom name="original_lower_solid_collision" type="mesh" group="3" mesh="tip_original_collision" material="collision_original" />
+      <geom name="original_upper_solid_collision" size="0.00287797 0.008" pos="0 0 -0.008" type="cylinder" group="3" material="collision_original" />
+      <geom name="original_connector_reference" size="0.00199955 0.012" pos="0 0 0.004" type="cylinder" contype="0" conaffinity="0" group="5" material="connector_ref" />
+    </body>
+
+    <body name="hollow_tip" pos="0.04 0 0.07">
+      <geom name="hollow_visual" type="mesh" contype="0" conaffinity="0" group="2" mesh="tip_visual" material="tip_clear" />
+      <geom name="hollow_collision" type="mesh" group="3" mesh="tip_hollow_collision" material="collision_hollow" />
+      <geom name="hollow_connector_reference" size="0.00199955 0.012" pos="0 0 0.004" type="cylinder" contype="0" conaffinity="0" group="5" material="connector_ref" />
+    </body>
+
+    <camera name="check_camera" pos="0 -0.18 0.095" xyaxes="1 0 0 0 0.25 0.97" />
+  </worldbody>
+</mujoco>

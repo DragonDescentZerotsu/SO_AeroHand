@@ -168,6 +168,7 @@ python scripts/teleop/quest_so101_aero_ik_teleop.py \
 ## 代码地图
 
 - 专家轨迹主线：`aero_tasks/motion_planning.py`、`aero_tasks/task_sampling.py`、`aero_tasks/payload_collision.py`、`aero_tasks/lerobot_export.py`、`scripts/planning/plan_piper_gripper_pipette_handoff.py`、`scripts/planning/generate_piper_pipette_handoff_lerobot.py`、`scripts/planning/preview_lerobot_cameras.py`、`scripts/planning/replay_trajectory.py`。具体命令、数据布局和回放按键见 `scripts/planning/AGENTS.md`。
+- A2 枪头安装实验入口：`aero_tasks/tip_attachment.py` 管理 tip box weld、pipette-tip weld 和 ejector release；`scripts/debug/demo_tip_attachment.py` 是最小 attach/eject smoke demo；`scripts/debug/generate_tip_ring_proxy_collision.py` 生成 12-block ring/cone tip collision proxy。
 - Blender 渲染基础设施：`aero_tasks/blender_render.py` 负责普通 Python 侧 manifest/命令调度，`aero_tasks/blender_scene.py` 负责 Blender 内 MuJoCo geom/camera animation，`aero_tasks/blender_liquid.py` 负责 `wet_state.jsonl` 液面和 tip 液柱 overlay；入口是 `scripts/planning/render_trajectory_blender.py`，Blender worker 是 `scripts/blender/render_trajectory_worker.py`。Blender 默认只渲染 MuJoCo visual groups `0/1/2`，不要把 collision group `3` 当可视模型输出。
 - 接收：`scripts/04_receive_quest_tcp.py`，完整遥操作在 `scripts/teleop/`。
 - 解析和类型化坐标帧模型：`aero_quest/quest_hand_frame.py`。
@@ -202,6 +203,7 @@ python scripts/teleop/quest_so101_aero_ik_teleop.py \
 - `models/piper_aero_hand/Piper_aerohand.xml`：基础 AgileX Piper 机械臂 + Aero Hand 组合模型。这里保留 Piper 的 `link6/joint6` wrist roll，删除原平行夹爪 `link7/link8`，把 Aero palm 的安装轴对齐到 `link6` 的 `+Z` 末端轴。
 - `models/piper_aero_hand/Piper_original_gripper_black.xml`：原始 AgileX Piper 模型的项目内视觉版本，仅把 `link6/link7/link8` gripper 可视 mesh 设为黑色，供左侧原始 gripper 任务实例使用。
 - `models/piper_aero_hand/scenes/ejectable_pipette_tip_demo.xml`：可弹出 pipette tip 的简化验证模型。它把 tip 作为独立 free body，初始用 `tip_lock` weld 固定在 socket 上；`pipette_ejector` slide joint 行程为 `[-0.0095, 0]m`，当前弹簧设定约为未按下 `2N`、按到底 `5N`。`scripts/debug/demo_ejectable_pipette_tip.py` 会按下 ejector，到阈值后关闭 weld，并沿 `tip_socket_site` 的局部 `-Z` 方向给 tip 初速度。这个文件目前是 demo，不是 `Piper_dual_pipette_rack_table.xml` 的正式任务 pipette。
+- `models/piper_aero_hand/objects/pipette_tip_detachable.xml`：A2 枪头安装实验用的可拆 tip 模型。visual 使用 AutoBio 200uL tip mesh，collision 不用原始实心 mesh，而是 12 个上口 ring wedge 加 12 个下方 cone wedge，中心孔可被 MuJoCo 实际碰撞保留。`models/piper_aero_hand/scenes/tip_attach_demo.xml` 使用该 tip、`tip_box_lock` 和 `pipette_tip_lock` 验证从 tip box 安装和 ejector 弹出。
 - `models/piper_aero_hand/scenes/pipette_liquid_transfer_demo.xml`：pipette 吸液/排液可视化验证模型，使用 AutoBio pipette/tip mesh、一个 source tube 和一个 target well。实际 tip 液体渲染由 `scripts/debug/demo_mujoco_pipette_liquid_transfer.py` 在输出目录生成 64 段 frustum liquid proxy 的临时 MJCF，不把这些 proxy 当作正式任务模型拓扑。
 - `scripts/scenes/build_piper_aero_scene.py`：生成基础 Piper + Aero Hand 模型，以及左侧原始 Piper 的黑色 gripper 视觉模型。
 - `configs/scenes/*.yaml`：任务场景 recipe。这里描述基础模型、机器人实例、要放入的物体、物体初始位姿、是否添加 `freejoint`，以及之后训练用的随机化/任务字段。
@@ -241,7 +243,7 @@ python -m mujoco.viewer --mjcf=models/piper_aero_hand/scenes/Piper_dual_pipette_
 
 当前 `pipette_grasp.yaml` 直接引用本机 `/data/tianang/projects/AutoBio/autobio/model/object/pipette.gen.xml`。如果场景需要脱离这台机器运行，应先把相关 AutoBio MJCF 和 mesh assets 复制或子模块化到本项目，再更新 recipe 的 `source` 路径。
 
-如果之后把可 eject tip 的 pipette 接入专家轨迹，不要直接用当前 demo MJCF 替换 YAML 的 `source`：当前 scene builder 通过 `<attach model="pipette_model" body="pipette" prefix="pipette_0/">` 只挂指定 body subtree，而 demo 里的 `pipette_tip` 是独立 sibling body。正式模型或 scene builder 扩展必须继续保留 `pipette_0`、`pipette_0_free`、`pipette_0/pipette`、`pipette_0/tip_site`、`pipette_0/pipette_ejector` 和 `pipette_0/pipette_button` 等 planner 依赖名称，并同步处理 tip free body 初始 pose、weld 开关和新增 qpos/ctrl 维度。
+如果之后把可拆/eject tip 接入专家轨迹，不要直接用旧 `ejectable_pipette_tip_demo.xml` 或当前 `tip_attach_demo.xml` 替换 YAML 的 `source`：当前 scene builder 通过 `<attach model="pipette_model" body="pipette" prefix="pipette_0/">` 只挂指定 body subtree，而 detachable tip 是独立 free body。正式模型或 scene builder 扩展必须继续保留 `pipette_0`、`pipette_0_free`、`pipette_0/pipette`、`pipette_0/tip_site`、`pipette_0/pipette_ejector` 和 `pipette_0/pipette_button` 等 planner 依赖名称，并同步处理 tip freejoint 初始 pose、`tip_box_lock`/`pipette_tip_lock` equality 状态、`TipAttachmentController` 事件、ejector 释放、以及新增 qpos/ctrl/eq_active 对轨迹回放和 LeRobot 导出的影响。
 
 ## Liquid Plan
 
@@ -350,11 +352,12 @@ raw/episode_xxxxxx/
   liquid.usd
 ```
 
-已完成：语义状态、体积账本、基本解析容器几何、可选 meshplane geometry 后端、tip frustum 体积反推、圆形容器 `tip_site` 检测、第一版 BCS evaluator、MuJoCo tip liquid transfer demo、AutoBio meshplane 离心管液面 demo、检测/BCS demo、通用 Blender 轨迹渲染基础版、Blender wet-state overlay 基础版、真实 pipette/tip + 离心管 Blender 检查 demo 和单元测试。当前专家轨迹 planner 仍主要停留在 pipette 拿取/handoff 阶段，所以还不能把液体逻辑完整接进正式专家轨迹。
+已完成：语义状态、体积账本、基本解析容器几何、可选 meshplane geometry 后端、tip frustum 体积反推、圆形容器 `tip_site` 检测、第一版 BCS evaluator、A2 detachable tip collision/attach/eject smoke demo、MuJoCo tip liquid transfer demo、AutoBio meshplane 离心管液面 demo、检测/BCS demo、通用 Blender 轨迹渲染基础版、Blender wet-state overlay 基础版、真实 pipette/tip + 离心管 Blender 检查 demo 和单元测试。当前专家轨迹 planner 仍主要停留在 pipette 拿取/handoff 阶段，所以还不能把液体逻辑完整接进正式专家轨迹。
 
 之后要补：
 
 - 把正式 pipetting planner 的 `tip_site`、容器 registry 和 plunger qpos 接到 `PipetteLiquidController`。
+- 把 A2 tip 安装 planner 从当前 scripted `tip_attach_demo.xml` 接到 A1 末态，让 planner 控制 `tip_socket_site` 对准 `tip_0/tip_mount_site`，并把 attach/eject 事件写入 episode。
 - 把 `wet_state.jsonl`、BCS/evaluator 结果写入 episode。
 - 把 tip 液柱和大容器液面 overlay 接入 LeRobot renderer。
 - 把 Blender liquid overlay 扩展成 AutoBio 风格 `liquid.usd`/meshplane bulk exporter。
@@ -400,6 +403,14 @@ python -m py_compile aero_tasks/motion_planning.py aero_tasks/task_sampling.py a
 pytest tests/test_task_sampling.py
 pytest tests/test_piper_handoff_success.py
 MUJOCO_GL=egl python scripts/planning/preview_lerobot_cameras.py --out-dir outputs/lerobot/camera_preview_smoke --frame 8186
+```
+
+修改 A2 detachable tip collision、`tip_attach_demo.xml` 或 `aero_tasks/tip_attachment.py` 时，至少运行：
+
+```bash
+python -m py_compile aero_tasks/tip_attachment.py scripts/debug/demo_tip_attachment.py scripts/debug/generate_tip_ring_proxy_collision.py
+conda run -n aero_sim python -c "import mujoco; mujoco.MjModel.from_xml_path('models/piper_aero_hand/scenes/tip_attach_demo.xml')"
+MUJOCO_GL=egl conda run -n aero_sim python scripts/debug/demo_tip_attachment.py --no-video --duration 4.0
 ```
 
 修改 Blender renderer、liquid overlay 或 `wet_state` 渲染格式时，至少运行：

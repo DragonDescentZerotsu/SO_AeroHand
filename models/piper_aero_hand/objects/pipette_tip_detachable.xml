@@ -1,0 +1,47 @@
+<mujoco model="pipette_tip_detachable">
+  <compiler angle="radian" />
+
+  <asset>
+    <mesh name="pipette_tip_visual" file="/data/tianang/projects/AutoBio/autobio/assets/container/tip_200ul_vis/visual.obj" scale="0.001 0.001 0.001" />
+    <mesh name="tip_upper_ring_wedge" file="../assets/tip_200ul_upper_ring_wedge_12.obj" scale="0.001 0.001 0.001" />
+    <mesh name="tip_lower_cone_wedge" file="../assets/tip_200ul_lower_cone_wedge_12.obj" scale="0.001 0.001 0.001" />
+
+    <material name="tip_clear" rgba="1 1 1 0.5" />
+    <material name="tip_collision" rgba="0.1 0.65 1 0.35" />
+  </asset>
+
+  <worldbody>
+    <body name="pipette_tip">
+      <geom name="tip_visual" type="mesh" contype="0" conaffinity="0" group="2" mesh="pipette_tip_visual" material="tip_clear" />
+
+      <geom name="ring_block_00" type="mesh" mesh="tip_upper_ring_wedge" euler="0 0 0" group="3" material="tip_collision" />
+      <geom name="ring_block_01" type="mesh" mesh="tip_upper_ring_wedge" euler="0 0 0.523598775598" group="3" material="tip_collision" />
+      <geom name="ring_block_02" type="mesh" mesh="tip_upper_ring_wedge" euler="0 0 1.0471975512" group="3" material="tip_collision" />
+      <geom name="ring_block_03" type="mesh" mesh="tip_upper_ring_wedge" euler="0 0 1.57079632679" group="3" material="tip_collision" />
+      <geom name="ring_block_04" type="mesh" mesh="tip_upper_ring_wedge" euler="0 0 2.09439510239" group="3" material="tip_collision" />
+      <geom name="ring_block_05" type="mesh" mesh="tip_upper_ring_wedge" euler="0 0 2.61799387799" group="3" material="tip_collision" />
+      <geom name="ring_block_06" type="mesh" mesh="tip_upper_ring_wedge" euler="0 0 3.14159265359" group="3" material="tip_collision" />
+      <geom name="ring_block_07" type="mesh" mesh="tip_upper_ring_wedge" euler="0 0 3.66519142919" group="3" material="tip_collision" />
+      <geom name="ring_block_08" type="mesh" mesh="tip_upper_ring_wedge" euler="0 0 4.18879020479" group="3" material="tip_collision" />
+      <geom name="ring_block_09" type="mesh" mesh="tip_upper_ring_wedge" euler="0 0 4.71238898038" group="3" material="tip_collision" />
+      <geom name="ring_block_10" type="mesh" mesh="tip_upper_ring_wedge" euler="0 0 5.23598775598" group="3" material="tip_collision" />
+      <geom name="ring_block_11" type="mesh" mesh="tip_upper_ring_wedge" euler="0 0 5.75958653158" group="3" material="tip_collision" />
+
+      <geom name="cone_block_00" type="mesh" mesh="tip_lower_cone_wedge" euler="0 0 0" group="3" material="tip_collision" />
+      <geom name="cone_block_01" type="mesh" mesh="tip_lower_cone_wedge" euler="0 0 0.523598775598" group="3" material="tip_collision" />
+      <geom name="cone_block_02" type="mesh" mesh="tip_lower_cone_wedge" euler="0 0 1.0471975512" group="3" material="tip_collision" />
+      <geom name="cone_block_03" type="mesh" mesh="tip_lower_cone_wedge" euler="0 0 1.57079632679" group="3" material="tip_collision" />
+      <geom name="cone_block_04" type="mesh" mesh="tip_lower_cone_wedge" euler="0 0 2.09439510239" group="3" material="tip_collision" />
+      <geom name="cone_block_05" type="mesh" mesh="tip_lower_cone_wedge" euler="0 0 2.61799387799" group="3" material="tip_collision" />
+      <geom name="cone_block_06" type="mesh" mesh="tip_lower_cone_wedge" euler="0 0 3.14159265359" group="3" material="tip_collision" />
+      <geom name="cone_block_07" type="mesh" mesh="tip_lower_cone_wedge" euler="0 0 3.66519142919" group="3" material="tip_collision" />
+      <geom name="cone_block_08" type="mesh" mesh="tip_lower_cone_wedge" euler="0 0 4.18879020479" group="3" material="tip_collision" />
+      <geom name="cone_block_09" type="mesh" mesh="tip_lower_cone_wedge" euler="0 0 4.71238898038" group="3" material="tip_collision" />
+      <geom name="cone_block_10" type="mesh" mesh="tip_lower_cone_wedge" euler="0 0 5.23598775598" group="3" material="tip_collision" />
+      <geom name="cone_block_11" type="mesh" mesh="tip_lower_cone_wedge" euler="0 0 5.75958653158" group="3" material="tip_collision" />
+
+      <site name="tip_mount_site" pos="0 0 0" type="sphere" size="0.001" rgba="0.1 0.65 1 1" group="5" />
+      <site name="tip_site" pos="0 0 -0.05" type="sphere" size="0.0008" rgba="0.9 0.9 0.9 1" group="5" />
+    </body>
+  </worldbody>
+</mujoco>

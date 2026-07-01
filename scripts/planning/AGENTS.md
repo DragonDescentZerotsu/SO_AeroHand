@@ -33,7 +33,9 @@
 16. 支持 `--episode-spec <json>` 覆盖 episode 初始静态 body pose 和 freejoint pose。当前 batch sampler 会用它随机 rack pose，并把 pipette 放到 rack 局部横梁上的采样位置。
 17. 进入 handoff 动力学 rollout 前会运行 carried-payload sweep：用 gripper TCP 刚性携带当前实际姿态的 pipette，检查 `pre_handoff/hook_insert/hook_settle` 阶段是否撞到 `table_0` 或 `pipette_rack_0`。刚从 rack 抬起时的支撑接触和最终与 Aero Hand 的目标接触不属于这个检查。
 
-当前专家轨迹仍使用场景 YAML 中引用的 AutoBio `pipette.gen.xml`。`models/piper_aero_hand/scenes/ejectable_pipette_tip_demo.xml` 只是可弹出 tip 的独立 demo；如果之后接入 planning 主线，正式模型必须保留 `pipette_0_free`、`pipette_0/pipette`、`pipette_0/tip_site` 和 `pipette_0/pipette_ejector` 等名称，且要显式处理 tip free body、`tip_lock` weld 释放和新增 qpos/ctrl 对轨迹回放、LeRobot 导出的影响。
+当前 handoff 专家轨迹仍使用场景 YAML 中引用的 AutoBio `pipette.gen.xml`，不包含 detachable tip 生命周期。A2 枪头安装当前在 `models/piper_aero_hand/scenes/tip_attach_demo.xml` 和 `scripts/debug/demo_tip_attachment.py` 中作为独立 smoke demo 验证，使用 `aero_tasks/tip_attachment.py` 切换 `tip_box_lock`、`pipette_tip_lock` 和 ejector release；旧 `models/piper_aero_hand/scenes/ejectable_pipette_tip_demo.xml` 只保留为可弹出 tip 的单功能对照 demo。
+
+如果之后把 A2 接入 planning 主线，不要直接用 demo MJCF 替换 YAML 的 `source`。正式模型或 scene builder 扩展必须继续保留 `pipette_0_free`、`pipette_0/pipette`、`pipette_0/tip_site`、`pipette_0/pipette_ejector` 和 `pipette_0/pipette_button` 等现有 handoff/planner 依赖名称，同时新增独立 tip freejoint、tip box 初始锁、pipette-tip weld、`TipAttachmentController` 事件、ejector release、以及 qpos/ctrl/eq_active 在回放和 LeRobot 导出中的记录。
 
 运行：
 

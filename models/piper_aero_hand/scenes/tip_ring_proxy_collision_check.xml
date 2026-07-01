@@ -1,0 +1,67 @@
+<mujoco model="tip_ring_proxy_collision_check">
+  <compiler angle="radian" />
+  <option timestep="0.002" integrator="implicitfast" cone="elliptic" />
+
+  <visual>
+    <headlight diffuse="0.7 0.7 0.7" ambient="0.35 0.35 0.35" specular="0.1 0.1 0.1" />
+    <global azimuth="135" elevation="-20" offwidth="1280" offheight="720" />
+  </visual>
+
+  <asset>
+    <texture name="grid" type="2d" builtin="checker" width="512" height="512" rgb1="0.24 0.24 0.24" rgb2="0.31 0.31 0.31" />
+    <material name="floor_grid" texture="grid" texrepeat="4 4" reflectance="0.08" />
+    <material name="tip_clear" rgba="1 1 1 0.35" />
+    <material name="collision_original" rgba="1 0.45 0.1 0.35" />
+    <material name="collision_ring" rgba="0.1 0.65 1 0.45" />
+    <material name="collision_cone" rgba="0.75 0.75 0.75 0.45" />
+    <material name="connector_ref" rgba="0.95 0.1 0.1 0.75" />
+
+    <mesh name="tip_visual" file="/data/tianang/projects/AutoBio/autobio/assets/container/tip_200ul_vis/visual.obj" scale="0.001 0.001 0.001" />
+    <mesh name="tip_original_collision" file="/data/tianang/projects/AutoBio/autobio/assets/container/tip_200ul_col/tip_collision_0.obj" scale="0.001 0.001 0.001" />
+    <mesh name="tip_upper_ring_wedge" file="../assets/tip_200ul_upper_ring_wedge_12.obj" scale="0.001 0.001 0.001" />
+    <mesh name="tip_lower_cone_wedge" file="../assets/tip_200ul_lower_cone_wedge_12.obj" scale="0.001 0.001 0.001" />
+  </asset>
+
+  <worldbody>
+    <light name="key" pos="0.25 -0.55 0.7" dir="-0.3 0.7 -1" diffuse="0.8 0.8 0.8" />
+    <geom name="floor" type="plane" size="0.15 0.12 0.02" material="floor_grid" />
+
+    <body name="original_solid_tip" pos="-0.04 0 0.07">
+      <geom name="original_visual" type="mesh" contype="0" conaffinity="0" group="2" mesh="tip_visual" material="tip_clear" />
+      <geom name="original_lower_solid_collision" type="mesh" group="3" mesh="tip_original_collision" material="collision_original" />
+      <geom name="original_upper_solid_collision" size="0.00287797 0.008" pos="0 0 -0.008" type="cylinder" group="3" material="collision_original" />
+      <geom name="original_connector_reference" size="0.00199955 0.012" pos="0 0 0.004" type="cylinder" contype="0" conaffinity="0" group="5" material="connector_ref" />
+    </body>
+
+    <body name="ring_proxy_tip">
+      <geom name="ring_proxy_visual" type="mesh" contype="0" conaffinity="0" group="2" mesh="tip_visual" pos="0.04 0 0.07" material="tip_clear" />
+      <geom name="ring_block_00" type="mesh" mesh="tip_upper_ring_wedge" pos="0.040000 0 0.07" euler="0 0 0" group="3" material="collision_ring" />
+      <geom name="ring_block_01" type="mesh" mesh="tip_upper_ring_wedge" pos="0.040000 0 0.07" euler="0 0 0.523598775598" group="3" material="collision_ring" />
+      <geom name="ring_block_02" type="mesh" mesh="tip_upper_ring_wedge" pos="0.040000 0 0.07" euler="0 0 1.0471975512" group="3" material="collision_ring" />
+      <geom name="ring_block_03" type="mesh" mesh="tip_upper_ring_wedge" pos="0.040000 0 0.07" euler="0 0 1.57079632679" group="3" material="collision_ring" />
+      <geom name="ring_block_04" type="mesh" mesh="tip_upper_ring_wedge" pos="0.040000 0 0.07" euler="0 0 2.09439510239" group="3" material="collision_ring" />
+      <geom name="ring_block_05" type="mesh" mesh="tip_upper_ring_wedge" pos="0.040000 0 0.07" euler="0 0 2.61799387799" group="3" material="collision_ring" />
+      <geom name="ring_block_06" type="mesh" mesh="tip_upper_ring_wedge" pos="0.040000 0 0.07" euler="0 0 3.14159265359" group="3" material="collision_ring" />
+      <geom name="ring_block_07" type="mesh" mesh="tip_upper_ring_wedge" pos="0.040000 0 0.07" euler="0 0 3.66519142919" group="3" material="collision_ring" />
+      <geom name="ring_block_08" type="mesh" mesh="tip_upper_ring_wedge" pos="0.040000 0 0.07" euler="0 0 4.18879020479" group="3" material="collision_ring" />
+      <geom name="ring_block_09" type="mesh" mesh="tip_upper_ring_wedge" pos="0.040000 0 0.07" euler="0 0 4.71238898038" group="3" material="collision_ring" />
+      <geom name="ring_block_10" type="mesh" mesh="tip_upper_ring_wedge" pos="0.040000 0 0.07" euler="0 0 5.23598775598" group="3" material="collision_ring" />
+      <geom name="ring_block_11" type="mesh" mesh="tip_upper_ring_wedge" pos="0.040000 0 0.07" euler="0 0 5.75958653158" group="3" material="collision_ring" />
+      <geom name="cone_block_00" type="mesh" mesh="tip_lower_cone_wedge" pos="0.040000 0 0.07" euler="0 0 0" group="3" material="collision_cone" />
+      <geom name="cone_block_01" type="mesh" mesh="tip_lower_cone_wedge" pos="0.040000 0 0.07" euler="0 0 0.523598775598" group="3" material="collision_cone" />
+      <geom name="cone_block_02" type="mesh" mesh="tip_lower_cone_wedge" pos="0.040000 0 0.07" euler="0 0 1.0471975512" group="3" material="collision_cone" />
+      <geom name="cone_block_03" type="mesh" mesh="tip_lower_cone_wedge" pos="0.040000 0 0.07" euler="0 0 1.57079632679" group="3" material="collision_cone" />
+      <geom name="cone_block_04" type="mesh" mesh="tip_lower_cone_wedge" pos="0.040000 0 0.07" euler="0 0 2.09439510239" group="3" material="collision_cone" />
+      <geom name="cone_block_05" type="mesh" mesh="tip_lower_cone_wedge" pos="0.040000 0 0.07" euler="0 0 2.61799387799" group="3" material="collision_cone" />
+      <geom name="cone_block_06" type="mesh" mesh="tip_lower_cone_wedge" pos="0.040000 0 0.07" euler="0 0 3.14159265359" group="3" material="collision_cone" />
+      <geom name="cone_block_07" type="mesh" mesh="tip_lower_cone_wedge" pos="0.040000 0 0.07" euler="0 0 3.66519142919" group="3" material="collision_cone" />
+      <geom name="cone_block_08" type="mesh" mesh="tip_lower_cone_wedge" pos="0.040000 0 0.07" euler="0 0 4.18879020479" group="3" material="collision_cone" />
+      <geom name="cone_block_09" type="mesh" mesh="tip_lower_cone_wedge" pos="0.040000 0 0.07" euler="0 0 4.71238898038" group="3" material="collision_cone" />
+      <geom name="cone_block_10" type="mesh" mesh="tip_lower_cone_wedge" pos="0.040000 0 0.07" euler="0 0 5.23598775598" group="3" material="collision_cone" />
+      <geom name="cone_block_11" type="mesh" mesh="tip_lower_cone_wedge" pos="0.040000 0 0.07" euler="0 0 5.75958653158" group="3" material="collision_cone" />
+      <geom name="ring_proxy_connector_reference" size="0.00199955 0.012" pos="0.04 0 0.074" type="cylinder" contype="0" conaffinity="0" group="5" material="connector_ref" />
+    </body>
+
+    <camera name="check_camera" pos="0 -0.18 0.095" xyaxes="1 0 0 0 0.25 0.97" />
+  </worldbody>
+</mujoco>
